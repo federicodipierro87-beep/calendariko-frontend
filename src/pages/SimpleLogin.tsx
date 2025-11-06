@@ -140,10 +140,10 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-4 px-4 sm:py-12">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-2 sm:mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
             🎵 {isRegisterMode ? 'Registrati su Calendariko' : 'Accedi a Calendariko'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
@@ -162,7 +162,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
                   console.error('❌ ERRORE nel toggleMode:', error);
                 }
               }}
-              className="bg-green-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-600 transition-colors"
+              className="bg-green-500 text-white px-4 py-2 sm:px-6 rounded-lg font-medium hover:bg-green-600 transition-colors text-sm sm:text-base"
             >
               {isRegisterMode ? '← Torna al Login' : '✨ Crea un nuovo account'}
             </button>
@@ -183,7 +183,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
           
           <div className="space-y-4">
             {isRegisterMode && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
                     Nome *
@@ -193,7 +193,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
                     name="firstName"
                     type="text"
                     required={isRegisterMode}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base"
                     placeholder="Mario"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
@@ -208,7 +208,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
                     name="lastName"
                     type="text"
                     required={isRegisterMode}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base"
                     placeholder="Rossi"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
@@ -226,7 +226,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
                 name="email"
                 type="email"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base"
                 placeholder={isRegisterMode ? "mario.rossi@email.com" : "admin@calendariko.com"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -242,7 +242,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
                   id="phone"
                   name="phone"
                   type="tel"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base"
                   placeholder="+39 123 456 7890"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -259,7 +259,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
                   id="group"
                   name="group"
                   required={isRegisterMode}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base"
                   value={selectedGroup}
                   onChange={(e) => setSelectedGroup(e.target.value)}
                 >
@@ -286,7 +286,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
                 name="password"
                 type="password"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base"
                 placeholder={isRegisterMode ? "Crea una password sicura" : "admin123"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -298,7 +298,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
               {loading 
                 ? (isRegisterMode ? 'Registrazione in corso...' : 'Accesso in corso...') 
