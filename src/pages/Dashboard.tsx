@@ -1053,7 +1053,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 • Ultimo controllo: ${new Date().toLocaleString('it-IT')}
 
 Funzionalità disponibili:
-${emailData.features.map(f => `• ${f}`).join('\n')}
+${emailData.features.map((f: any) => `• ${f}`).join('\n')}
 
 ${emailData.configured ? 'Il sistema di notifiche è completamente operativo!' : 'Configura le credenziali email nel file .env'}`;
                               alert(message);

@@ -92,7 +92,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
     if (newEvent.title && newEvent.time && newEvent.endTime && newEvent.group_id) {
       onCreateEvent({
         ...newEvent,
-        date: selectedDate
+        date: selectedDate,
+        fee: newEvent.fee ? Number(newEvent.fee) : 0
       });
       setNewEvent({
         title: '',
