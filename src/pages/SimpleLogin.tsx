@@ -37,10 +37,8 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
       
       if (Array.isArray(groupsData)) {
         console.log('🔍 Chiamando setGroups...');
-        const uniqueGroups = groupsData.filter((group: any, index: number, self: any[]) => 
-          index === self.findIndex(g => g.id === group.id)
-        );
-        setGroups(uniqueGroups);
+        console.log('🔍 FRONTEND LOGIN - Groups received:', groupsData.length, groupsData.map((g: any) => g.id));
+        setGroups(groupsData);
         console.log('🔍 setGroups completato');
       } else {
         console.error('❌ Dati gruppi non sono un array:', groupsData);
