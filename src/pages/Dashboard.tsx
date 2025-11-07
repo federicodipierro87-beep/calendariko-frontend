@@ -61,14 +61,20 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           fee: event.fee
         }));
         
-        // Carica gruppi
+        // Carica gruppi e rimuovi duplicati
         const groupsData = await groupsApi.getAll();
-        setGroups(groupsData);
+        const uniqueGroups = groupsData.filter((group: any, index: number, self: any[]) => 
+          index === self.findIndex(g => g.id === group.id)
+        );
+        setGroups(uniqueGroups);
 
         // Carica gruppi dell'utente corrente per le availability
         if (user.role === 'ARTIST') {
           const userGroupsData = await groupsApi.getUserGroups();
-          setUserGroups(userGroupsData);
+          const uniqueUserGroups = userGroupsData.filter((group: any, index: number, self: any[]) => 
+            index === self.findIndex(g => g.id === group.id)
+          );
+          setUserGroups(uniqueUserGroups);
         }
         
         // Carica utenti se admin

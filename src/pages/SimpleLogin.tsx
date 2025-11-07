@@ -22,17 +22,8 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
   useEffect(() => {
     console.log('🔍 useEffect trigger, isRegisterMode:', isRegisterMode);
     if (isRegisterMode) {
-      console.log('🔍 Modalità registrazione - usando gruppi reali hardcoded temporanei');
-      // Gruppi reali dal database con ID corretti - hardcoded finché non risolviamo l'API
-      const tempGroups = [
-        { id: 'cmhlbg6m40003v2f89s12j62a', name: 'Jazz Quartet Milano', type: 'BAND', genre: 'Jazz' },
-        { id: 'cmhlbg6lr0001v2f8q4n4owyt', name: 'DJ Marco Electronic', type: 'DJ', genre: 'Electronic' },
-        { id: 'cmhlbg6jh0000v2f80keyvnen', name: 'Sofia Vocal', type: 'SOLO', genre: 'Pop/Soul' },
-        { id: 'cmhlbg6m00002v2f8btnpwaot', name: 'Rock Band Thunder', type: 'BAND', genre: 'Rock' },
-        { id: 'cmhlbg6m60004v2f8o3e309gy', name: 'DJ Luna House', type: 'DJ', genre: 'House' },
-        { id: 'cmhlbn0hl0000v2n8u5qbsp4x', name: 'tribal sound', type: 'BAND', genre: 'commerciale' }
-      ];
-      setGroups(tempGroups);
+      console.log('🔍 Modalità registrazione - caricando gruppi via API');
+      loadGroups();
     }
   }, [isRegisterMode]);
 
@@ -46,7 +37,10 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
       
       if (Array.isArray(groupsData)) {
         console.log('🔍 Chiamando setGroups...');
-        setGroups(groupsData);
+        const uniqueGroups = groupsData.filter((group: any, index: number, self: any[]) => 
+          index === self.findIndex(g => g.id === group.id)
+        );
+        setGroups(uniqueGroups);
         console.log('🔍 setGroups completato');
       } else {
         console.error('❌ Dati gruppi non sono un array:', groupsData);
