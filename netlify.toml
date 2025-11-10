@@ -5,6 +5,7 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_VERSION = "9"
+  VITE_API_URL = "https://calendariko-backend-production.up.railway.app/api"
 
 [[headers]]
   for = "/assets/*"
