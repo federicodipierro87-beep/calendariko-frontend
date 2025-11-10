@@ -228,7 +228,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     }
   };
 
-  const handleDeleteEvent = (eventId: string) => {
+  const handleDeleteEvent = (eventId: string, eventTitle?: string) => {
+    const eventToDelete = events.find(event => event.id === eventId);
+    const title = eventTitle || eventToDelete?.title || 'questo evento';
+    
+    if (!window.confirm(`Sei sicuro di voler eliminare l'evento "${title}"? Questa azione non può essere annullata.`)) {
+      return;
+    }
+    
     setEvents(events.filter(event => event.id !== eventId));
   };
 
@@ -682,7 +689,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                     )}
                                   </div>
                                   <button
-                                    onClick={() => handleDeleteEvent(event.id)}
+                                    onClick={() => handleDeleteEvent(event.id, event.title)}
                                     className="text-red-500 hover:text-red-700 text-xs"
                                   >
                                     🗑️
@@ -941,7 +948,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                       )}
                                     </div>
                                     <button
-                                      onClick={() => handleDeleteEvent(event.id)}
+                                      onClick={() => handleDeleteEvent(event.id, event.title)}
                                       className="text-red-500 hover:text-red-700 ml-2"
                                       title="Elimina evento"
                                     >
