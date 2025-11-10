@@ -41,7 +41,7 @@ interface DayEventsModalProps {
   userGroups: any[];
   users?: any[]; // Lista di tutti gli utenti per admin
   onCreateEvent: (event: Omit<Event, 'id'>) => void;
-  onDeleteEvent: (eventId: string) => void;
+  onDeleteEvent: (eventId: string, eventTitle?: string) => void;
   onCreateAvailability?: (availability: any) => void;
 }
 
