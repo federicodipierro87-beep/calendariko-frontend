@@ -323,6 +323,25 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     }
   };
 
+  const handleDeleteGroup = async (groupId: string, groupName: string) => {
+    if (!window.confirm(`Sei sicuro di voler eliminare il gruppo "${groupName}"? Questa azione eliminerà anche tutti gli eventi e disponibilità associati al gruppo. Questa azione non può essere annullata.`)) {
+      return;
+    }
+
+    try {
+      await groupsApi.delete(groupId);
+      
+      // Ricarica la lista dei gruppi
+      const updatedGroups = await groupsApi.getAll();
+      setGroups(updatedGroups);
+      
+      alert(`✅ Gruppo "${groupName}" eliminato con successo.`);
+    } catch (error: any) {
+      console.error('Errore nell\'eliminazione del gruppo:', error);
+      alert(`❌ Errore nell'eliminazione del gruppo: ${error.message}`);
+    }
+  };
+
   const handleProfileChange = (field: string, value: string) => {
     setUserProfile(prev => ({
       ...prev,
@@ -715,11 +734,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                             return (
                               <div 
                                 key={group.id} 
-                                className="bg-white p-4 rounded border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
-                                onClick={() => handleGroupClick(group)}
+                                className="bg-white p-4 rounded border border-gray-200 hover:bg-gray-50 transition-colors"
                               >
                                 <div className="flex justify-between items-start">
-                                  <div>
+                                  <div 
+                                    className="flex-1 cursor-pointer"
+                                    onClick={() => handleGroupClick(group)}
+                                  >
                                     <h5 className="font-medium text-gray-900">{group.name}</h5>
                                     <div className="text-sm text-gray-600">
                                       <span className={`px-2 py-1 rounded text-xs ${
@@ -741,8 +762,26 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                       </div>
                                     )}
                                   </div>
-                                  <div className="text-sm text-blue-600">
-                                    👁️ Visualizza
+                                  <div className="flex items-center gap-2 ml-4">
+                                    <button
+                                      onClick={() => handleGroupClick(group)}
+                                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-colors"
+                                      title="Visualizza dettagli gruppo"
+                                    >
+                                      👁️ Visualizza
+                                    </button>
+                                    {user.role === 'ADMIN' && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteGroup(group.id, group.name);
+                                        }}
+                                        className="px-3 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 transition-colors"
+                                        title="Elimina gruppo"
+                                      >
+                                        🗑️ Elimina
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                               </div>

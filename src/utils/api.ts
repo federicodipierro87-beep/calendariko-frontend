@@ -141,6 +141,9 @@ export const groupsApi = {
   leaveGroup: (groupId: string) => apiCall(`/groups/${groupId}/leave`, {
     method: 'DELETE',
   }),
+  delete: (groupId: string) => apiCall(`/groups/${groupId}`, {
+    method: 'DELETE',
+  }),
 };
 
 export const eventsApi = {
