@@ -237,11 +237,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                     {/* Pulsante elimina per eventi (solo admin) */}
                     {event.type !== 'availability-busy' && user?.role === 'ADMIN' && (
                       <button
-                        onClick={() => {
-                          if (window.confirm(`Sei sicuro di voler eliminare l'evento "${event.title}"? Questa azione non può essere annullata.`)) {
-                            onDeleteEvent(event.id);
-                          }
-                        }}
+                        onClick={() => onDeleteEvent(event.id, event.title)}
                         className="text-red-500 hover:text-red-700 ml-2"
                         title="Elimina evento"
                       >
