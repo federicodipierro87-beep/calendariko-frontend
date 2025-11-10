@@ -220,7 +220,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       // Ricarica i dati per sicurezza
       setTimeout(() => reloadData(), 500);
       
-      alert('✅ Evento creato con successo!');
+      alert('✅ Evento creato con successo! Le notifiche email sono state inviate ai membri del gruppo.');
     } catch (error: any) {
       console.error('❌ Errore nella creazione dell\'evento:', error);
       const errorMessage = error?.message || 'Errore sconosciuto';
