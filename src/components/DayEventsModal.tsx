@@ -81,10 +81,15 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
   if (!isOpen) return null;
 
   const handleDeleteEvent = (eventId: string, eventTitle: string) => {
+    console.log('🔍 DayEventsModal handleDeleteEvent chiamata con:', { eventId, eventTitle });
+    console.trace('🔍 DayEventsModal Stack trace della chiamata');
+    
     if (!window.confirm(`Sei sicuro di voler eliminare "${eventTitle}"? Questa azione non può essere annullata.`)) {
+      console.log('🔍 DayEventsModal Utente ha annullato eliminazione');
       return;
     }
     
+    console.log('🔍 DayEventsModal Chiamando onDeleteEvent...');
     onDeleteEvent(eventId, eventTitle);
     alert(`✅ "${eventTitle}" eliminato con successo!`);
   };

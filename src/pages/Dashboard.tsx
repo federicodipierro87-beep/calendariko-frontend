@@ -233,13 +233,18 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   };
 
   const handleDeleteEvent = (eventId: string, eventTitle?: string) => {
+    console.log('🔍 handleDeleteEvent chiamata con:', { eventId, eventTitle });
+    console.trace('🔍 Stack trace della chiamata');
+    
     const eventToDeleteData = events.find(event => event.id === eventId);
     const title = eventTitle || eventToDeleteData?.title || 'questo evento';
     
     if (!window.confirm(`Sei sicuro di voler eliminare l'evento "${title}"? Questa azione non può essere annullata.`)) {
+      console.log('🔍 Utente ha annullato eliminazione');
       return;
     }
     
+    console.log('🔍 Procedendo con eliminazione...');
     setEvents(events.filter(event => event.id !== eventId));
     alert(`✅ Evento "${title}" eliminato con successo!`);
   };
