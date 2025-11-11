@@ -65,9 +65,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         }));
         
         // Carica gruppi
+        console.log('📡 Loading groups...');
         const groupsData = await groupsApi.getAll();
-        console.log('🔍 FRONTEND - Groups received:', groupsData.length, groupsData.map((g: any) => g.id));
+        console.log('🔍 FRONTEND - Groups received:', groupsData.length, groupsData);
         setGroups(groupsData);
+        console.log('✅ Groups state updated');
 
         // Carica gruppi dell'utente corrente per le availability
         if (user.role === 'ARTIST') {
@@ -78,8 +80,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         
         // Carica utenti se admin
         if (user.role === 'ADMIN') {
+          console.log('📡 Loading users...');
           const usersData = await usersApi.getAll();
+          console.log('🔍 FRONTEND - Users received:', usersData.length, usersData);
           setUsers(usersData);
+          console.log('✅ Users state updated');
         }
 
         // Carica disponibilità
@@ -654,11 +659,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     <div className="space-y-2">
                       {(() => {
                         // Filtra i gruppi in base al ruolo e alla ricerca
+                        console.log('🔍 Rendering groups section. Total groups:', groups.length, 'User role:', user.role);
                         let filteredGroups = user.role === 'ADMIN' 
                           ? groups 
                           : groups.filter(group => 
                               group.user_groups?.some((ug: any) => ug.user_id === user.id)
                             );
+                        console.log('🔍 Filtered groups for user:', filteredGroups.length);
                         
                         // Applica filtro di ricerca
                         if (groupsSearchTerm.trim()) {
