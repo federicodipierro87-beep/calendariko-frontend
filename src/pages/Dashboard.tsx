@@ -5,7 +5,6 @@ import CreateGroupModal from '../components/CreateGroupModal';
 import CreateUserModal from '../components/CreateUserModal';
 import GroupDetailModal from '../components/GroupDetailModal';
 import AvailabilityModal from '../components/AvailabilityModal';
-import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import { groupsApi, eventsApi, usersApi, availabilityApi } from '../utils/api';
 
 interface DashboardProps {
@@ -31,8 +30,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [eventsPerPage] = useState(10);
   const [groupsSearchTerm, setGroupsSearchTerm] = useState('');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState<{id: string, title: string} | null>(null);
   const [userProfile, setUserProfile] = useState({
     firstName: user.first_name || '',
     lastName: user.last_name || '',
@@ -239,17 +236,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     const eventToDeleteData = events.find(event => event.id === eventId);
     const title = eventTitle || eventToDeleteData?.title || 'questo evento';
     
-    setEventToDelete({ id: eventId, title });
-    setShowDeleteConfirm(true);
-  };
-
-  const confirmDeleteEvent = () => {
-    if (eventToDelete) {
-      setEvents(events.filter(event => event.id !== eventToDelete.id));
-      setShowDeleteConfirm(false);
-      setEventToDelete(null);
-      alert(`✅ Evento "${eventToDelete.title}" eliminato con successo!`);
+    if (!window.confirm(`Sei sicuro di voler eliminare l'evento "${title}"? Questa azione non può essere annullata.`)) {
+      return;
     }
+    
+    setEvents(events.filter(event => event.id !== eventId));
+    alert(`✅ Evento "${title}" eliminato con successo!`);
   };
 
   const handleCreateAvailability = async (availabilityData: any) => {
@@ -1438,17 +1430,6 @@ ${emailData.configured ? 'Il sistema di notifiche è completamente operativo!' :
           </button>
         </div>
       </nav>
-
-      {/* Modal di conferma eliminazione */}
-      <ConfirmDeleteModal
-        isOpen={showDeleteConfirm}
-        onClose={() => {
-          setShowDeleteConfirm(false);
-          setEventToDelete(null);
-        }}
-        onConfirm={confirmDeleteEvent}
-        eventTitle={eventToDelete?.title || ''}
-      />
     </div>
   );
 };

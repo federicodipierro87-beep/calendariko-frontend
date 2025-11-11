@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import ConfirmDeleteModal from './ConfirmDeleteModal';
 
 interface Event {
   id: string;
@@ -78,23 +77,16 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
     user_id: '',
     notes: ''
   });
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState<{id: string, title: string} | null>(null);
 
   if (!isOpen) return null;
 
-  const handleDeleteClick = (eventId: string, eventTitle: string) => {
-    setEventToDelete({ id: eventId, title: eventTitle });
-    setShowDeleteConfirm(true);
-  };
-
-  const confirmDeleteEvent = () => {
-    if (eventToDelete) {
-      onDeleteEvent(eventToDelete.id, eventToDelete.title);
-      setShowDeleteConfirm(false);
-      setEventToDelete(null);
-      alert(`✅ "${eventToDelete.title}" eliminato con successo!`);
+  const handleDeleteEvent = (eventId: string, eventTitle: string) => {
+    if (!window.confirm(`Sei sicuro di voler eliminare "${eventTitle}"? Questa azione non può essere annullata.`)) {
+      return;
     }
+    
+    onDeleteEvent(eventId, eventTitle);
+    alert(`✅ "${eventTitle}" eliminato con successo!`);
   };
 
   const formatDate = (dateStr: string) => {
@@ -187,21 +179,9 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
     );
   };
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (showDeleteConfirm) return; // Non chiudere se il modal di conferma è aperto
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleModalClick = (e: React.MouseEvent) => {
-    if (showDeleteConfirm) return; // Blocca eventi se modal di conferma è aperto
-    e.stopPropagation();
-  };
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={handleOverlayClick}>
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={handleModalClick}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
@@ -270,7 +250,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                     {/* Pulsante elimina per eventi (solo admin) */}
                     {event.type !== 'availability-busy' && user?.role === 'ADMIN' && (
                       <button
-                        onClick={() => handleDeleteClick(event.id, event.title)}
+                        onClick={() => handleDeleteEvent(event.id, event.title)}
                         className="text-red-500 hover:text-red-700 ml-2"
                         title="Elimina evento"
                       >
@@ -281,7 +261,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                     {/* Pulsante elimina per indisponibilità proprie */}
                     {event.type === 'availability-busy' && event.user?.id === user?.id && (
                       <button
-                        onClick={() => handleDeleteClick(event.id, 'Indisponibilità')}
+                        onClick={() => handleDeleteEvent(event.id, 'Indisponibilità')}
                         className="text-red-500 hover:text-red-700 ml-2"
                         title="Rimuovi indisponibilità"
                       >
@@ -581,17 +561,6 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
           </div>
         )}
       </div>
-
-      {/* Modal di conferma eliminazione */}
-      <ConfirmDeleteModal
-        isOpen={showDeleteConfirm}
-        onClose={() => {
-          setShowDeleteConfirm(false);
-          setEventToDelete(null);
-        }}
-        onConfirm={confirmDeleteEvent}
-        eventTitle={eventToDelete?.title || ''}
-      />
     </div>
   );
 };
