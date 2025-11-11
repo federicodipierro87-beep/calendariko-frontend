@@ -265,7 +265,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     }
   };
 
-  const handleDeleteEvent = (eventId: string, eventTitle?: string) => {
+  const handleDeleteEvent = async (eventId: string, eventTitle?: string) => {
     // Previeni chiamate multiple
     if (isDeleting) {
       return;
@@ -281,13 +281,22 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       return;
     }
     
-    setEvents(events.filter(event => event.id !== eventId));
-    alert(`✅ Evento "${title}" eliminato con successo! Le notifiche email sono state inviate a tutti i membri del gruppo.`);
-    
-    // Reset flag dopo un delay per permettere nuove eliminazioni
-    setTimeout(() => {
-      setIsDeleting(false);
-    }, 1000);
+    try {
+      // Chiamata API per eliminare l'evento dal backend
+      await eventsApi.delete(eventId);
+      
+      // Rimuovi l'evento dalla lista locale solo dopo il successo
+      setEvents(events.filter(event => event.id !== eventId));
+      alert(`✅ Evento "${title}" eliminato con successo! Le notifiche email sono state inviate a tutti i membri del gruppo.`);
+    } catch (error: any) {
+      console.error('Errore nell\'eliminazione dell\'evento:', error);
+      alert(`❌ Errore nell'eliminazione dell'evento: ${error.message}`);
+    } finally {
+      // Reset flag dopo un delay per permettere nuove eliminazioni
+      setTimeout(() => {
+        setIsDeleting(false);
+      }, 1000);
+    }
   };
 
   const handleCreateAvailability = async (availabilityData: any) => {
