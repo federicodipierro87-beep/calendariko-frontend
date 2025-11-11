@@ -22,6 +22,7 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [isUserMember, setIsUserMember] = useState(false);
   const [activeTab, setActiveTab] = useState('members'); // 'members' or 'events'
+  const [membersSearchTerm, setMembersSearchTerm] = useState('');
 
   useEffect(() => {
     if (isOpen && group) {
@@ -253,15 +254,39 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                 {canManageMembers && (
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-3">
-                      Aggiungi Membri ({nonMembers.length} disponibili)
-                </h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {nonMembers.length === 0 ? (
-                        <div className="bg-gray-50 p-3 rounded text-center text-gray-500">
-                          Tutti gli utenti sono già membri
-                        </div>
-                      ) : (
-                        nonMembers.map((user) => (
+                      Aggiungi Membri ({nonMembers.filter(user =>
+                        !membersSearchTerm.trim() ||
+                        `${user.first_name} ${user.last_name} ${user.email}`.toLowerCase()
+                          .includes(membersSearchTerm.toLowerCase())
+                      ).length} disponibili)
+                    </h3>
+                    
+                    {/* Campo di ricerca membri */}
+                    <div className="mb-3">
+                      <input
+                        type="text"
+                        placeholder="🔍 Cerca membro per nome o email..."
+                        value={membersSearchTerm}
+                        onChange={(e) => setMembersSearchTerm(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {(() => {
+                        // Applica filtro di ricerca
+                        const filteredNonMembers = nonMembers.filter(user =>
+                          !membersSearchTerm.trim() ||
+                          `${user.first_name} ${user.last_name} ${user.email}`.toLowerCase()
+                            .includes(membersSearchTerm.toLowerCase())
+                        );
+                        
+                        return filteredNonMembers.length === 0 ? (
+                          <div className="bg-gray-50 p-3 rounded text-center text-gray-500">
+                            {membersSearchTerm.trim() ? 'Nessun utente trovato' : 'Tutti gli utenti sono già membri'}
+                          </div>
+                        ) : (
+                          filteredNonMembers.map((user) => (
                           <div key={user.id} className="bg-gray-50 border rounded p-3 flex justify-between items-center">
                             <div>
                               <div className="font-medium">{user.first_name} {user.last_name}</div>
@@ -275,8 +300,8 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                               Aggiungi
                             </button>
                           </div>
-                        ))
-                      )}
+                        ));
+                      })()}
                     </div>
                   </div>
                 )}

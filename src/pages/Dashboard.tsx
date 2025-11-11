@@ -29,6 +29,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [userGroups, setUserGroups] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [eventsPerPage] = useState(10);
+  const [groupsSearchTerm, setGroupsSearchTerm] = useState('');
   const [userProfile, setUserProfile] = useState({
     firstName: user.first_name || '',
     lastName: user.last_name || '',
@@ -371,7 +372,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
+      {/* Desktop Header - Hidden on mobile */}
+      <header className="hidden md:block bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
@@ -401,10 +403,39 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      {/* Mobile Header */}
+      <header className="md:hidden bg-white shadow-sm border-b">
+        <div className="px-4 py-3">
+          <div className="flex justify-between items-center">
+            <h1 className="text-lg font-semibold text-gray-900">
+              🎵 Calendariko
+            </h1>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-gray-600">
+                {user.first_name}
+              </span>
+              <button
+                onClick={handleForceReauth}
+                className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs"
+                title="Re-auth"
+              >
+                🔄
+              </button>
+              <button
+                onClick={handleLogout}
+                className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs"
+              >
+                Esci
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 pb-20 md:pb-6">
         <div className="px-4 py-6 sm:px-0">
-          {/* Navigation Menu */}
-          <div className="bg-white shadow rounded-lg mb-6">
+          {/* Desktop Navigation Menu */}
+          <div className="hidden md:block bg-white shadow rounded-lg mb-6">
             <div className="px-4 py-3">
               <nav className="flex space-x-8">
                 <button
@@ -485,7 +516,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Calendario */}
                         <div className="lg:col-span-2">
-                          <h4 className="text-lg font-medium text-gray-900 mb-4">📅 Calendario Eventi</h4>
                           <SimpleCalendar events={events} onDayClick={handleDayClick} userRole={user.role} />
                         </div>
 
@@ -534,12 +564,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                 </p>
                               </div>
 
-                              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 cursor-pointer hover:bg-indigo-100 transition-colors" onClick={() => handleSectionClick('notifications')}>
-                                <h5 className="text-indigo-800 font-medium mb-1">📧 Notifiche</h5>
-                                <p className="text-indigo-700 text-sm">
-                                  Sistema email
-                                </p>
-                              </div>
                             </>
                           )}
                         </div>
@@ -615,14 +639,35 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         : 'Visualizza i tuoi gruppi e gestisci la tua appartenenza. Clicca per entrare e vedere gli altri membri.'
                       }
                     </p>
+                    
+                    {/* Campo di ricerca gruppi */}
+                    <div className="mb-4">
+                      <input
+                        type="text"
+                        placeholder="🔍 Cerca gruppo per nome, tipo o genere..."
+                        value={groupsSearchTerm}
+                        onChange={(e) => setGroupsSearchTerm(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      />
+                    </div>
+                    
                     <div className="space-y-2">
                       {(() => {
-                        // Filtra i gruppi in base al ruolo
-                        const filteredGroups = user.role === 'ADMIN' 
+                        // Filtra i gruppi in base al ruolo e alla ricerca
+                        let filteredGroups = user.role === 'ADMIN' 
                           ? groups 
                           : groups.filter(group => 
                               group.user_groups?.some((ug: any) => ug.user_id === user.id)
                             );
+                        
+                        // Applica filtro di ricerca
+                        if (groupsSearchTerm.trim()) {
+                          filteredGroups = filteredGroups.filter(group =>
+                            group.name.toLowerCase().includes(groupsSearchTerm.toLowerCase()) ||
+                            group.type.toLowerCase().includes(groupsSearchTerm.toLowerCase()) ||
+                            (group.genre && group.genre.toLowerCase().includes(groupsSearchTerm.toLowerCase()))
+                          );
+                        }
                         
                         return filteredGroups.length === 0 ? (
                           <div className="bg-white p-3 rounded border">
@@ -1321,6 +1366,69 @@ ${emailData.configured ? 'Il sistema di notifiche è completamente operativo!' :
         )}
         onDataChanged={reloadData}
       />
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+        <div className="flex justify-around py-2">
+          <button
+            onClick={() => handleSectionClick('home')}
+            className={`flex flex-col items-center px-2 py-2 text-xs ${
+              activeSection === 'home'
+                ? 'text-blue-600'
+                : 'text-gray-500'
+            }`}
+          >
+            <span className="text-lg">📅</span>
+            <span>Calendario</span>
+          </button>
+          <button
+            onClick={() => handleSectionClick('groups')}
+            className={`flex flex-col items-center px-2 py-2 text-xs ${
+              activeSection === 'groups'
+                ? 'text-blue-600'
+                : 'text-gray-500'
+            }`}
+          >
+            <span className="text-lg">👥</span>
+            <span>Gruppi</span>
+          </button>
+          {user.role === 'ADMIN' && (
+            <button
+              onClick={() => handleSectionClick('users')}
+              className={`flex flex-col items-center px-2 py-2 text-xs ${
+                activeSection === 'users'
+                  ? 'text-blue-600'
+                  : 'text-gray-500'
+              }`}
+            >
+              <span className="text-lg">👤</span>
+              <span>Utenti</span>
+            </button>
+          )}
+          <button
+            onClick={() => handleSectionClick('events')}
+            className={`flex flex-col items-center px-2 py-2 text-xs ${
+              activeSection === 'events'
+                ? 'text-blue-600'
+                : 'text-gray-500'
+            }`}
+          >
+            <span className="text-lg">{user.role === 'ADMIN' ? '🎤' : '📅'}</span>
+            <span>{user.role === 'ADMIN' ? 'Eventi' : 'Disponibilità'}</span>
+          </button>
+          <button
+            onClick={() => handleSectionClick('user')}
+            className={`flex flex-col items-center px-2 py-2 text-xs ${
+              activeSection === 'user'
+                ? 'text-blue-600'
+                : 'text-gray-500'
+            }`}
+          >
+            <span className="text-lg">⚙️</span>
+            <span>Profilo</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 };
