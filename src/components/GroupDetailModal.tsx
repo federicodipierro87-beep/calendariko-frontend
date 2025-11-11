@@ -220,64 +220,66 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                   <h3 className="text-lg font-medium text-gray-900 mb-3">
                     Membri Attuali ({members.length})
                   </h3>
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {members.length === 0 ? (
-                  <div className="bg-gray-50 p-3 rounded text-center text-gray-500">
-                    Nessun membro nel gruppo
-                  </div>
-                ) : (
-                  members.map((member) => (
-                    <div key={member.id} className="bg-white border rounded p-3 flex justify-between items-center">
-                      <div>
-                        <div className="font-medium">{member.first_name} {member.last_name}</div>
-                        <div className="text-sm text-gray-600">{member.email}</div>
-                        <div className="text-xs text-gray-500">
-                          {member.role} {member.id === currentUser.id && '(Tu)'}
-                        </div>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {members.length === 0 ? (
+                      <div className="bg-gray-50 p-3 rounded text-center text-gray-500">
+                        Nessun membro nel gruppo
                       </div>
-                      {canManageMembers && member.id !== currentUser.id && (
-                        <button
-                          onClick={() => handleRemoveMember(member.id)}
-                          className="px-3 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
-                        >
-                          Rimuovi
-                        </button>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+                    ) : (
+                      members.map((member) => (
+                        <div key={member.id} className="bg-white border rounded p-3 flex justify-between items-center">
+                          <div>
+                            <div className="font-medium">{member.first_name} {member.last_name}</div>
+                            <div className="text-sm text-gray-600">{member.email}</div>
+                            <div className="text-xs text-gray-500">
+                              {member.role} {member.id === currentUser.id && '(Tu)'}
+                            </div>
+                          </div>
+                          {canManageMembers && member.id !== currentUser.id && (
+                            <button
+                              onClick={() => handleRemoveMember(member.id)}
+                              className="px-3 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
+                            >
+                              Rimuovi
+                            </button>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
 
-            {/* Lista utenti da aggiungere (solo per admin) */}
-            {canManageMembers && (
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-3">
-                  Aggiungi Membri ({nonMembers.length} disponibili)
+                {/* Lista utenti da aggiungere (solo per admin) */}
+                {canManageMembers && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-3">
+                      Aggiungi Membri ({nonMembers.length} disponibili)
                 </h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {nonMembers.length === 0 ? (
-                    <div className="bg-gray-50 p-3 rounded text-center text-gray-500">
-                      Tutti gli utenti sono già membri
-                    </div>
-                  ) : (
-                    nonMembers.map((user) => (
-                      <div key={user.id} className="bg-gray-50 border rounded p-3 flex justify-between items-center">
-                        <div>
-                          <div className="font-medium">{user.first_name} {user.last_name}</div>
-                          <div className="text-sm text-gray-600">{user.email}</div>
-                          <div className="text-xs text-gray-500">{user.role}</div>
+                        <div className="bg-gray-50 p-3 rounded text-center text-gray-500">
+                          Tutti gli utenti sono già membri
                         </div>
-                        <button
-                          onClick={() => handleAddMember(user.id)}
-                          className="px-3 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
-                        >
-                          Aggiungi
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
+                      ) : (
+                        nonMembers.map((user) => (
+                          <div key={user.id} className="bg-gray-50 border rounded p-3 flex justify-between items-center">
+                            <div>
+                              <div className="font-medium">{user.first_name} {user.last_name}</div>
+                              <div className="text-sm text-gray-600">{user.email}</div>
+                              <div className="text-xs text-gray-500">{user.role}</div>
+                            </div>
+                            <button
+                              onClick={() => handleAddMember(user.id)}
+                              className="px-3 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
+                            >
+                              Aggiungi
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               /* Tab Eventi */
