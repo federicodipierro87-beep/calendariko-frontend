@@ -82,18 +82,13 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
   if (!isOpen) return null;
 
   const handleDeleteEvent = (eventId: string, eventTitle: string) => {
-    console.log('🔍 DayEventsModal handleDeleteEvent chiamata con:', { eventId, eventTitle, isDeleting });
-    console.trace('🔍 DayEventsModal Stack trace della chiamata');
-    
     // Previeni chiamate multiple
     if (isDeleting) {
-      console.log('🔍 DayEventsModal Eliminazione già in corso, ignorando...');
       return;
     }
     
     setIsDeleting(true);
     
-    console.log('🔍 DayEventsModal Chiamando onDeleteEvent (Dashboard gestirà conferma e alert)...');
     onDeleteEvent(eventId, eventTitle);
     
     // Reset flag dopo un delay per permettere nuove eliminazioni

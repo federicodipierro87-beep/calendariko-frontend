@@ -234,12 +234,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   };
 
   const handleDeleteEvent = (eventId: string, eventTitle?: string) => {
-    console.log('🔍 handleDeleteEvent chiamata con:', { eventId, eventTitle, isDeleting });
-    console.trace('🔍 Stack trace della chiamata');
-    
     // Previeni chiamate multiple
     if (isDeleting) {
-      console.log('🔍 Eliminazione già in corso, ignorando...');
       return;
     }
     
@@ -249,12 +245,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     setIsDeleting(true);
     
     if (!window.confirm(`Sei sicuro di voler eliminare l'evento "${title}"? Questa azione non può essere annullata.`)) {
-      console.log('🔍 Utente ha annullato eliminazione');
       setIsDeleting(false);
       return;
     }
     
-    console.log('🔍 Procedendo con eliminazione...');
     setEvents(events.filter(event => event.id !== eventId));
     alert(`✅ Evento "${title}" eliminato con successo!`);
     
