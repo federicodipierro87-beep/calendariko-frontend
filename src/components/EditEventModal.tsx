@@ -49,7 +49,6 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
     venue_city: event.venue_city,
     group_id: event.group_id || '',
     fee: event.fee?.toString() || '',
-    status: event.status || 'PROPOSED',
     notes: event.notes || '',
     contact_responsible: event.contact_responsible || ''
   });
@@ -80,7 +79,6 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
       venue_city: formData.venue_city,
       group_id: formData.group_id,
       fee: formData.fee ? parseFloat(formData.fee) : undefined,
-      status: formData.status,
       notes: formData.notes,
       contact_responsible: formData.contact_responsible
     };
@@ -186,11 +184,11 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
             </div>
           </div>
 
-          {/* Venue */}
+          {/* Locale */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label htmlFor="venue_name" className="block text-sm font-medium text-gray-700 mb-1">
-                Nome Venue *
+                Nome Locale *
               </label>
               <input
                 type="text"
@@ -272,38 +270,19 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
             </div>
           </div>
 
-          {/* Status e Contatto */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                Stato
-              </label>
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="PROPOSED">Proposto</option>
-                <option value="CONFIRMED">Confermato</option>
-                <option value="CANCELLED">Cancellato</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="contact_responsible" className="block text-sm font-medium text-gray-700 mb-1">
-                Contatto Responsabile
-              </label>
-              <input
-                type="text"
-                id="contact_responsible"
-                name="contact_responsible"
-                value={formData.contact_responsible}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+          {/* Contatto Responsabile */}
+          <div>
+            <label htmlFor="contact_responsible" className="block text-sm font-medium text-gray-700 mb-1">
+              Contatto Responsabile
+            </label>
+            <input
+              type="text"
+              id="contact_responsible"
+              name="contact_responsible"
+              value={formData.contact_responsible}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
 
           {/* Note */}

@@ -459,7 +459,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Venue/Luogo
+                  Locale
                 </label>
                 <input
                   type="text"
