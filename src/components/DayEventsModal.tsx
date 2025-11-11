@@ -93,15 +93,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
     
     setIsDeleting(true);
     
-    if (!window.confirm(`Sei sicuro di voler eliminare "${eventTitle}"? Questa azione non può essere annullata.`)) {
-      console.log('🔍 DayEventsModal Utente ha annullato eliminazione');
-      setIsDeleting(false);
-      return;
-    }
-    
-    console.log('🔍 DayEventsModal Chiamando onDeleteEvent...');
+    console.log('🔍 DayEventsModal Chiamando onDeleteEvent (Dashboard gestirà conferma e alert)...');
     onDeleteEvent(eventId, eventTitle);
-    alert(`✅ "${eventTitle}" eliminato con successo!`);
     
     // Reset flag dopo un delay per permettere nuove eliminazioni
     setTimeout(() => {
