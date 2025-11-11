@@ -65,11 +65,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         }));
         
         // Carica gruppi
-        console.log('📡 Loading groups...');
         const groupsData = await groupsApi.getAll();
-        console.log('🔍 FRONTEND - Groups received:', groupsData.length, groupsData);
+        console.log('🔍 FRONTEND - Groups received:', groupsData.length);
         setGroups(groupsData);
-        console.log('✅ Groups state updated');
 
         // Carica gruppi dell'utente corrente per le availability
         if (user.role === 'ARTIST') {
@@ -80,11 +78,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         
         // Carica utenti se admin
         if (user.role === 'ADMIN') {
-          console.log('📡 Loading users...');
           const usersData = await usersApi.getAll();
-          console.log('🔍 FRONTEND - Users received:', usersData.length, usersData);
+          console.log('🔍 FRONTEND - Users received:', usersData.length);
           setUsers(usersData);
-          console.log('✅ Users state updated');
         }
 
         // Carica disponibilità
@@ -587,10 +583,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                 </div>
                               </div>
                               <div className={`px-2 py-1 rounded text-xs ${
-                                event.type === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                event.type === 'availability' ? 'bg-green-100 text-green-700' :
                                 'bg-blue-100 text-blue-700'
                               }`}>
-                                {event.type === 'confirmed' ? 'Confermata' : 'Opzionata'}
+                                {event.type === 'availability' ? 'Confermata' : 'Opzionata'}
                               </div>
                             </div>
                           ))}
@@ -657,13 +653,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     <div className="space-y-2">
                       {(() => {
                         // Filtra i gruppi in base al ruolo e alla ricerca
-                        console.log('🔍 Rendering groups section. Total groups:', groups.length, 'User role:', user.role);
                         let filteredGroups = user.role === 'ADMIN' 
                           ? groups 
                           : groups.filter(group => 
                               group.user_groups?.some((ug: any) => ug.user_id === user.id)
                             );
-                        console.log('🔍 Filtered groups for user:', filteredGroups.length);
                         
                         // Applica filtro di ricerca
                         if (groupsSearchTerm.trim()) {
@@ -911,10 +905,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                       <div className="flex items-center gap-2">
                                         <h6 className="font-medium text-gray-900">{event.title}</h6>
                                         <span className={`px-2 py-1 rounded text-xs ${
-                                          event.type === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                          event.type === 'availability' ? 'bg-green-100 text-green-700' :
                                           'bg-blue-100 text-blue-700'
                                         }`}>
-                                          {event.type === 'confirmed' ? 'Confermata' : 'Opzionata'}
+                                          {event.type === 'availability' ? 'Confermata' : 'Opzionata'}
                                         </span>
                                       </div>
                                       <div className="text-sm text-gray-600 mt-1">

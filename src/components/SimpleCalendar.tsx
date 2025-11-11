@@ -5,7 +5,7 @@ interface Event {
   title: string;
   date: string;
   time: string;
-  type: 'confirmed' | 'optional' | 'availability-busy';
+  type: 'rehearsal' | 'availability' | 'availability-busy';
   fee?: number;
   contact_responsible?: string;
 }
@@ -78,8 +78,8 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
     
     // Priorità: indisponibilità (rosso) > eventi (viola) > prove (blu) > disponibilità (verde)
     if (dayEvents.some(e => e.type === 'availability-busy')) return 'bg-red-100 border-red-300';
-    if (dayEvents.some(e => e.type === 'confirmed')) return 'bg-green-100 border-green-300';
-    if (dayEvents.some(e => e.type === 'optional')) return 'bg-blue-100 border-blue-300';
+    if (dayEvents.some(e => e.type === 'availability')) return 'bg-green-100 border-green-300';
+    if (dayEvents.some(e => e.type === 'rehearsal')) return 'bg-blue-100 border-blue-300';
     
     return '';
   };
@@ -132,10 +132,10 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                 className="text-xs mb-1 px-1 py-0.5 rounded"
                 style={{
                   backgroundColor: event.type === 'availability-busy' ? '#fee2e2' :
-                                   event.type === 'confirmed' ? '#dcfce7' :
+                                   event.type === 'availability' ? '#dcfce7' :
                                    '#dbeafe',
                   color: event.type === 'availability-busy' ? '#991b1b' :
-                         event.type === 'confirmed' ? '#166534' :
+                         event.type === 'availability' ? '#166534' :
                          '#1e40af'
                 }}
               >
