@@ -5,6 +5,7 @@ import CreateGroupModal from '../components/CreateGroupModal';
 import CreateUserModal from '../components/CreateUserModal';
 import GroupDetailModal from '../components/GroupDetailModal';
 import AvailabilityModal from '../components/AvailabilityModal';
+import EditEventModal from '../components/EditEventModal';
 import { groupsApi, eventsApi, usersApi, availabilityApi } from '../utils/api';
 
 interface DashboardProps {
@@ -31,6 +32,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [eventsPerPage] = useState(10);
   const [groupsSearchTerm, setGroupsSearchTerm] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showEditEventModal, setShowEditEventModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [userProfile, setUserProfile] = useState({
     firstName: user.first_name || '',
     lastName: user.last_name || '',
@@ -230,6 +233,35 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       console.error('❌ Errore nella creazione dell\'evento:', error);
       const errorMessage = error?.message || 'Errore sconosciuto';
       alert(`❌ Errore nella creazione dell'evento: ${errorMessage}`);
+    }
+  };
+
+  const handleEditEvent = (event: any) => {
+    if (user.role !== 'ADMIN') {
+      alert('⚠️ Solo gli admin possono modificare gli eventi');
+      return;
+    }
+    
+    setSelectedEvent(event);
+    setShowEditEventModal(true);
+  };
+
+  const handleSaveEventChanges = async (eventData: any) => {
+    try {
+      // Aggiorna l'evento tramite API
+      await eventsApi.update(eventData.id, eventData);
+      
+      // Ricarica gli eventi
+      await reloadData();
+      
+      // Chiudi il modal
+      setShowEditEventModal(false);
+      setSelectedEvent(null);
+      
+      alert('✅ Evento modificato con successo! I membri del gruppo riceveranno una notifica via email.');
+    } catch (error: any) {
+      console.error('Errore nella modifica dell\'evento:', error);
+      alert(`❌ Errore nella modifica dell'evento: ${error.message}`);
     }
   };
 
@@ -592,7 +624,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                           {events.slice(0, 3).map(event => (
                             <div key={event.id} className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-b-0">
                               <div>
-                                <div className="font-medium text-sm">{event.title}</div>
+                                <div 
+                                  className={`font-medium text-sm ${user.role === 'ADMIN' ? 'cursor-pointer hover:text-blue-600 hover:underline' : ''}`}
+                                  onClick={() => user.role === 'ADMIN' && handleEditEvent(event)}
+                                  title={user.role === 'ADMIN' ? 'Clicca per modificare evento' : ''}
+                                >
+                                  {event.title}
+                                </div>
                                 <div className="text-xs text-gray-500">
                                   {new Date(event.date).toLocaleDateString('it-IT')} - {event.time}
                                 </div>
@@ -918,7 +956,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                   <div className="flex justify-between items-start">
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2">
-                                        <h6 className="font-medium text-gray-900">{event.title}</h6>
+                                        <h6 
+                                          className={`font-medium text-gray-900 ${user.role === 'ADMIN' ? 'cursor-pointer hover:text-blue-600 hover:underline' : ''}`}
+                                          onClick={() => user.role === 'ADMIN' && handleEditEvent(event)}
+                                          title={user.role === 'ADMIN' ? 'Clicca per modificare evento' : ''}
+                                        >
+                                          {event.title}
+                                        </h6>
                                         <span className={`px-2 py-1 rounded text-xs ${
                                           event.type === 'availability' ? 'bg-green-100 text-green-700' :
                                           'bg-blue-100 text-blue-700'
@@ -1448,6 +1492,20 @@ ${emailData.configured ? 'Il sistema di notifiche è completamente operativo!' :
           </button>
         </div>
       </nav>
+
+      {/* Modal per modifica eventi */}
+      {selectedEvent && (
+        <EditEventModal
+          isOpen={showEditEventModal}
+          onClose={() => {
+            setShowEditEventModal(false);
+            setSelectedEvent(null);
+          }}
+          onSave={handleSaveEventChanges}
+          event={selectedEvent}
+          groups={groups}
+        />
+      )}
     </div>
   );
 };
