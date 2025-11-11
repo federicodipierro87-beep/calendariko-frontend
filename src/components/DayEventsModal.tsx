@@ -5,7 +5,7 @@ interface Event {
   title: string;
   date: string;
   time: string;
-  type: 'event' | 'rehearsal' | 'availability-busy';
+  type: 'confirmed' | 'optional' | 'availability-busy';
   venue?: string;
   notes?: string;
   group_id?: string;
@@ -65,7 +65,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
     title: '',
     time: '',
     endTime: '',
-    type: 'event' as const,
+    type: 'confirmed' as const,
     venue: '',
     notes: '',
     group_id: '',
@@ -101,7 +101,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
         title: '',
         time: '',
         endTime: '',
-        type: 'event',
+        type: 'confirmed',
         venue: '',
         notes: '',
         group_id: '',
@@ -139,8 +139,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
-      case 'event': return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'rehearsal': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'confirmed': return 'bg-green-100 text-green-700 border-green-200';
+      case 'optional': return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'availability-busy': return 'bg-red-100 text-red-700 border-red-200';
       default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
@@ -148,8 +148,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
 
   const getEventTypeLabel = (type: string) => {
     switch (type) {
-      case 'event': return 'Evento';
-      case 'rehearsal': return 'Opzionata';
+      case 'confirmed': return 'Confermata';
+      case 'optional': return 'Opzionata';
       case 'availability-busy': return 'Indisponibilità';
       default: return type;
     }
@@ -158,7 +158,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
   // Controlla se ci sono eventi reali (non indisponibilità) nella giornata
   const hasRealEvents = () => {
     return events.some(event => 
-      event.type === 'event' || event.type === 'rehearsal'
+      event.type === 'confirmed' || event.type === 'optional'
     );
   };
 
@@ -395,8 +395,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                     onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value as any })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="event">Evento</option>
-                    <option value="rehearsal">Opzionata</option>
+                    <option value="confirmed">Confermata</option>
+                    <option value="optional">Opzionata</option>
                   </select>
                 </div>
               </div>

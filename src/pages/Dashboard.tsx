@@ -587,10 +587,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                 </div>
                               </div>
                               <div className={`px-2 py-1 rounded text-xs ${
-                                event.type === 'event' ? 'bg-purple-100 text-purple-700' :
+                                event.type === 'confirmed' ? 'bg-green-100 text-green-700' :
                                 'bg-blue-100 text-blue-700'
                               }`}>
-                                {event.type === 'event' ? 'Evento' : 'Opzionata'}
+                                {event.type === 'confirmed' ? 'Confermata' : 'Opzionata'}
                               </div>
                             </div>
                           ))}
@@ -911,10 +911,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                       <div className="flex items-center gap-2">
                                         <h6 className="font-medium text-gray-900">{event.title}</h6>
                                         <span className={`px-2 py-1 rounded text-xs ${
-                                          event.type === 'event' ? 'bg-purple-100 text-purple-700' :
+                                          event.type === 'confirmed' ? 'bg-green-100 text-green-700' :
                                           'bg-blue-100 text-blue-700'
                                         }`}>
-                                          {event.type === 'event' ? 'Evento' : 'Opzionata'}
+                                          {event.type === 'confirmed' ? 'Confermata' : 'Opzionata'}
                                         </span>
                                       </div>
                                       <div className="text-sm text-gray-600 mt-1">
