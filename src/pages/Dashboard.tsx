@@ -282,7 +282,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     }
     
     setEvents(events.filter(event => event.id !== eventId));
-    alert(`✅ Evento "${title}" eliminato con successo!`);
+    alert(`✅ Evento "${title}" eliminato con successo! Le notifiche email sono state inviate a tutti i membri del gruppo.`);
     
     // Reset flag dopo un delay per permettere nuove eliminazioni
     setTimeout(() => {
