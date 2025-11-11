@@ -77,21 +77,36 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
     user_id: '',
     notes: ''
   });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   if (!isOpen) return null;
 
   const handleDeleteEvent = (eventId: string, eventTitle: string) => {
-    console.log('🔍 DayEventsModal handleDeleteEvent chiamata con:', { eventId, eventTitle });
+    console.log('🔍 DayEventsModal handleDeleteEvent chiamata con:', { eventId, eventTitle, isDeleting });
     console.trace('🔍 DayEventsModal Stack trace della chiamata');
+    
+    // Previeni chiamate multiple
+    if (isDeleting) {
+      console.log('🔍 DayEventsModal Eliminazione già in corso, ignorando...');
+      return;
+    }
+    
+    setIsDeleting(true);
     
     if (!window.confirm(`Sei sicuro di voler eliminare "${eventTitle}"? Questa azione non può essere annullata.`)) {
       console.log('🔍 DayEventsModal Utente ha annullato eliminazione');
+      setIsDeleting(false);
       return;
     }
     
     console.log('🔍 DayEventsModal Chiamando onDeleteEvent...');
     onDeleteEvent(eventId, eventTitle);
     alert(`✅ "${eventTitle}" eliminato con successo!`);
+    
+    // Reset flag dopo un delay per permettere nuove eliminazioni
+    setTimeout(() => {
+      setIsDeleting(false);
+    }, 1000);
   };
 
   const formatDate = (dateStr: string) => {
@@ -255,7 +270,11 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                     {/* Pulsante elimina per eventi (solo admin) */}
                     {event.type !== 'availability-busy' && user?.role === 'ADMIN' && (
                       <button
-                        onClick={() => handleDeleteEvent(event.id, event.title)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeleteEvent(event.id, event.title);
+                        }}
                         className="text-red-500 hover:text-red-700 ml-2"
                         title="Elimina evento"
                       >
@@ -266,7 +285,11 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                     {/* Pulsante elimina per indisponibilità proprie */}
                     {event.type === 'availability-busy' && event.user?.id === user?.id && (
                       <button
-                        onClick={() => handleDeleteEvent(event.id, 'Indisponibilità')}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeleteEvent(event.id, 'Indisponibilità');
+                        }}
                         className="text-red-500 hover:text-red-700 ml-2"
                         title="Rimuovi indisponibilità"
                       >

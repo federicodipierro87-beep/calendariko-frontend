@@ -30,6 +30,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [eventsPerPage] = useState(10);
   const [groupsSearchTerm, setGroupsSearchTerm] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
   const [userProfile, setUserProfile] = useState({
     firstName: user.first_name || '',
     lastName: user.last_name || '',
@@ -233,20 +234,34 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   };
 
   const handleDeleteEvent = (eventId: string, eventTitle?: string) => {
-    console.log('🔍 handleDeleteEvent chiamata con:', { eventId, eventTitle });
+    console.log('🔍 handleDeleteEvent chiamata con:', { eventId, eventTitle, isDeleting });
     console.trace('🔍 Stack trace della chiamata');
+    
+    // Previeni chiamate multiple
+    if (isDeleting) {
+      console.log('🔍 Eliminazione già in corso, ignorando...');
+      return;
+    }
     
     const eventToDeleteData = events.find(event => event.id === eventId);
     const title = eventTitle || eventToDeleteData?.title || 'questo evento';
     
+    setIsDeleting(true);
+    
     if (!window.confirm(`Sei sicuro di voler eliminare l'evento "${title}"? Questa azione non può essere annullata.`)) {
       console.log('🔍 Utente ha annullato eliminazione');
+      setIsDeleting(false);
       return;
     }
     
     console.log('🔍 Procedendo con eliminazione...');
     setEvents(events.filter(event => event.id !== eventId));
     alert(`✅ Evento "${title}" eliminato con successo!`);
+    
+    // Reset flag dopo un delay per permettere nuove eliminazioni
+    setTimeout(() => {
+      setIsDeleting(false);
+    }, 1000);
   };
 
   const handleCreateAvailability = async (availabilityData: any) => {
@@ -931,7 +946,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                       )}
                                     </div>
                                     <button
-                                      onClick={() => handleDeleteEvent(event.id, event.title)}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleDeleteEvent(event.id, event.title);
+                                      }}
                                       className="text-red-500 hover:text-red-700 ml-2"
                                       title="Elimina evento"
                                     >
