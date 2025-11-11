@@ -50,6 +50,8 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
       // Se admin, carica tutti gli utenti per gestione membri
       if (currentUser.role === 'ADMIN') {
         const users = await usersApi.getAll();
+        console.log('🔍 Utenti caricati dall\'API:', users);
+        console.log('🔍 Primo utente esempio:', users[0]);
         setAllUsers(users);
       }
     } catch (error) {
@@ -294,7 +296,11 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                               <div className="text-xs text-gray-500">{user.role}</div>
                             </div>
                             <button
-                              onClick={() => handleAddMember(user.id)}
+                              onClick={() => {
+                                console.log('🔍 Cliccato aggiungi per utente:', user);
+                                console.log('🔍 user.id:', user.id);
+                                handleAddMember(user.id);
+                              }}
                               className="px-3 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
                             >
                               Aggiungi
