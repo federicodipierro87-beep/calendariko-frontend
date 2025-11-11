@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 
 interface Event {
   id: string;
@@ -77,8 +78,22 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
     user_id: '',
     notes: ''
   });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<{id: string, title: string} | null>(null);
 
   if (!isOpen) return null;
+
+  const handleDeleteClick = (eventId: string, eventTitle: string) => {
+    setEventToDelete({ id: eventId, title: eventTitle });
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteEvent = () => {
+    if (eventToDelete) {
+      onDeleteEvent(eventToDelete.id, eventToDelete.title);
+      setEventToDelete(null);
+    }
+  };
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('it-IT', {
@@ -241,7 +256,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                     {/* Pulsante elimina per eventi (solo admin) */}
                     {event.type !== 'availability-busy' && user?.role === 'ADMIN' && (
                       <button
-                        onClick={() => onDeleteEvent(event.id, event.title)}
+                        onClick={() => handleDeleteClick(event.id, event.title)}
                         className="text-red-500 hover:text-red-700 ml-2"
                         title="Elimina evento"
                       >
@@ -252,13 +267,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                     {/* Pulsante elimina per indisponibilità proprie */}
                     {event.type === 'availability-busy' && event.user?.id === user?.id && (
                       <button
-                        onClick={() => {
-                          if (confirm('Sei sicuro di voler rimuovere questa indisponibilità?')) {
-                            // Qui dovresti chiamare l'API per eliminare l'availability
-                            // Per ora uso onDeleteEvent che funziona per gli eventi normali
-                            onDeleteEvent(event.id);
-                          }
-                        }}
+                        onClick={() => handleDeleteClick(event.id, 'Indisponibilità')}
                         className="text-red-500 hover:text-red-700 ml-2"
                         title="Rimuovi indisponibilità"
                       >
@@ -558,6 +567,17 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
           </div>
         )}
       </div>
+
+      {/* Modal di conferma eliminazione */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setEventToDelete(null);
+        }}
+        onConfirm={confirmDeleteEvent}
+        eventTitle={eventToDelete?.title || ''}
+      />
     </div>
   );
 };
