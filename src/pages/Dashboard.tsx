@@ -919,6 +919,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                       {event.group && (
                                         <div className="text-sm text-gray-600">👥 {event.group.name}</div>
                                       )}
+                                      {event.contact_responsible && (
+                                        <div className="text-sm text-gray-600">👤 Contatto: {event.contact_responsible}</div>
+                                      )}
                                     </div>
                                     <button
                                       onClick={() => handleDeleteEvent(event.id, event.title)}

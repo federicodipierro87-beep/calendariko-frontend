@@ -10,6 +10,7 @@ interface Event {
   notes?: string;
   group_id?: string;
   fee?: number;
+  contact_responsible?: string;
   group?: {
     id: string;
     name: string;
@@ -68,7 +69,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
     venue: '',
     notes: '',
     group_id: '',
-    fee: ''
+    fee: '',
+    contact_responsible: ''
   });
   const [newAvailability, setNewAvailability] = useState({
     group_id: '',
@@ -103,7 +105,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
         venue: '',
         notes: '',
         group_id: '',
-        fee: ''
+        fee: '',
+        contact_responsible: ''
       });
       setIsCreating(false);
     }
@@ -227,6 +230,9 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                       )}
                       {event.user && event.type === 'availability-busy' && (
                         <p className="text-sm opacity-80">👤 {event.user.first_name} {event.user.last_name}</p>
+                      )}
+                      {event.contact_responsible && (
+                        <p className="text-sm opacity-80">👤 Contatto: {event.contact_responsible}</p>
                       )}
                       {event.notes && (
                         <p className="text-sm opacity-80 mt-1">📝 {event.notes}</p>
@@ -444,6 +450,19 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                   />
                 </div>
               )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  👤 Contatto responsabile
+                </label>
+                <input
+                  type="text"
+                  value={newEvent.contact_responsible}
+                  onChange={(e) => setNewEvent({ ...newEvent, contact_responsible: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Es: Mario Rossi, 329-1234567"
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

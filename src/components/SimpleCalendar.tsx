@@ -7,6 +7,7 @@ interface Event {
   time: string;
   type: 'availability' | 'rehearsal' | 'availability-busy';
   fee?: number;
+  contact_responsible?: string;
 }
 
 interface SimpleCalendarProps {

@@ -341,6 +341,9 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                     {event.fee && (
                                       <p className="text-sm text-green-600 font-medium">💰 €{event.fee}</p>
                                     )}
+                                    {event.contact_responsible && (
+                                      <p className="text-sm text-gray-600">👤 Contatto: {event.contact_responsible}</p>
+                                    )}
                                   </div>
                                   <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
                                     {event.status === 'CONFIRMED' ? 'Confermato' : 
@@ -377,6 +380,9 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                     </p>
                                     {event.fee && (
                                       <p className="text-sm text-gray-600">💰 €{event.fee}</p>
+                                    )}
+                                    {event.contact_responsible && (
+                                      <p className="text-sm text-gray-500">👤 Contatto: {event.contact_responsible}</p>
                                     )}
                                   </div>
                                   <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
