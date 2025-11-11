@@ -1394,6 +1394,7 @@ ${emailData.configured ? 'Il sistema di notifiche è completamente operativo!' :
         onCreateEvent={handleCreateEvent}
         onDeleteEvent={handleDeleteEvent}
         onCreateAvailability={handleCreateAvailability}
+        onEditEvent={handleEditEvent}
       />
 
       {/* Modal per creazione gruppi */}

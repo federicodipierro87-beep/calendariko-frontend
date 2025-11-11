@@ -44,6 +44,7 @@ interface DayEventsModalProps {
   onCreateEvent: (event: Omit<Event, 'id'>) => void;
   onDeleteEvent: (eventId: string, eventTitle?: string) => void;
   onCreateAvailability?: (availability: any) => void;
+  onEditEvent?: (event: any) => void; // Nuova funzione per editing eventi
 }
 
 const DayEventsModal: React.FC<DayEventsModalProps> = ({
@@ -57,7 +58,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
   users = [],
   onCreateEvent,
   onDeleteEvent,
-  onCreateAvailability
+  onCreateAvailability,
+  onEditEvent
 }) => {
   const [isCreating, setIsCreating] = useState(false);
   const [isCreatingAvailability, setIsCreatingAvailability] = useState(false);
@@ -255,19 +257,35 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                         <p className="text-sm opacity-80 mt-1">📝 {event.notes}</p>
                       )}
                     </div>
-                    {/* Pulsante elimina per eventi (solo admin) */}
+                    {/* Pulsanti per eventi (solo admin) */}
                     {event.type !== 'availability-busy' && user?.role === 'ADMIN' && (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleDeleteEvent(event.id, event.title);
-                        }}
-                        className="text-red-500 hover:text-red-700 ml-2"
-                        title="Elimina evento"
-                      >
-                        🗑️
-                      </button>
+                      <div className="flex items-center gap-2 ml-2">
+                        {/* Pulsante modifica */}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onEditEvent?.(event);
+                          }}
+                          className="text-blue-500 hover:text-blue-700"
+                          title="Modifica evento"
+                        >
+                          ✏️
+                        </button>
+                        
+                        {/* Pulsante elimina */}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDeleteEvent(event.id, event.title);
+                          }}
+                          className="text-red-500 hover:text-red-700"
+                          title="Elimina evento"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     )}
                     
                     {/* Pulsante elimina per indisponibilità proprie */}
