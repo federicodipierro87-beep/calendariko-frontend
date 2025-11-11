@@ -5,7 +5,7 @@ interface Event {
   title: string;
   date: string;
   time: string;
-  type: 'availability' | 'rehearsal' | 'availability-busy';
+  type: 'event' | 'availability' | 'rehearsal' | 'availability-busy';
   venue?: string;
   notes?: string;
   group_id?: string;
@@ -65,7 +65,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
     title: '',
     time: '',
     endTime: '',
-    type: 'rehearsal' as const,
+    type: 'event' as const,
     venue: '',
     notes: '',
     group_id: '',
@@ -101,7 +101,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
         title: '',
         time: '',
         endTime: '',
-        type: 'rehearsal',
+        type: 'event',
         venue: '',
         notes: '',
         group_id: '',
@@ -139,6 +139,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
+      case 'event': return 'bg-purple-100 text-purple-700 border-purple-200';
       case 'rehearsal': return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'availability': return 'bg-green-100 text-green-700 border-green-200';
       case 'availability-busy': return 'bg-red-100 text-red-700 border-red-200';
@@ -148,6 +149,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
 
   const getEventTypeLabel = (type: string) => {
     switch (type) {
+      case 'event': return 'Evento';
       case 'rehearsal': return 'Opzionata';
       case 'availability': return 'Confermata';
       case 'availability-busy': return 'Indisponibilità';
@@ -158,7 +160,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
   // Controlla se ci sono eventi reali (non indisponibilità) nella giornata
   const hasRealEvents = () => {
     return events.some(event => 
-      event.type === 'rehearsal'
+      event.type === 'event' || event.type === 'rehearsal'
     );
   };
 
@@ -395,6 +397,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                     onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value as any })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
+                    <option value="event">Evento</option>
                     <option value="rehearsal">Opzionata</option>
                     <option value="availability">Confermata</option>
                   </select>
