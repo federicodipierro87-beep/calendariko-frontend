@@ -300,7 +300,7 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                               Aggiungi
                             </button>
                           </div>
-                        ));
+                        )));
                       })()}
                     </div>
                   </div>
