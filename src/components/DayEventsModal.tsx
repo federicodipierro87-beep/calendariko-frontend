@@ -91,7 +91,9 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
   const confirmDeleteEvent = () => {
     if (eventToDelete) {
       onDeleteEvent(eventToDelete.id, eventToDelete.title);
+      setShowDeleteConfirm(false);
       setEventToDelete(null);
+      alert(`✅ "${eventToDelete.title}" eliminato con successo!`);
     }
   };
 

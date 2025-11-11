@@ -246,7 +246,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const confirmDeleteEvent = () => {
     if (eventToDelete) {
       setEvents(events.filter(event => event.id !== eventToDelete.id));
+      setShowDeleteConfirm(false);
       setEventToDelete(null);
+      alert(`✅ Evento "${eventToDelete.title}" eliminato con successo!`);
     }
   };
 

@@ -17,7 +17,6 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
 
   const handleConfirm = () => {
     onConfirm();
-    onClose();
   };
 
   return (
