@@ -246,6 +246,28 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     setShowEditEventModal(true);
   };
 
+  // FUNZIONE DI TEST TEMPORANEA
+  const handleTestEmail = async (eventId: string) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/events/test-email/${eventId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        alert('✅ Test email inviato! Controlla Railway logs e Resend.');
+      } else {
+        alert('❌ Errore nell\'invio test email');
+      }
+    } catch (error) {
+      console.error('Errore test email:', error);
+      alert('❌ Errore nella chiamata test email');
+    }
+  };
+
   const handleSaveEventChanges = async (eventData: any) => {
     try {
       // Aggiorna l'evento tramite API
@@ -1404,6 +1426,7 @@ ${emailData.configured ? 'Il sistema di notifiche è completamente operativo!' :
         onDeleteEvent={handleDeleteEvent}
         onCreateAvailability={handleCreateAvailability}
         onEditEvent={handleEditEvent}
+        onTestEmail={handleTestEmail}
       />
 
       {/* Modal per creazione gruppi */}
