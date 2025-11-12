@@ -175,11 +175,6 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         if (!isRegisterMode) {
           const debugEntry = `✅ LOGIN SUCCESSO! User: ${data.user?.email} [${new Date().toLocaleTimeString()}]`;
           addToDebugLog(debugEntry);
-          
-          // FERMIAMO QUI per vedere il debug - NON fare login
-          alert('LOGIN SUCCESSO - Debug Mode - Non facciamo login per vedere il log');
-          setLoading(false);
-          return;
         }
         
         onLogin(data.user, data.accessToken, data.refreshToken);
