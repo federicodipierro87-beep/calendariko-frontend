@@ -19,8 +19,14 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
-  const [showRecaptcha, setShowRecaptcha] = useState(false);
-  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [showRecaptcha, setShowRecaptcha] = useState(() => {
+    const saved = localStorage.getItem('show_recaptcha');
+    return saved === 'true';
+  });
+  const [loginAttempts, setLoginAttempts] = useState(() => {
+    const saved = localStorage.getItem('login_attempts');
+    return saved ? parseInt(saved) : 0;
+  });
   const [debugLog, setDebugLog] = useState<string[]>(() => {
     const saved = localStorage.getItem('debug_login_log');
     return saved ? JSON.parse(saved) : [];
@@ -35,6 +41,26 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
   const clearDebugLog = () => {
     setDebugLog([]);
     localStorage.removeItem('debug_login_log');
+  };
+
+  const updateLoginAttempts = (newAttempts: number) => {
+    setLoginAttempts(newAttempts);
+    localStorage.setItem('login_attempts', newAttempts.toString());
+  };
+
+  const clearLoginAttempts = () => {
+    setLoginAttempts(0);
+    localStorage.removeItem('login_attempts');
+  };
+
+  const updateShowRecaptcha = (show: boolean) => {
+    setShowRecaptcha(show);
+    localStorage.setItem('show_recaptcha', show.toString());
+  };
+
+  const clearShowRecaptcha = () => {
+    setShowRecaptcha(false);
+    localStorage.removeItem('show_recaptcha');
   };
 
 
@@ -172,7 +198,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         
         console.log('🔍 LOGIN FAILED - Attempts:', newAttempts, 'Error:', errorMessage);
         
-        setLoginAttempts(newAttempts);
+        updateLoginAttempts(newAttempts);
         
         // Mostra reCAPTCHA se l'errore lo richiede o dopo 3 tentativi
         if (errorMessage.includes('reCAPTCHA richiesta') || newAttempts >= 3) {
@@ -180,7 +206,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
           addToDebugLog(recaptchaLogEntry);
           
           console.log('🔍 SHOWING RECAPTCHA - Attempts:', newAttempts);
-          setShowRecaptcha(true);
+          updateShowRecaptcha(true);
           setRecaptchaToken(null); // Reset del token
         }
       }
@@ -199,8 +225,8 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
     setError('');
     setSuccess('');
     setRecaptchaToken(null);
-    setShowRecaptcha(false);
-    setLoginAttempts(0);
+    clearShowRecaptcha();
+    clearLoginAttempts();
     clearDebugLog();
   };
 
