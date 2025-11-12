@@ -60,6 +60,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           title: event.title,
           date: event.date ? event.date.split('T')[0] : '', // Estrae solo la data con controllo
           time: event.start_time || '',
+          endTime: event.end_time || '',               // AGGIUNTO: mappa end_time a endTime
           type: event.event_type || 'event',
           venue: event.venue_name || '',
           notes: event.notes || '',
@@ -133,6 +134,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         title: event.title,
         date: event.date ? event.date.split('T')[0] : '',
         time: event.start_time || '',
+        endTime: event.end_time || '',               // AGGIUNTO: mappa end_time a endTime
         type: event.event_type || 'event',
         venue: event.venue_name || '',
         notes: event.notes || '',
@@ -214,6 +216,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         title: createdEvent.title || newEvent.title,
         date: createdEvent.date ? createdEvent.date.split('T')[0] : newEvent.date,
         time: createdEvent.start_time || newEvent.time,
+        endTime: createdEvent.end_time || newEvent.endTime,    // AGGIUNTO: mappa end_time a endTime
         type: createdEvent.event_type || newEvent.type || 'event',
         venue: createdEvent.venue_name || newEvent.venue || '',
         notes: createdEvent.notes || newEvent.notes || '',
