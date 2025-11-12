@@ -69,6 +69,12 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
     setSuccess('');
 
     try {
+      // Debug log prima della chiamata API
+      if (!isRegisterMode) {
+        const debugEntry = `TENTATIVO LOGIN in corso... Email: ${email} [${new Date().toLocaleTimeString()}]`;
+        setDebugLog(prev => [...prev, debugEntry]);
+      }
+      
       if (isRegisterMode) {
         // Registrazione
         if (!firstName || !lastName) {
@@ -123,6 +129,13 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         }
 
         const data = await authApi.login(loginData);
+        
+        // Debug successo
+        if (!isRegisterMode) {
+          const debugEntry = `✅ LOGIN SUCCESSO! [${new Date().toLocaleTimeString()}]`;
+          setDebugLog(prev => [...prev, debugEntry]);
+        }
+        
         onLogin(data.user, data.accessToken, data.refreshToken);
       }
     } catch (err: any) {
