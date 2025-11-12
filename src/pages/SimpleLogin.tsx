@@ -64,6 +64,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Previene ulteriori eventi
     setLoading(true);
     setError('');
     setSuccess('');
@@ -132,8 +133,13 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         
         // Debug successo
         if (!isRegisterMode) {
-          const debugEntry = `✅ LOGIN SUCCESSO! [${new Date().toLocaleTimeString()}]`;
+          const debugEntry = `✅ LOGIN SUCCESSO! User: ${data.user?.email} [${new Date().toLocaleTimeString()}]`;
           setDebugLog(prev => [...prev, debugEntry]);
+          
+          // FERMIAMO QUI per vedere il debug - NON fare login
+          alert('LOGIN SUCCESSO - Debug Mode - Non facciamo login per vedere il log');
+          setLoading(false);
+          return;
         }
         
         onLogin(data.user, data.accessToken, data.refreshToken);
