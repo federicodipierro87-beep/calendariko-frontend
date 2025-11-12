@@ -21,7 +21,21 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [showRecaptcha, setShowRecaptcha] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
-  const [debugLog, setDebugLog] = useState<string[]>([]);
+  const [debugLog, setDebugLog] = useState<string[]>(() => {
+    const saved = localStorage.getItem('debug_login_log');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const addToDebugLog = (entry: string) => {
+    const newLog = [...debugLog, entry];
+    setDebugLog(newLog);
+    localStorage.setItem('debug_login_log', JSON.stringify(newLog));
+  };
+
+  const clearDebugLog = () => {
+    setDebugLog([]);
+    localStorage.removeItem('debug_login_log');
+  };
 
 
   // Carica i gruppi disponibili quando si passa alla modalità registrazione
@@ -73,7 +87,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
       // Debug log prima della chiamata API
       if (!isRegisterMode) {
         const debugEntry = `TENTATIVO LOGIN in corso... Email: ${email} [${new Date().toLocaleTimeString()}]`;
-        setDebugLog(prev => [...prev, debugEntry]);
+        addToDebugLog(debugEntry);
       }
       
       if (isRegisterMode) {
@@ -134,7 +148,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         // Debug successo
         if (!isRegisterMode) {
           const debugEntry = `✅ LOGIN SUCCESSO! User: ${data.user?.email} [${new Date().toLocaleTimeString()}]`;
-          setDebugLog(prev => [...prev, debugEntry]);
+          addToDebugLog(debugEntry);
           
           // FERMIAMO QUI per vedere il debug - NON fare login
           alert('LOGIN SUCCESSO - Debug Mode - Non facciamo login per vedere il log');
@@ -154,7 +168,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         
         // Aggiungi al log persistente
         const logEntry = `TENTATIVO ${newAttempts}: ${errorMessage} [${new Date().toLocaleTimeString()}]`;
-        setDebugLog(prev => [...prev, logEntry]);
+        addToDebugLog(logEntry);
         
         console.log('🔍 LOGIN FAILED - Attempts:', newAttempts, 'Error:', errorMessage);
         
@@ -163,7 +177,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         // Mostra reCAPTCHA se l'errore lo richiede o dopo 3 tentativi
         if (errorMessage.includes('reCAPTCHA richiesta') || newAttempts >= 3) {
           const recaptchaLogEntry = `>>> ATTIVANDO reCAPTCHA dopo ${newAttempts} tentativi [${new Date().toLocaleTimeString()}]`;
-          setDebugLog(prev => [...prev, recaptchaLogEntry]);
+          addToDebugLog(recaptchaLogEntry);
           
           console.log('🔍 SHOWING RECAPTCHA - Attempts:', newAttempts);
           setShowRecaptcha(true);
@@ -187,7 +201,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
     setRecaptchaToken(null);
     setShowRecaptcha(false);
     setLoginAttempts(0);
-    setDebugLog([]);
+    clearDebugLog();
   };
 
   const toggleMode = () => {
@@ -373,7 +387,16 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
           {/* Log persistente dei tentativi */}
           {debugLog.length > 0 && (
             <div className="bg-yellow-50 border border-yellow-300 p-3 mb-4 rounded">
-              <h4 className="font-bold text-yellow-800 mb-2">🔍 LOG TENTATIVI LOGIN:</h4>
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-bold text-yellow-800">🔍 LOG TENTATIVI LOGIN:</h4>
+                <button 
+                  type="button"
+                  onClick={clearDebugLog}
+                  className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                >
+                  Pulisci Log
+                </button>
+              </div>
               {debugLog.map((log, index) => (
                 <div key={index} className="text-xs text-yellow-700 mb-1 font-mono">
                   {log}
