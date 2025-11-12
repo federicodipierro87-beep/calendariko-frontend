@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface Event {
   id: string;
@@ -39,19 +39,58 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   groups
 }) => {
   const [formData, setFormData] = useState({
-    title: event.title,
-    event_type: event.event_type || 'rehearsal',
-    date: event.date ? event.date.split('T')[0] : '',
-    start_time: event.start_time ? event.start_time.split('T')[1]?.substring(0, 5) || '' : '',
-    end_time: event.end_time ? event.end_time.split('T')[1]?.substring(0, 5) || '' : '',
-    venue_name: event.venue_name,
-    venue_address: event.venue_address || '',
-    venue_city: event.venue_city,
-    group_id: event.group_id || '',
-    fee: event.fee?.toString() || '',
-    notes: event.notes || '',
-    contact_responsible: event.contact_responsible || ''
+    title: '',
+    event_type: 'rehearsal',
+    date: '',
+    start_time: '',
+    end_time: '',
+    venue_name: '',
+    venue_address: '',
+    venue_city: '',
+    group_id: '',
+    fee: '',
+    notes: '',
+    contact_responsible: ''
   });
+
+  // Aggiorna il form quando cambia l'evento
+  useEffect(() => {
+    if (event && isOpen) {
+      console.log('EditEventModal - Event data received:', event);
+      
+      // Funzione helper per estrarre data
+      const getDatePart = (dateStr: string | Date) => {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        return date.toISOString().split('T')[0];
+      };
+      
+      // Funzione helper per estrarre tempo
+      const getTimePart = (dateStr: string | Date) => {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        return date.toTimeString().substring(0, 5);
+      };
+      
+      const newFormData = {
+        title: event.title || '',
+        event_type: event.event_type || 'rehearsal', 
+        date: getDatePart(event.date),
+        start_time: getTimePart(event.start_time),
+        end_time: getTimePart(event.end_time),
+        venue_name: event.venue_name || '',
+        venue_address: event.venue_address || '',
+        venue_city: event.venue_city || '',
+        group_id: event.group_id || '',
+        fee: event.fee?.toString() || '',
+        notes: event.notes || '',
+        contact_responsible: event.contact_responsible || ''
+      };
+      
+      console.log('EditEventModal - Form data set to:', newFormData);
+      setFormData(newFormData);
+    }
+  }, [event, isOpen]);
 
   if (!isOpen) return null;
 
