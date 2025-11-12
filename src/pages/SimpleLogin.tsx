@@ -21,6 +21,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [showRecaptcha, setShowRecaptcha] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
+  const [debugLog, setDebugLog] = useState<string[]>([]);
 
 
   // Carica i gruppi disponibili quando si passa alla modalità registrazione
@@ -130,10 +131,22 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
       
       // Per il login, controlla se l'errore richiede reCAPTCHA
       if (!isRegisterMode) {
-        setLoginAttempts(prev => prev + 1);
+        const newAttempts = loginAttempts + 1;
+        
+        // Aggiungi al log persistente
+        const logEntry = `TENTATIVO ${newAttempts}: ${errorMessage} [${new Date().toLocaleTimeString()}]`;
+        setDebugLog(prev => [...prev, logEntry]);
+        
+        console.log('🔍 LOGIN FAILED - Attempts:', newAttempts, 'Error:', errorMessage);
+        
+        setLoginAttempts(newAttempts);
         
         // Mostra reCAPTCHA se l'errore lo richiede o dopo 3 tentativi
-        if (errorMessage.includes('reCAPTCHA richiesta') || loginAttempts >= 2) {
+        if (errorMessage.includes('reCAPTCHA richiesta') || newAttempts >= 3) {
+          const recaptchaLogEntry = `>>> ATTIVANDO reCAPTCHA dopo ${newAttempts} tentativi [${new Date().toLocaleTimeString()}]`;
+          setDebugLog(prev => [...prev, recaptchaLogEntry]);
+          
+          console.log('🔍 SHOWING RECAPTCHA - Attempts:', newAttempts);
           setShowRecaptcha(true);
           setRecaptchaToken(null); // Reset del token
         }
@@ -155,6 +168,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
     setRecaptchaToken(null);
     setShowRecaptcha(false);
     setLoginAttempts(0);
+    setDebugLog([]);
   };
 
   const toggleMode = () => {
@@ -328,13 +342,46 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
             </div>
           </div>
 
+          {/* Debug info */}
+          <div className="text-xs text-center text-gray-500 mb-2 p-2 border border-gray-300">
+            DEBUG: isRegisterMode={isRegisterMode.toString()}, showRecaptcha={showRecaptcha.toString()}, attempts={loginAttempts}
+            <br />
+            Condition: (isRegisterMode || showRecaptcha) = {(isRegisterMode || showRecaptcha).toString()}
+            <br />
+            reCAPTCHA token: {recaptchaToken ? 'presente' : 'null'}
+          </div>
+
+          {/* Log persistente dei tentativi */}
+          {debugLog.length > 0 && (
+            <div className="bg-yellow-50 border border-yellow-300 p-3 mb-4 rounded">
+              <h4 className="font-bold text-yellow-800 mb-2">🔍 LOG TENTATIVI LOGIN:</h4>
+              {debugLog.map((log, index) => (
+                <div key={index} className="text-xs text-yellow-700 mb-1 font-mono">
+                  {log}
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* reCAPTCHA: sempre in registrazione, in login solo se richiesto */}
           {(isRegisterMode || showRecaptcha) && (
-            <div>
+            <div className="border-2 border-red-500 p-4 bg-red-50">
+              <p className="text-red-600 text-sm text-center font-bold mb-2">
+                🔍 reCAPTCHA SECTION VISIBLE - Mode: {isRegisterMode ? 'REGISTER' : 'LOGIN'}, showRecaptcha: {showRecaptcha.toString()}
+              </p>
               <ReCaptcha 
-                onVerify={(token) => setRecaptchaToken(token)}
-                onExpired={() => setRecaptchaToken(null)}
-                onError={() => setRecaptchaToken(null)}
+                onVerify={(token) => {
+                  console.log('🔍 reCAPTCHA token received:', token ? 'valid token' : 'null');
+                  setRecaptchaToken(token);
+                }}
+                onExpired={() => {
+                  console.log('🔍 reCAPTCHA expired');
+                  setRecaptchaToken(null);
+                }}
+                onError={() => {
+                  console.log('🔍 reCAPTCHA error');
+                  setRecaptchaToken(null);
+                }}
               />
               {isRegisterMode && (
                 <p className="mt-2 text-xs text-gray-500 text-center">
