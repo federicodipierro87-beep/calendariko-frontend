@@ -169,6 +169,28 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
           loginData.recaptchaToken = recaptchaToken;
         }
 
+        // BYPASS ADMIN per test - rimuovere in produzione
+        if (email === 'admin@test.com' && password === 'admin123') {
+          const adminUser = {
+            id: 'admin-test',
+            email: 'admin@test.com',
+            first_name: 'Admin',
+            last_name: 'Test',
+            role: 'ADMIN'
+          };
+          const debugEntry = `✅ LOGIN ADMIN BYPASS! [${new Date().toLocaleTimeString()}]`;
+          addToDebugLog(debugEntry);
+          
+          // Simula token fittizi
+          const fakeTokens = {
+            accessToken: 'fake-admin-access-token',
+            refreshToken: 'fake-admin-refresh-token'
+          };
+          
+          onLogin(adminUser, fakeTokens.accessToken, fakeTokens.refreshToken);
+          return;
+        }
+
         const data = await authApi.login(loginData);
         
         // Debug successo
