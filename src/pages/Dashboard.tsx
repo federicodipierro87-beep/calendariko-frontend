@@ -64,6 +64,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           type: event.event_type || 'event',
           venue: event.venue_name || '',
           notes: event.notes || '',
+          contact_responsible: event.contact_responsible || '',  // AGGIUNTO: mappa contact_responsible
           group_id: event.group_id,
           group: event.group,
           fee: event.fee || 0
@@ -138,6 +139,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         type: event.event_type || 'event',
         venue: event.venue_name || '',
         notes: event.notes || '',
+        contact_responsible: event.contact_responsible || '',  // AGGIUNTO: mappa contact_responsible
         group_id: event.group_id,
         group: event.group,
         fee: event.fee || 0
@@ -220,6 +222,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         type: createdEvent.event_type || newEvent.type || 'event',
         venue: createdEvent.venue_name || newEvent.venue || '',
         notes: createdEvent.notes || newEvent.notes || '',
+        contact_responsible: createdEvent.contact_responsible || newEvent.contact_responsible || '',  // AGGIUNTO: mappa contact_responsible
         group_id: createdEvent.group_id || newEvent.group_id,
         group: createdEvent.group,
         fee: createdEvent.fee || (newEvent.fee ? parseFloat(newEvent.fee) : 0)
