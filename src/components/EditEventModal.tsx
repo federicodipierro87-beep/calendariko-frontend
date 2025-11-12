@@ -57,6 +57,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   useEffect(() => {
     if (event && isOpen) {
       console.log('EditEventModal - Event data received:', event);
+      console.log('EditEventModal - Available fields:', Object.keys(event));
       
       // Funzione helper per estrarre data
       const getDatePart = (dateStr: string | Date) => {
@@ -72,19 +73,22 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
         return date.toTimeString().substring(0, 5);
       };
       
+      // Cast per bypassare TypeScript e accedere ai campi dinamicamente
+      const eventData = event as any;
+      
       const newFormData = {
-        title: event.title || '',
-        event_type: event.event_type || 'rehearsal', 
-        date: getDatePart(event.date),
-        start_time: getTimePart(event.start_time),
-        end_time: getTimePart(event.end_time),
-        venue_name: event.venue_name || '',
-        venue_address: event.venue_address || '',
-        venue_city: event.venue_city || '',
-        group_id: event.group_id || '',
-        fee: event.fee?.toString() || '',
-        notes: event.notes || '',
-        contact_responsible: event.contact_responsible || ''
+        title: eventData.title || '',
+        event_type: eventData.type || eventData.event_type || 'rehearsal',
+        date: getDatePart(eventData.date),
+        start_time: getTimePart(eventData.time || eventData.start_time),
+        end_time: getTimePart(eventData.endTime || eventData.end_time),
+        venue_name: eventData.venue || eventData.venue_name || '',
+        venue_address: eventData.venue_address || '',
+        venue_city: eventData.venue_city || '',
+        group_id: eventData.group_id || '',
+        fee: eventData.fee?.toString() || '',
+        notes: eventData.notes || '',
+        contact_responsible: eventData.contact_responsible || ''
       };
       
       console.log('EditEventModal - Form data set to:', newFormData);
