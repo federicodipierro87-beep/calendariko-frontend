@@ -22,13 +22,6 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
   const [showRecaptcha, setShowRecaptcha] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
 
-  // Debug logging per stati
-  console.log('🔍 STATI COMPONENTE:', {
-    isRegisterMode,
-    showRecaptcha,
-    recaptchaToken,
-    shouldShowRecaptcha: isRegisterMode || showRecaptcha
-  });
 
   // Carica i gruppi disponibili quando si passa alla modalità registrazione
   useEffect(() => {
@@ -90,17 +83,11 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         }
         
         // Per la registrazione, reCAPTCHA è sempre richiesto
-        console.log('🔍 VERIFICA RECAPTCHA - Token presente:', !!recaptchaToken);
-        console.log('🔍 RECAPTCHA TOKEN VALUE:', recaptchaToken);
-        
         if (!recaptchaToken) {
-          console.log('🔍 ERRORE: Token reCAPTCHA mancante!');
           setError('Completa la verifica reCAPTCHA per registrarti');
           setLoading(false);
           return;
         }
-
-        console.log('🔍 INVIO REGISTRAZIONE con reCAPTCHA token');
         const response = await authApi.publicRegister({
           email,
           password,
@@ -190,7 +177,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
       <div className="max-w-md w-full space-y-6 sm:space-y-8">
         <div>
           <h2 className="mt-2 sm:mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
-            🎵 {isRegisterMode ? 'Registrati su Calendariko (v2.0)' : 'Accedi a Calendariko'}
+            🎵 {isRegisterMode ? 'Registrati su Calendariko' : 'Accedi a Calendariko'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Portale Gestione Eventi per Band & DJ
@@ -344,22 +331,10 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
           {/* reCAPTCHA: sempre in registrazione, in login solo se richiesto */}
           {(isRegisterMode || showRecaptcha) && (
             <div>
-              <p className="text-red-600 text-sm text-center font-bold">
-                🔍 DEBUG: reCAPTCHA dovrebbe apparire qui (isRegisterMode: {isRegisterMode.toString()}, showRecaptcha: {showRecaptcha.toString()})
-              </p>
               <ReCaptcha 
-                onVerify={(token) => {
-                  console.log('🔍 reCAPTCHA token received:', token);
-                  setRecaptchaToken(token);
-                }}
-                onExpired={() => {
-                  console.log('🔍 reCAPTCHA expired');
-                  setRecaptchaToken(null);
-                }}
-                onError={() => {
-                  console.log('🔍 reCAPTCHA error');
-                  setRecaptchaToken(null);
-                }}
+                onVerify={(token) => setRecaptchaToken(token)}
+                onExpired={() => setRecaptchaToken(null)}
+                onError={() => setRecaptchaToken(null)}
               />
               {isRegisterMode && (
                 <p className="mt-2 text-xs text-gray-500 text-center">
@@ -368,7 +343,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
               )}
               {!isRegisterMode && showRecaptcha && (
                 <p className="mt-2 text-xs text-orange-600 text-center">
-                  Verifica richiesta a causa di tentativi di accesso falliti
+                  ⚠️ Verifica reCAPTCHA richiesta a causa di tentativi di accesso falliti
                 </p>
               )}
             </div>
