@@ -384,6 +384,25 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     }
   };
 
+  const handleUnlockUser = async (userId: string) => {
+    if (!window.confirm('Sei sicuro di voler sbloccare questo utente? Potrà nuovamente accedere al sistema.')) {
+      return;
+    }
+
+    try {
+      await usersApi.unlock(userId);
+      
+      // Ricarica la lista degli utenti
+      const updatedUsers = await usersApi.getAll();
+      setUsers(updatedUsers);
+      
+      alert('✅ Utente sbloccato con successo. Ora può accedere al sistema.');
+    } catch (error: any) {
+      console.error('Errore nello sblocco dell\'utente:', error);
+      alert(`Errore nello sblocco dell'utente: ${error.message}`);
+    }
+  };
+
   const handleGroupClick = (group: any) => {
     setSelectedGroup(group);
     setShowGroupDetailModal(true);
@@ -1036,19 +1055,58 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     </p>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {users.map((userItem) => (
-                        <div key={userItem.id} className="bg-white p-3 rounded border flex justify-between items-center">
+                        <div key={userItem.id} className={`p-3 rounded border flex justify-between items-center ${
+                          userItem.account_locked ? 'bg-red-50 border-red-200' : 'bg-white'
+                        }`}>
                           <div>
-                            <strong>{userItem.first_name} {userItem.last_name}</strong> - {userItem.email}
+                            <div className="flex items-center gap-2">
+                              <strong>{userItem.first_name} {userItem.last_name}</strong>
+                              <span>-</span>
+                              <span>{userItem.email}</span>
+                              {userItem.account_locked && (
+                                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                  🔒 BLOCCATO
+                                </span>
+                              )}
+                            </div>
                             <div className="text-sm text-gray-600">
                               Ruolo: {userItem.role}
                               {userItem.phone && ` • Tel: ${userItem.phone}`}
+                              {userItem.failed_login_attempts > 0 && (
+                                <span className="text-orange-600">
+                                  {' • Tentativi falliti: '}
+                                  {userItem.failed_login_attempts}
+                                </span>
+                              )}
                             </div>
                             <div className="text-xs text-gray-500">
                               Creato: {new Date(userItem.created_at).toLocaleDateString('it-IT')}
+                              {userItem.locked_at && (
+                                <span className="text-red-600">
+                                  {' • Bloccato il: '}
+                                  {new Date(userItem.locked_at).toLocaleDateString('it-IT')} alle{' '}
+                                  {new Date(userItem.locked_at).toLocaleTimeString('it-IT')}
+                                </span>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Attivo</span>
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              userItem.account_locked 
+                                ? 'bg-red-100 text-red-800' 
+                                : 'bg-green-100 text-green-800'
+                            }`}>
+                              {userItem.account_locked ? 'Bloccato' : 'Attivo'}
+                            </span>
+                            {userItem.account_locked && (
+                              <button
+                                onClick={() => handleUnlockUser(userItem.id)}
+                                className="px-3 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 transition-colors"
+                                title="Sblocca utente"
+                              >
+                                🔓 Sblocca
+                              </button>
+                            )}
                             {userItem.id !== user.id && (
                               <button
                                 onClick={() => handleDeleteUser(userItem.id)}
