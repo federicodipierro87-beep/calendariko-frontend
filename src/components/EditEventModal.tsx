@@ -40,11 +40,11 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     title: '',
-    event_type: 'rehearsal',
+    type: 'rehearsal',        // Stesso nome del modal di creazione
     date: '',
-    start_time: '',
-    end_time: '',
-    venue_name: '',
+    time: '',                 // Stesso nome del modal di creazione  
+    endTime: '',              // Stesso nome del modal di creazione
+    venue: '',                // Stesso nome del modal di creazione
     venue_address: '',
     venue_city: '',
     group_id: '',
@@ -78,11 +78,11 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
       
       const newFormData = {
         title: eventData.title || '',
-        event_type: eventData.type || eventData.event_type || 'rehearsal',
+        type: eventData.type || eventData.event_type || 'rehearsal',
         date: getDatePart(eventData.date),
-        start_time: getTimePart(eventData.time || eventData.start_time),
-        end_time: getTimePart(eventData.endTime || eventData.end_time),
-        venue_name: eventData.venue || eventData.venue_name || '',
+        time: getTimePart(eventData.time || eventData.start_time),
+        endTime: getTimePart(eventData.endTime || eventData.end_time),
+        venue: eventData.venue || eventData.venue_name || '',
         venue_address: eventData.venue_address || '',
         venue_city: eventData.venue_city || '',
         group_id: eventData.group_id || '',
@@ -109,15 +109,15 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Costruisci l'oggetto con le modifiche
+    // Costruisci l'oggetto con le modifiche mappando ai nomi API corretti
     const eventUpdates = {
       id: event.id,
       title: formData.title,
-      event_type: formData.event_type,
+      event_type: formData.type,           // Mappa 'type' a 'event_type'
       date: formData.date,
-      start_time: formData.start_time,
-      end_time: formData.end_time,
-      venue_name: formData.venue_name,
+      start_time: formData.time,           // Mappa 'time' a 'start_time' 
+      end_time: formData.endTime,          // Mappa 'endTime' a 'end_time'
+      venue_name: formData.venue,          // Mappa 'venue' a 'venue_name'
       venue_address: formData.venue_address,
       venue_city: formData.venue_city,
       group_id: formData.group_id,
@@ -163,13 +163,13 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
             </div>
 
             <div>
-              <label htmlFor="event_type" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
                 Tipo Evento
               </label>
               <select
-                id="event_type"
-                name="event_type"
-                value={formData.event_type}
+                id="type"
+                name="type"
+                value={formData.type}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
@@ -197,14 +197,14 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
             </div>
 
             <div>
-              <label htmlFor="start_time" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">
                 Ora Inizio *
               </label>
               <input
                 type="time"
-                id="start_time"
-                name="start_time"
-                value={formData.start_time}
+                id="time"
+                name="time"
+                value={formData.time}
                 onChange={handleInputChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -212,14 +212,14 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
             </div>
 
             <div>
-              <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
                 Ora Fine *
               </label>
               <input
                 type="time"
-                id="end_time"
-                name="end_time"
-                value={formData.end_time}
+                id="endTime"
+                name="endTime"
+                value={formData.endTime}
                 onChange={handleInputChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -230,14 +230,14 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
           {/* Locale */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label htmlFor="venue_name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="venue" className="block text-sm font-medium text-gray-700 mb-1">
                 Nome Locale *
               </label>
               <input
                 type="text"
-                id="venue_name"
-                name="venue_name"
-                value={formData.venue_name}
+                id="venue"
+                name="venue"
+                value={formData.venue}
                 onChange={handleInputChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
