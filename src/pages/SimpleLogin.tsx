@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { authApi, groupsApi } from '../utils/api';
+import ReCaptcha from '../components/ReCaptcha';
 
 interface SimpleLoginProps {
   onLogin: (user: any, accessToken: string, refreshToken: string) => void;
@@ -17,6 +18,17 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const [showRecaptcha, setShowRecaptcha] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+
+  // Debug logging per stati
+  console.log('🔍 STATI COMPONENTE:', {
+    isRegisterMode,
+    showRecaptcha,
+    recaptchaToken,
+    shouldShowRecaptcha: isRegisterMode || showRecaptcha
+  });
 
   // Carica i gruppi disponibili quando si passa alla modalità registrazione
   useEffect(() => {
@@ -77,13 +89,26 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
           return;
         }
         
+        // Per la registrazione, reCAPTCHA è sempre richiesto
+        console.log('🔍 VERIFICA RECAPTCHA - Token presente:', !!recaptchaToken);
+        console.log('🔍 RECAPTCHA TOKEN VALUE:', recaptchaToken);
+        
+        if (!recaptchaToken) {
+          console.log('🔍 ERRORE: Token reCAPTCHA mancante!');
+          setError('Completa la verifica reCAPTCHA per registrarti');
+          setLoading(false);
+          return;
+        }
+
+        console.log('🔍 INVIO REGISTRAZIONE con reCAPTCHA token');
         const response = await authApi.publicRegister({
           email,
           password,
           first_name: firstName,
           last_name: lastName,
           phone: phone || undefined,
-          selectedGroup: selectedGroup
+          selectedGroup: selectedGroup,
+          recaptchaToken: recaptchaToken
         });
         
         // Mostra popup di successo più visibile
@@ -97,11 +122,35 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         setIsRegisterMode(false);
       } else {
         // Login
-        const data = await authApi.login({ email, password });
+        // Se reCAPTCHA è richiesto, verifica che sia presente
+        if (showRecaptcha && !recaptchaToken) {
+          setError('Completa la verifica reCAPTCHA per continuare');
+          setLoading(false);
+          return;
+        }
+
+        const loginData: any = { email, password };
+        if (recaptchaToken) {
+          loginData.recaptchaToken = recaptchaToken;
+        }
+
+        const data = await authApi.login(loginData);
         onLogin(data.user, data.accessToken, data.refreshToken);
       }
     } catch (err: any) {
-      setError(err.message || (isRegisterMode ? 'Registrazione fallita' : 'Login fallito'));
+      const errorMessage = err.message || (isRegisterMode ? 'Registrazione fallita' : 'Login fallito');
+      setError(errorMessage);
+      
+      // Per il login, controlla se l'errore richiede reCAPTCHA
+      if (!isRegisterMode) {
+        setLoginAttempts(prev => prev + 1);
+        
+        // Mostra reCAPTCHA se l'errore lo richiede o dopo 3 tentativi
+        if (errorMessage.includes('reCAPTCHA richiesta') || loginAttempts >= 2) {
+          setShowRecaptcha(true);
+          setRecaptchaToken(null); // Reset del token
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -116,6 +165,9 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
     setSelectedGroup('');
     setError('');
     setSuccess('');
+    setRecaptchaToken(null);
+    setShowRecaptcha(false);
+    setLoginAttempts(0);
   };
 
   const toggleMode = () => {
@@ -138,7 +190,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
       <div className="max-w-md w-full space-y-6 sm:space-y-8">
         <div>
           <h2 className="mt-2 sm:mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
-            🎵 {isRegisterMode ? 'Registrati su Calendariko' : 'Accedi a Calendariko'}
+            🎵 {isRegisterMode ? 'Registrati su Calendariko (v2.0)' : 'Accedi a Calendariko'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Portale Gestione Eventi per Band & DJ
@@ -289,10 +341,43 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
             </div>
           </div>
 
+          {/* reCAPTCHA: sempre in registrazione, in login solo se richiesto */}
+          {(isRegisterMode || showRecaptcha) && (
+            <div>
+              <p className="text-red-600 text-sm text-center font-bold">
+                🔍 DEBUG: reCAPTCHA dovrebbe apparire qui (isRegisterMode: {isRegisterMode.toString()}, showRecaptcha: {showRecaptcha.toString()})
+              </p>
+              <ReCaptcha 
+                onVerify={(token) => {
+                  console.log('🔍 reCAPTCHA token received:', token);
+                  setRecaptchaToken(token);
+                }}
+                onExpired={() => {
+                  console.log('🔍 reCAPTCHA expired');
+                  setRecaptchaToken(null);
+                }}
+                onError={() => {
+                  console.log('🔍 reCAPTCHA error');
+                  setRecaptchaToken(null);
+                }}
+              />
+              {isRegisterMode && (
+                <p className="mt-2 text-xs text-gray-500 text-center">
+                  Verifica di essere umano per completare la registrazione
+                </p>
+              )}
+              {!isRegisterMode && showRecaptcha && (
+                <p className="mt-2 text-xs text-orange-600 text-center">
+                  Verifica richiesta a causa di tentativi di accesso falliti
+                </p>
+              )}
+            </div>
+          )}
+
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (isRegisterMode && !recaptchaToken) || (showRecaptcha && !recaptchaToken)}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
               {loading 

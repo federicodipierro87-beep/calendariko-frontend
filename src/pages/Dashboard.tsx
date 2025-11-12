@@ -54,11 +54,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       try {
         // Carica eventi
         const eventsData = await eventsApi.getAll();
-        console.log('🔍 EVENTI DAL BACKEND (primi 2):', eventsData.slice(0, 2).map((e: any) => ({
-          id: e.id,
-          title: e.title,
-          contact_responsible: e.contact_responsible
-        })));
         // Trasforma il formato degli eventi per il calendario
         const transformedEvents = eventsData.map((event: any) => ({
           id: event.id,
