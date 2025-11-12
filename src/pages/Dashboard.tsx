@@ -249,7 +249,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   // FUNZIONE DI TEST TEMPORANEA
   const handleTestEmail = async (eventId: string) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/events/test-email/${eventId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/events/test-email/${eventId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
