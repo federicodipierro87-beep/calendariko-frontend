@@ -1063,11 +1063,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                               <strong>{userItem.first_name} {userItem.last_name}</strong>
                               <span>-</span>
                               <span>{userItem.email}</span>
-                              {userItem.account_locked && (
-                                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">
-                                  🔒 BLOCCATO
-                                </span>
-                              )}
                             </div>
                             <div className="text-sm text-gray-600">
                               Ruolo: {userItem.role}
