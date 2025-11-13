@@ -184,6 +184,7 @@ export const usersApi = {
   unlock: (id: string) => apiCall(`/users/${id}/unlock`, {
     method: 'POST',
   }),
+  getUsersWithoutGroup: () => apiCall('/users/without-group'),
 };
 
 export const availabilityApi = {
@@ -212,4 +213,18 @@ export const availabilityApi = {
     method: 'DELETE',
   }),
   getGroupAvailabilityOverview: (groupId: string) => apiCall(`/availability/group/${groupId}/overview`),
+};
+
+export const notificationsApi = {
+  getAll: () => apiCall('/notifications'),
+  markAsRead: (id: string) => apiCall(`/notifications/${id}/read`, {
+    method: 'PUT',
+  }),
+  markAllAsRead: () => apiCall('/notifications/mark-all-read', {
+    method: 'PUT',
+  }),
+  delete: (id: string) => apiCall(`/notifications/${id}`, {
+    method: 'DELETE',
+  }),
+  getUnreadCount: () => apiCall('/notifications/unread-count'),
 };

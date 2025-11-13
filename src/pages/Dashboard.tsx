@@ -6,7 +6,8 @@ import CreateUserModal from '../components/CreateUserModal';
 import GroupDetailModal from '../components/GroupDetailModal';
 import AvailabilityModal from '../components/AvailabilityModal';
 import EditEventModal from '../components/EditEventModal';
-import { groupsApi, eventsApi, usersApi, availabilityApi } from '../utils/api';
+import Notifications from './Notifications';
+import { groupsApi, eventsApi, usersApi, availabilityApi, notificationsApi } from '../utils/api';
 
 interface DashboardProps {
   user: any;
@@ -34,6 +35,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showEditEventModal, setShowEditEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [usersWithoutGroup, setUsersWithoutGroup] = useState<any[]>([]);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const [userProfile, setUserProfile] = useState({
     firstName: user.first_name || '',
     lastName: user.last_name || '',
@@ -113,6 +116,19 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           ...transformedEvents.filter((event: any) => event.date), 
           ...transformedAvailability
         ]);
+
+        // Se l'utente è admin, carica le notifiche e utenti senza gruppo
+        if (user.role === 'ADMIN') {
+          try {
+            const notificationsCount = await notificationsApi.getUnreadCount();
+            setUnreadNotificationsCount(notificationsCount.count || 0);
+
+            const usersWithoutGroupData = await usersApi.getUsersWithoutGroup();
+            setUsersWithoutGroup(usersWithoutGroupData);
+          } catch (error) {
+            console.error('Errore nel caricamento dati admin:', error);
+          }
+        }
         
       } catch (error) {
         console.error('Errore nel caricamento dei dati:', error);
@@ -564,6 +580,23 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 >
                   {user.role === 'ADMIN' ? '🎤 Eventi' : '📅 Disponibilità'}
                 </button>
+                {user.role === 'ADMIN' && (
+                  <button
+                    onClick={() => handleSectionClick('notifications')}
+                    className={`px-3 py-2 rounded-md text-sm font-medium relative ${
+                      activeSection === 'notifications'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    📧 Notifiche
+                    {unreadNotificationsCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1 min-w-[20px] h-5 flex items-center justify-center">
+                        {unreadNotificationsCount}
+                      </span>
+                    )}
+                  </button>
+                )}
                 <button
                   onClick={() => handleSectionClick('user')}
                   className={`px-3 py-2 rounded-md text-sm font-medium ${
@@ -645,6 +678,23 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                 <h5 className="text-yellow-800 font-medium mb-1">👤 Utenti</h5>
                                 <p className="text-yellow-700 text-sm">
                                   Gestisci account
+                                </p>
+                              </div>
+
+                              <div className="bg-red-50 border border-red-200 rounded-lg p-4 cursor-pointer hover:bg-red-100 transition-colors" onClick={() => handleSectionClick('notifications')}>
+                                <h5 className="text-red-800 font-medium mb-1 flex items-center justify-between">
+                                  📧 Notifiche
+                                  {unreadNotificationsCount > 0 && (
+                                    <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                      {unreadNotificationsCount}
+                                    </span>
+                                  )}
+                                </h5>
+                                <p className="text-red-700 text-sm">
+                                  {usersWithoutGroup.length > 0 
+                                    ? `${usersWithoutGroup.length} utenti da assegnare` 
+                                    : 'Gestisci sistema notifiche'
+                                  }
                                 </p>
                               </div>
 
@@ -1139,111 +1189,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               )}
 
               {activeSection === 'notifications' && user.role === 'ADMIN' && (
-                <div>
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    📧 Sistema Notifiche
-                  </h3>
-                  <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-6">
-                    <h4 className="text-indigo-800 font-medium text-lg mb-3">Notifiche Email</h4>
-                    <p className="text-indigo-700 mb-4">
-                      Configura e invia email automatiche per eventi, richieste di disponibilità e aggiornamenti sistema.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="bg-white p-4 rounded border">
-                        <h5 className="font-medium mb-2">Notifiche Eventi</h5>
-                        <div className="text-sm text-gray-600">
-                          Notifica automaticamente gli artisti sui nuovi eventi e cambi di programma.
-                        </div>
-                        <button 
-                          onClick={() => alert('Configurazione notifiche eventi in sviluppo')}
-                          className="mt-2 bg-indigo-100 text-indigo-700 px-3 py-1 rounded text-sm hover:bg-indigo-200"
-                        >
-                          Configura
-                        </button>
-                      </div>
-                      <div className="bg-white p-4 rounded border">
-                        <h5 className="font-medium mb-2">Richieste Disponibilità</h5>
-                        <div className="text-sm text-gray-600">
-                          Invia promemoria agli artisti per aggiornare la loro disponibilità.
-                        </div>
-                        <button 
-                          onClick={() => alert('Configurazione richieste disponibilità in sviluppo')}
-                          className="mt-2 bg-indigo-100 text-indigo-700 px-3 py-1 rounded text-sm hover:bg-indigo-200"
-                        >
-                          Configura
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 mt-4">
-                      <button 
-                        onClick={async () => {
-                          try {
-                            const response = await fetch('http://localhost:3000/api/email/test', {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                              },
-                              body: JSON.stringify({ email: user.email })
-                            });
-                            
-                            const data = await response.json();
-                            
-                            if (data.success) {
-                              alert('✅ Email di test inviata con successo! Controlla la tua casella di posta.');
-                            } else {
-                              alert('❌ Errore nell\'invio email: ' + data.message);
-                            }
-                          } catch (error) {
-                            console.error('Errore invio email test:', error);
-                            alert('❌ Errore nell\'invio email di test');
-                          }
-                        }}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-                      >
-                        Invia Email di Test
-                      </button>
-                      <button 
-                        onClick={async () => {
-                          try {
-                            const response = await fetch('/api/email/status', {
-                              headers: {
-                                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                              }
-                            });
-                            
-                            const data = await response.json();
-                            
-                            if (data.success) {
-                              const emailData = data.data;
-                              const message = `📧 Sistema Email Calendariko
-
-• Configurazione: ${emailData.configured ? '✅ Attiva' : '❌ Non configurata'}
-• Server Email: ${emailData.emailUser}
-• Servizio: ${emailData.service}
-• Gruppi monitorati: ${groups.length}
-• Ultimo controllo: ${new Date().toLocaleString('it-IT')}
-
-Funzionalità disponibili:
-${emailData.features.map((f: any) => `• ${f}`).join('\n')}
-
-${emailData.configured ? 'Il sistema di notifiche è completamente operativo!' : 'Configura le credenziali email nel file .env'}`;
-                              alert(message);
-                            } else {
-                              alert('❌ Errore nel controllo status email');
-                            }
-                          } catch (error) {
-                            console.error('Errore controllo status email:', error);
-                            alert('❌ Errore nel controllo status email');
-                          }
-                        }}
-                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
-                      >
-                        Status Email
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <Notifications />
               )}
 
               {activeSection === 'user' && (
@@ -1550,6 +1496,24 @@ ${emailData.configured ? 'Il sistema di notifiche è completamente operativo!' :
             <span className="text-lg">{user.role === 'ADMIN' ? '🎤' : '📅'}</span>
             <span>{user.role === 'ADMIN' ? 'Eventi' : 'Disponibilità'}</span>
           </button>
+          {user.role === 'ADMIN' && (
+            <button
+              onClick={() => handleSectionClick('notifications')}
+              className={`flex flex-col items-center px-2 py-2 text-xs relative ${
+                activeSection === 'notifications'
+                  ? 'text-blue-600'
+                  : 'text-gray-500'
+              }`}
+            >
+              <span className="text-lg">📧</span>
+              <span>Notifiche</span>
+              {unreadNotificationsCount > 0 && (
+                <span className="absolute top-0 right-2 bg-red-500 text-white text-xs rounded-full px-1 min-w-[18px] h-4 flex items-center justify-center text-[10px]">
+                  {unreadNotificationsCount}
+                </span>
+              )}
+            </button>
+          )}
           <button
             onClick={() => handleSectionClick('user')}
             className={`flex flex-col items-center px-2 py-2 text-xs ${

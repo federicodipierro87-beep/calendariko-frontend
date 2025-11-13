@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { authApi, groupsApi } from '../utils/api';
+import React, { useState } from 'react';
+import { authApi } from '../utils/api';
 import ReCaptcha from '../components/ReCaptcha';
 
 interface SimpleLoginProps {
@@ -13,8 +13,6 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
-  const [selectedGroup, setSelectedGroup] = useState('');
-  const [groups, setGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -29,28 +27,6 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
   });
 
 
-  // Carica i gruppi disponibili quando si passa alla modalità registrazione
-  useEffect(() => {
-    if (isRegisterMode) {
-      loadGroups();
-    }
-  }, [isRegisterMode]);
-
-  const loadGroups = async () => {
-    try {
-      const groupsData = await groupsApi.getPublic();
-      
-      if (Array.isArray(groupsData)) {
-        setGroups(groupsData);
-      } else {
-        setGroups([]);
-        setError('Formato dati gruppi non valido');
-      }
-    } catch (error) {
-      setGroups([]);
-      setError('Errore nel caricamento dei gruppi disponibili');
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,12 +45,6 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
           return;
         }
         
-        if (!selectedGroup) {
-          setError('Seleziona un gruppo');
-          setLoading(false);
-          return;
-        }
-        
         // Per la registrazione, reCAPTCHA è sempre richiesto
         if (!recaptchaToken) {
           setError('Completa la verifica reCAPTCHA per registrarti');
@@ -87,7 +57,6 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
           first_name: firstName,
           last_name: lastName,
           phone: phone || undefined,
-          selectedGroup: selectedGroup,
           recaptchaToken: recaptchaToken
         });
         
@@ -145,7 +114,6 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
     setFirstName('');
     setLastName('');
     setPhone('');
-    setSelectedGroup('');
     setError('');
     setSuccess('');
     setRecaptchaToken(null);
@@ -263,28 +231,10 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
             )}
             
             {isRegisterMode && (
-              <div>
-                <label htmlFor="group" className="block text-sm font-medium text-gray-700">
-                  Gruppo di appartenenza *
-                </label>
-                <select
-                  id="group"
-                  name="group"
-                  required={isRegisterMode}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base"
-                  value={selectedGroup}
-                  onChange={(e) => setSelectedGroup(e.target.value)}
-                >
-                  <option value="">Seleziona un gruppo...</option>
-                  {groups.map(group => (
-                    <option key={group.id} value={group.id}>
-                      {group.name} ({group.type === 'BAND' ? 'Band' : group.type === 'DJ' ? 'DJ' : group.type === 'SOLO' ? 'Solista' : group.type})
-                      {group.genre && ` - ${group.genre}`}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1 text-xs text-gray-500">
-                  Vedrai solo gli eventi di questo gruppo una volta effettuato l'accesso
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <strong>ℹ️ Nota:</strong> Dopo la registrazione, un amministratore ti assegnerà al gruppo appropriato.
+                  Riceverai una notifica via email quando il tuo account sarà attivato.
                 </p>
               </div>
             )}
