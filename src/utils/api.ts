@@ -103,7 +103,17 @@ export const apiCall = async (
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
       console.log('🔍 API ERROR DETECTED:', response.status, errorData);
       console.log('🔍 ERROR DATA:', JSON.stringify(errorData, null, 2));
-      throw new ApiError(response.status, errorData.error || errorData.message || 'Request failed');
+      
+      // Log anche all'interno del localStorage per debug persistente
+      const errorMsg = errorData.error || errorData.message || 'Request failed';
+      localStorage.setItem('last_api_error', JSON.stringify({
+        status: response.status,
+        data: errorData,
+        message: errorMsg,
+        timestamp: new Date().toISOString()
+      }));
+      
+      throw new ApiError(response.status, errorMsg);
     }
 
     const responseData = await response.json();

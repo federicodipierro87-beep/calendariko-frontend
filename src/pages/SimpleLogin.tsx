@@ -188,6 +188,17 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         addToDebugLog(`🔍 ERRORE: ${errorMessage}`);
       }
       
+      // Debug: mostra l'ultimo errore API dal localStorage
+      const lastApiError = localStorage.getItem('last_api_error');
+      if (lastApiError) {
+        try {
+          const errorInfo = JSON.parse(lastApiError);
+          addToDebugLog(`🔍 ULTIMO ERRORE API: ${JSON.stringify(errorInfo, null, 2)}`);
+        } catch (e) {
+          addToDebugLog(`🔍 ULTIMO ERRORE API: ${lastApiError}`);
+        }
+      }
+      
       setError(errorMessage);
       
       // Per il login, controlla se l'errore richiede reCAPTCHA
