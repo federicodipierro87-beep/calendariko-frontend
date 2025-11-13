@@ -83,19 +83,24 @@ export const apiCall = async (
     let response = await fetch(url, requestOptions);
     console.log('🔍 API RESPONSE:', response.status, response.statusText);
 
-    // Se ricevo 401 (token scaduto), provo a fare il refresh
+    // Se ricevo 401, verifica se è un errore di login o token scaduto
     if (response.status === 401) {
-      console.log('Token scaduto, tentativo di refresh...');
-      
-      const newAccessToken = await refreshToken();
-      if (newAccessToken) {
-        console.log('Nuovo token ottenuto, riprovo la chiamata...');
-        // Riprovo la chiamata con il nuovo token
-        (requestOptions.headers as any)['Authorization'] = `Bearer ${newAccessToken}`;
-        response = await fetch(url, requestOptions);
-        console.log('Seconda risposta API:', response.status, response.statusText);
+      // Per il login, non fare refresh - passa direttamente l'errore
+      if (url.includes('/auth/login')) {
+        console.log('🔍 Login failed - NOT attempting token refresh');
       } else {
-        throw new ApiError(401, 'Authentication failed');
+        console.log('Token scaduto, tentativo di refresh...');
+        
+        const newAccessToken = await refreshToken();
+        if (newAccessToken) {
+          console.log('Nuovo token ottenuto, riprovo la chiamata...');
+          // Riprovo la chiamata con il nuovo token
+          (requestOptions.headers as any)['Authorization'] = `Bearer ${newAccessToken}`;
+          response = await fetch(url, requestOptions);
+          console.log('Seconda risposta API:', response.status, response.statusText);
+        } else {
+          throw new ApiError(401, 'Authentication failed');
+        }
       }
     }
 
