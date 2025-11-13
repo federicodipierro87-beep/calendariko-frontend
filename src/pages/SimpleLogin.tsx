@@ -172,13 +172,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
 
         const data = await authApi.login(loginData);
         
-        // Debug successo
-        if (!isRegisterMode) {
-          const debugEntry = `✅ LOGIN SUCCESSO! User: ${data.user?.email} [${new Date().toLocaleTimeString()}]`;
-          addToDebugLog(debugEntry);
-          addToDebugLog(`🔍 RICEVUTA RISPOSTA API SUCCESSO [${new Date().toLocaleTimeString()}]`);
-        }
-        
+        // Login completato con successo
         onLogin(data.user, data.accessToken, data.refreshToken);
       }
     } catch (err: any) {
