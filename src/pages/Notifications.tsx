@@ -20,10 +20,12 @@ const Notifications: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
   const [assigning, setAssigning] = useState(false);
+  const [usersWithGroups, setUsersWithGroups] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadNotifications();
     loadGroups();
+    loadUsersWithGroups();
   }, []);
 
   const loadNotifications = async () => {
@@ -44,6 +46,25 @@ const Notifications: React.FC = () => {
       setGroups(data);
     } catch (error) {
       console.error('Error loading groups:', error);
+    }
+  };
+
+  const loadUsersWithGroups = async () => {
+    try {
+      const groupsData = await groupsApi.getAll();
+      const usersInGroups = new Set<string>();
+      
+      groupsData.forEach((group: any) => {
+        if (group.user_groups) {
+          group.user_groups.forEach((userGroup: any) => {
+            usersInGroups.add(userGroup.user_id);
+          });
+        }
+      });
+      
+      setUsersWithGroups(usersInGroups);
+    } catch (error) {
+      console.error('Error loading users with groups:', error);
     }
   };
 
@@ -105,8 +126,11 @@ const Notifications: React.FC = () => {
       setSelectedUser(null);
       setSelectedGroupId('');
       
-      // Ricarica le notifiche
-      await loadNotifications();
+      // Ricarica le notifiche e la lista degli utenti con gruppi
+      await Promise.all([
+        loadNotifications(),
+        loadUsersWithGroups()
+      ]);
       
       alert(`${selectedUser.first_name} ${selectedUser.last_name} è stato aggiunto al gruppo!`);
     } catch (error) {
@@ -190,13 +214,21 @@ const Notifications: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {notification.type === 'NEW_USER_REGISTRATION' && (
-                    <button
-                      onClick={() => openAssignModal(notification)}
-                      className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-colors"
-                    >
-                      Assegna gruppo
-                    </button>
+                  {notification.type === 'NEW_USER_REGISTRATION' && notification.data?.newUserId && (
+                    <>
+                      {usersWithGroups.has(notification.data.newUserId) ? (
+                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">
+                          ✅ Già assegnato
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => openAssignModal(notification)}
+                          className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-colors"
+                        >
+                          Assegna gruppo
+                        </button>
+                      )}
+                    </>
                   )}
                   
                   {!notification.is_read && (
