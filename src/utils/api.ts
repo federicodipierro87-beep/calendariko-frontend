@@ -228,3 +228,9 @@ export const notificationsApi = {
   }),
   getUnreadCount: () => apiCall('/notifications/unread-count'),
 };
+
+export const adminApi = {
+  applySchema: () => apiCall('/admin/apply-schema', {
+    method: 'POST',
+  }),
+};

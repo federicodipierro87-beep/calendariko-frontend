@@ -7,7 +7,7 @@ import GroupDetailModal from '../components/GroupDetailModal';
 import AvailabilityModal from '../components/AvailabilityModal';
 import EditEventModal from '../components/EditEventModal';
 import Notifications from './Notifications';
-import { groupsApi, eventsApi, usersApi, availabilityApi, notificationsApi } from '../utils/api';
+import { groupsApi, eventsApi, usersApi, availabilityApi, notificationsApi, adminApi } from '../utils/api';
 
 interface DashboardProps {
   user: any;
@@ -122,11 +122,16 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           try {
             const notificationsCount = await notificationsApi.getUnreadCount();
             setUnreadNotificationsCount(notificationsCount.count || 0);
+          } catch (error) {
+            console.error('Errore nel caricamento notifiche (probabilmente tabella non esiste):', error);
+            setUnreadNotificationsCount(0);
+          }
 
+          try {
             const usersWithoutGroupData = await usersApi.getUsersWithoutGroup();
             setUsersWithoutGroup(usersWithoutGroupData);
           } catch (error) {
-            console.error('Errore nel caricamento dati admin:', error);
+            console.error('Errore nel caricamento utenti senza gruppo:', error);
           }
         }
         
@@ -470,6 +475,23 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     }
   };
 
+  const handleApplySchema = async () => {
+    if (!window.confirm('Applicare lo schema delle notifiche al database? Questa operazione creerà la tabella notifications se non esiste.')) {
+      return;
+    }
+
+    try {
+      const result = await adminApi.applySchema();
+      alert(`✅ ${result.message}`);
+      
+      // Ricarica i dati per aggiornare le notifiche
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Errore nell\'applicazione dello schema:', error);
+      alert(`❌ Errore nell'applicazione dello schema: ${error.message}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Desktop Header - Hidden on mobile */}
@@ -485,6 +507,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               <span className="text-sm text-gray-700">
                 Benvenuto, {user.first_name} {user.last_name}
               </span>
+              {user.role === 'ADMIN' && (
+                <button
+                  onClick={handleApplySchema}
+                  className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded text-xs"
+                  title="Applica schema notifiche al database"
+                >
+                  🔧 Fix DB
+                </button>
+              )}
               <button
                 onClick={handleForceReauth}
                 className="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-xs"
@@ -514,6 +545,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               <span className="text-xs text-gray-600">
                 {user.first_name}
               </span>
+              {user.role === 'ADMIN' && (
+                <button
+                  onClick={handleApplySchema}
+                  className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs"
+                  title="Fix DB"
+                >
+                  🔧
+                </button>
+              )}
               <button
                 onClick={handleForceReauth}
                 className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs"
