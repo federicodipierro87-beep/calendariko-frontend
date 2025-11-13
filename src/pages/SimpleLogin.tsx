@@ -27,77 +27,27 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
     const saved = localStorage.getItem('login_attempts');
     return saved ? parseInt(saved) : 0;
   });
-  const [debugLog, setDebugLog] = useState<string[]>(() => {
-    const saved = localStorage.getItem('debug_login_log');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const addToDebugLog = (entry: string) => {
-    const newLog = [...debugLog, entry];
-    setDebugLog(newLog);
-    localStorage.setItem('debug_login_log', JSON.stringify(newLog));
-  };
-
-  const clearDebugLog = () => {
-    setDebugLog([]);
-    localStorage.removeItem('debug_login_log');
-  };
-
-  const updateLoginAttempts = (newAttempts: number) => {
-    setLoginAttempts(newAttempts);
-    localStorage.setItem('login_attempts', newAttempts.toString());
-  };
-
-  const clearLoginAttempts = () => {
-    setLoginAttempts(0);
-    localStorage.removeItem('login_attempts');
-  };
-
-  const updateShowRecaptcha = (show: boolean) => {
-    setShowRecaptcha(show);
-    localStorage.setItem('show_recaptcha', show.toString());
-  };
-
-  const clearShowRecaptcha = () => {
-    setShowRecaptcha(false);
-    localStorage.removeItem('show_recaptcha');
-  };
 
 
   // Carica i gruppi disponibili quando si passa alla modalità registrazione
   useEffect(() => {
-    console.log('🔍 useEffect trigger, isRegisterMode:', isRegisterMode);
     if (isRegisterMode) {
-      console.log('🔍 Modalità registrazione - caricando gruppi via API');
       loadGroups();
     }
   }, [isRegisterMode]);
 
   const loadGroups = async () => {
     try {
-      console.log('🔍 Chiamata API gruppi...');
-      console.log('🔍 Stato prima della chiamata - groups:', groups.length);
-      
       const groupsData = await groupsApi.getPublic();
-      console.log('🔍 Dati gruppi ricevuti:', groupsData);
       
       if (Array.isArray(groupsData)) {
-        console.log('🔍 Chiamando setGroups...');
-        console.log('🔍 FRONTEND LOGIN - Groups received:', groupsData.length, groupsData.map((g: any) => g.id));
         setGroups(groupsData);
-        console.log('🔍 setGroups completato');
       } else {
-        console.error('❌ Dati gruppi non sono un array:', groupsData);
-        console.log('🔍 Chiamando setGroups con array vuoto...');
         setGroups([]);
-        console.log('🔍 Chiamando setError...');
         setError('Formato dati gruppi non valido');
       }
     } catch (error) {
-      console.error('❌ Errore nel caricamento dei gruppi:', error);
-      console.log('🔍 Gestendo errore - chiamando setGroups con array vuoto...');
       setGroups([]);
-      console.log('🔍 Chiamando setError per errore...');
       setError('Errore nel caricamento dei gruppi disponibili');
     }
   };
@@ -110,12 +60,6 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
     setSuccess('');
 
     try {
-      // Debug log prima della chiamata API
-      if (!isRegisterMode) {
-        const debugEntry = `TENTATIVO LOGIN in corso... Email: ${email} [${new Date().toLocaleTimeString()}]`;
-        addToDebugLog(debugEntry);
-        addToDebugLog(`🔍 CHIAMANDO API LOGIN... [${new Date().toLocaleTimeString()}]`);
-      }
       
       if (isRegisterMode) {
         // Registrazione
@@ -176,50 +120,17 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         onLogin(data.user, data.accessToken, data.refreshToken);
       }
     } catch (err: any) {
-      console.log('🔍 CAUGHT ERROR:', err);
-      console.log('🔍 ERROR MESSAGE:', err.message);
-      
       const errorMessage = err.message || (isRegisterMode ? 'Registrazione fallita' : 'Login fallito');
-      
-      // Log persistente dell'errore per debug finale
-      if (errorMessage.includes('Account disabilitato') || errorMessage.includes('disabilitato')) {
-        addToDebugLog(`🔒 ACCOUNT BLOCCATO! ${errorMessage}`);
-      } else {
-        addToDebugLog(`🔍 ERRORE: ${errorMessage}`);
-      }
-      
-      // Debug: mostra l'ultimo errore API dal localStorage
-      const lastApiError = localStorage.getItem('last_api_error');
-      if (lastApiError) {
-        try {
-          const errorInfo = JSON.parse(lastApiError);
-          addToDebugLog(`🔍 ULTIMO ERRORE API: ${JSON.stringify(errorInfo, null, 2)}`);
-        } catch (e) {
-          addToDebugLog(`🔍 ULTIMO ERRORE API: ${lastApiError}`);
-        }
-      }
-      
       setError(errorMessage);
       
       // Per il login, controlla se l'errore richiede reCAPTCHA
       if (!isRegisterMode) {
         const newAttempts = loginAttempts + 1;
-        
-        // Aggiungi al log persistente
-        const logEntry = `TENTATIVO ${newAttempts}: ${errorMessage} [${new Date().toLocaleTimeString()}]`;
-        addToDebugLog(logEntry);
-        
-        console.log('🔍 LOGIN FAILED - Attempts:', newAttempts, 'Error:', errorMessage);
-        
-        updateLoginAttempts(newAttempts);
+        setLoginAttempts(newAttempts);
         
         // Mostra reCAPTCHA se l'errore lo richiede o dopo 3 tentativi
         if (errorMessage.includes('reCAPTCHA richiesta') || newAttempts >= 3) {
-          const recaptchaLogEntry = `>>> ATTIVANDO reCAPTCHA dopo ${newAttempts} tentativi [${new Date().toLocaleTimeString()}]`;
-          addToDebugLog(recaptchaLogEntry);
-          
-          console.log('🔍 SHOWING RECAPTCHA - Attempts:', newAttempts);
-          updateShowRecaptcha(true);
+          setShowRecaptcha(true);
           setRecaptchaToken(null); // Reset del token
         }
       }
@@ -238,24 +149,13 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
     setError('');
     setSuccess('');
     setRecaptchaToken(null);
-    clearShowRecaptcha();
-    clearLoginAttempts();
-    clearDebugLog();
+    setShowRecaptcha(false);
+    setLoginAttempts(0);
   };
 
   const toggleMode = () => {
-    console.log('🔄 Toggle mode chiamato, isRegisterMode attuale:', isRegisterMode);
-    try {
-      console.log('🔄 Chiamando clearForm...');
-      clearForm();
-      console.log('🔄 clearForm completato');
-      
-      console.log('🔄 Cambiando isRegisterMode da', isRegisterMode, 'a', !isRegisterMode);
-      setIsRegisterMode(!isRegisterMode);
-      console.log('🔄 setIsRegisterMode chiamato');
-    } catch (error) {
-      console.error('❌ ERRORE in toggleMode:', error);
-    }
+    clearForm();
+    setIsRegisterMode(!isRegisterMode);
   };
 
   return (
@@ -273,14 +173,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
           <div className="text-center mt-4">
             <button
               type="button"
-              onClick={() => {
-                console.log('🟢 PULSANTE CLICCATO!');
-                try {
-                  toggleMode();
-                } catch (error) {
-                  console.error('❌ ERRORE nel toggleMode:', error);
-                }
-              }}
+              onClick={toggleMode}
               className="bg-green-500 text-white px-4 py-2 sm:px-6 rounded-lg font-medium hover:bg-green-600 transition-colors text-sm sm:text-base"
             >
               {isRegisterMode ? '← Torna al Login' : '✨ Crea un nuovo account'}
@@ -414,55 +307,14 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
             </div>
           </div>
 
-          {/* Debug info */}
-          <div className="text-xs text-center text-gray-500 mb-2 p-2 border border-gray-300">
-            DEBUG: isRegisterMode={isRegisterMode.toString()}, showRecaptcha={showRecaptcha.toString()}, attempts={loginAttempts}
-            <br />
-            Condition: (isRegisterMode || showRecaptcha) = {(isRegisterMode || showRecaptcha).toString()}
-            <br />
-            reCAPTCHA token: {recaptchaToken ? 'presente' : 'null'}
-          </div>
-
-          {/* Log persistente dei tentativi */}
-          {debugLog.length > 0 && (
-            <div className="bg-yellow-50 border border-yellow-300 p-3 mb-4 rounded">
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="font-bold text-yellow-800">🔍 LOG TENTATIVI LOGIN:</h4>
-                <button 
-                  type="button"
-                  onClick={clearDebugLog}
-                  className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                >
-                  Pulisci Log
-                </button>
-              </div>
-              {debugLog.map((log, index) => (
-                <div key={index} className="text-xs text-yellow-700 mb-1 font-mono">
-                  {log}
-                </div>
-              ))}
-            </div>
-          )}
 
           {/* reCAPTCHA: sempre in registrazione, in login solo se richiesto */}
           {(isRegisterMode || showRecaptcha) && (
-            <div className="border-2 border-red-500 p-4 bg-red-50">
-              <p className="text-red-600 text-sm text-center font-bold mb-2">
-                🔍 reCAPTCHA SECTION VISIBLE - Mode: {isRegisterMode ? 'REGISTER' : 'LOGIN'}, showRecaptcha: {showRecaptcha.toString()}
-              </p>
+            <div>
               <ReCaptcha 
-                onVerify={(token) => {
-                  console.log('🔍 reCAPTCHA token received:', token ? 'valid token' : 'null');
-                  setRecaptchaToken(token);
-                }}
-                onExpired={() => {
-                  console.log('🔍 reCAPTCHA expired');
-                  setRecaptchaToken(null);
-                }}
-                onError={() => {
-                  console.log('🔍 reCAPTCHA error');
-                  setRecaptchaToken(null);
-                }}
+                onVerify={(token) => setRecaptchaToken(token)}
+                onExpired={() => setRecaptchaToken(null)}
+                onError={() => setRecaptchaToken(null)}
               />
               {isRegisterMode && (
                 <p className="mt-2 text-xs text-gray-500 text-center">
