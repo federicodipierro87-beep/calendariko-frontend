@@ -181,13 +181,12 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
       
       const errorMessage = err.message || (isRegisterMode ? 'Registrazione fallita' : 'Login fallito');
       
-      // Log persistente dell'errore
-      addToDebugLog(`🔍 CATCH BLOCK ATTIVATO! [${new Date().toLocaleTimeString()}]`);
-      addToDebugLog(`🔍 ERRORE COMPLETO: ${JSON.stringify(err, null, 2)}`);
-      addToDebugLog(`🔍 MESSAGGIO ERRORE: "${errorMessage}"`);
-      addToDebugLog(`🔍 ERR.MESSAGE ORIGINALE: "${err.message}"`);
-      addToDebugLog(`🔍 ERR.STATUS: ${err.status || 'undefined'}`);
-      addToDebugLog(`🔍 ERR.NAME: ${err.name || 'undefined'}`);
+      // Log persistente dell'errore per debug finale
+      if (errorMessage.includes('Account disabilitato') || errorMessage.includes('disabilitato')) {
+        addToDebugLog(`🔒 ACCOUNT BLOCCATO! ${errorMessage}`);
+      } else {
+        addToDebugLog(`🔍 ERRORE: ${errorMessage}`);
+      }
       
       setError(errorMessage);
       
