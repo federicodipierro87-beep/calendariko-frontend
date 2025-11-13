@@ -63,7 +63,7 @@ export const apiCall = async (
   
   // Aggiungi il token di autorizzazione
   let accessToken = localStorage.getItem('accessToken');
-  console.log('Chiamata API a:', url, 'con token:', accessToken ? `presente (${accessToken.substring(0, 20)}...)` : 'mancante');
+  console.log('🔍 API CALL TO:', url, 'con token:', accessToken ? `presente (${accessToken.substring(0, 20)}...)` : 'mancante');
   
   const headers = {
     'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ export const apiCall = async (
 
   try {
     let response = await fetch(url, requestOptions);
-    console.log('Risposta API:', response.status, response.statusText);
+    console.log('🔍 API RESPONSE:', response.status, response.statusText);
 
     // Se ricevo 401 (token scaduto), provo a fare il refresh
     if (response.status === 401) {
@@ -101,8 +101,8 @@ export const apiCall = async (
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      console.error('API Error:', response.status, errorData);
-      console.error('Full error details:', JSON.stringify(errorData, null, 2));
+      console.log('🔍 API ERROR DETECTED:', response.status, errorData);
+      console.log('🔍 ERROR DATA:', JSON.stringify(errorData, null, 2));
       throw new ApiError(response.status, errorData.error || errorData.message || 'Request failed');
     }
 
