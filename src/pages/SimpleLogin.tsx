@@ -182,10 +182,13 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
     } catch (err: any) {
       console.log('🔍 CAUGHT ERROR:', err);
       console.log('🔍 ERROR MESSAGE:', err.message);
-      console.log('🔍 ERROR FULL OBJECT:', JSON.stringify(err, null, 2));
       
       const errorMessage = err.message || (isRegisterMode ? 'Registrazione fallita' : 'Login fallito');
-      console.log('🔍 FINAL ERROR MESSAGE:', errorMessage);
+      
+      // Log persistente dell'errore
+      addToDebugLog(`🔍 ERRORE COMPLETO: ${JSON.stringify(err, null, 2)}`);
+      addToDebugLog(`🔍 MESSAGGIO ERRORE: "${errorMessage}"`);
+      addToDebugLog(`🔍 ERR.MESSAGE ORIGINALE: "${err.message}"`);
       
       setError(errorMessage);
       
