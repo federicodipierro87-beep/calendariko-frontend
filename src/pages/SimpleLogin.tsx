@@ -114,6 +114,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
       if (!isRegisterMode) {
         const debugEntry = `TENTATIVO LOGIN in corso... Email: ${email} [${new Date().toLocaleTimeString()}]`;
         addToDebugLog(debugEntry);
+        addToDebugLog(`🔍 CHIAMANDO API LOGIN... [${new Date().toLocaleTimeString()}]`);
       }
       
       if (isRegisterMode) {
@@ -175,6 +176,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         if (!isRegisterMode) {
           const debugEntry = `✅ LOGIN SUCCESSO! User: ${data.user?.email} [${new Date().toLocaleTimeString()}]`;
           addToDebugLog(debugEntry);
+          addToDebugLog(`🔍 RICEVUTA RISPOSTA API SUCCESSO [${new Date().toLocaleTimeString()}]`);
         }
         
         onLogin(data.user, data.accessToken, data.refreshToken);
@@ -186,9 +188,12 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
       const errorMessage = err.message || (isRegisterMode ? 'Registrazione fallita' : 'Login fallito');
       
       // Log persistente dell'errore
+      addToDebugLog(`🔍 CATCH BLOCK ATTIVATO! [${new Date().toLocaleTimeString()}]`);
       addToDebugLog(`🔍 ERRORE COMPLETO: ${JSON.stringify(err, null, 2)}`);
       addToDebugLog(`🔍 MESSAGGIO ERRORE: "${errorMessage}"`);
       addToDebugLog(`🔍 ERR.MESSAGE ORIGINALE: "${err.message}"`);
+      addToDebugLog(`🔍 ERR.STATUS: ${err.status || 'undefined'}`);
+      addToDebugLog(`🔍 ERR.NAME: ${err.name || 'undefined'}`);
       
       setError(errorMessage);
       
