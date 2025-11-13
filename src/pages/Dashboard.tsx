@@ -492,6 +492,18 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     }
   };
 
+  const reloadNotificationsCount = async () => {
+    if (user.role === 'ADMIN') {
+      try {
+        const notificationsCount = await notificationsApi.getUnreadCount();
+        setUnreadNotificationsCount(notificationsCount.count || 0);
+      } catch (error) {
+        console.error('Errore nel ricaricamento contatore notifiche:', error);
+        setUnreadNotificationsCount(0);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Desktop Header - Hidden on mobile */}
@@ -1229,7 +1241,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               )}
 
               {activeSection === 'notifications' && user.role === 'ADMIN' && (
-                <Notifications />
+                <Notifications onNotificationsChange={reloadNotificationsCount} />
               )}
 
               {activeSection === 'user' && (

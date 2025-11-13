@@ -11,7 +11,11 @@ interface Notification {
   data: any;
 }
 
-const Notifications: React.FC = () => {
+interface NotificationsProps {
+  onNotificationsChange?: () => void;
+}
+
+const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -74,6 +78,8 @@ const Notifications: React.FC = () => {
       setNotifications(prev => 
         prev.map(n => n.id === id ? { ...n, is_read: true } : n)
       );
+      // Aggiorna il contatore nel Dashboard
+      onNotificationsChange?.();
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
@@ -85,6 +91,8 @@ const Notifications: React.FC = () => {
       setNotifications(prev => 
         prev.map(n => ({ ...n, is_read: true }))
       );
+      // Aggiorna il contatore nel Dashboard
+      onNotificationsChange?.();
     } catch (error) {
       console.error('Error marking all as read:', error);
     }
@@ -96,6 +104,8 @@ const Notifications: React.FC = () => {
     try {
       await notificationsApi.delete(id);
       setNotifications(prev => prev.filter(n => n.id !== id));
+      // Aggiorna il contatore nel Dashboard
+      onNotificationsChange?.();
     } catch (error) {
       console.error('Error deleting notification:', error);
     }
@@ -131,6 +141,9 @@ const Notifications: React.FC = () => {
         loadNotifications(),
         loadUsersWithGroups()
       ]);
+      
+      // Aggiorna il contatore nel Dashboard (importante: la notifica è stata marcata come letta dal backend)
+      onNotificationsChange?.();
       
       alert(`${selectedUser.first_name} ${selectedUser.last_name} è stato aggiunto al gruppo!`);
     } catch (error) {
