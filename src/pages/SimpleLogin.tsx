@@ -180,7 +180,13 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         onLogin(data.user, data.accessToken, data.refreshToken);
       }
     } catch (err: any) {
+      console.log('🔍 CAUGHT ERROR:', err);
+      console.log('🔍 ERROR MESSAGE:', err.message);
+      console.log('🔍 ERROR FULL OBJECT:', JSON.stringify(err, null, 2));
+      
       const errorMessage = err.message || (isRegisterMode ? 'Registrazione fallita' : 'Login fallito');
+      console.log('🔍 FINAL ERROR MESSAGE:', errorMessage);
+      
       setError(errorMessage);
       
       // Per il login, controlla se l'errore richiede reCAPTCHA
