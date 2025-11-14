@@ -1208,16 +1208,19 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                           </div>
                         ) : (
                           filteredUsers.map((userItem) => (
-                        <div key={userItem.id} className={`p-4 rounded-lg border transition-colors ${
-                          userItem.account_locked ? 'bg-red-50 border-red-200' : 'bg-white hover:bg-gray-50'
-                        }`}>
+                            <div 
+                              key={userItem.id} 
+                              className={`p-4 rounded border transition-colors ${
+                                userItem.account_locked ? 'bg-red-50 border-red-200 hover:bg-red-100' : 'bg-white border-gray-200 hover:bg-gray-50'
+                              }`}
+                            >
                           {/* Layout ottimizzato per mobile */}
                           <div className="space-y-3">
-                            {/* Nome utente e email più prominenti */}
+                            {/* Nome utente più grande e prominente - come nei gruppi */}
                             <div>
-                              <h5 className="font-semibold text-lg text-gray-900 mb-1">
-                                {userItem.first_name} {userItem.last_name}
-                              </h5>
+                              <h5 className="font-semibold text-lg text-gray-900 mb-2">{userItem.first_name} {userItem.last_name}</h5>
+                              
+                              {/* Email subito sotto il nome */}
                               <div className="text-sm text-gray-600 mb-2">
                                 📧 {userItem.email}
                               </div>
