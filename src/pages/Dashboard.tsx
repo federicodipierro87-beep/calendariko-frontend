@@ -873,36 +873,54 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                 key={group.id} 
                                 className="bg-white p-4 rounded border border-gray-200 hover:bg-gray-50 transition-colors"
                               >
-                                <div className="flex justify-between items-start">
+                                {/* Layout ottimizzato per mobile */}
+                                <div className="space-y-3">
+                                  {/* Nome band più grande e prominente */}
                                   <div 
-                                    className="flex-1 cursor-pointer"
+                                    className="cursor-pointer"
                                     onClick={() => handleGroupClick(group)}
                                   >
-                                    <h5 className="font-medium text-gray-900">{group.name}</h5>
-                                    <div className="text-sm text-gray-600">
-                                      <span className={`px-2 py-1 rounded text-xs ${
+                                    <h5 className="font-semibold text-lg text-gray-900 mb-2">{group.name}</h5>
+                                    
+                                    {/* Tipo e genere su riga separata */}
+                                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                                      <span className={`px-2 py-1 rounded text-xs font-medium ${
                                         group.type === 'BAND' ? 'bg-purple-100 text-purple-700' :
                                         group.type === 'DJ' ? 'bg-blue-100 text-blue-700' :
                                         'bg-green-100 text-green-700'
                                       }`}>
                                         {group.type === 'BAND' ? 'Band' : group.type === 'DJ' ? 'DJ' : 'Solista'}
                                       </span>
-                                      {group.genre && <span className="ml-2">• {group.genre}</span>}
-                                      {isUserMember && <span className="ml-2 text-green-600">• Membro</span>}
+                                      {group.genre && (
+                                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                                          🎵 {group.genre}
+                                        </span>
+                                      )}
+                                      {isUserMember && (
+                                        <span className="px-2 py-1 bg-green-100 text-green-600 rounded text-xs font-medium">
+                                          ✅ Membro
+                                        </span>
+                                      )}
                                     </div>
+
+                                    {/* Descrizione se presente */}
                                     {group.description && (
-                                      <p className="text-sm text-gray-600 mt-1">{group.description}</p>
+                                      <p className="text-sm text-gray-600 mb-2 leading-relaxed">{group.description}</p>
                                     )}
+
+                                    {/* Numero membri */}
                                     {group.user_groups && (
-                                      <div className="text-xs text-gray-500 mt-1">
-                                        👥 {group.user_groups.length} membri
+                                      <div className="text-sm text-gray-500 mb-2">
+                                        👥 {group.user_groups.length} {group.user_groups.length === 1 ? 'membro' : 'membri'}
                                       </div>
                                     )}
                                   </div>
-                                  <div className="flex items-center gap-2 ml-4">
+
+                                  {/* Pulsanti sotto il nome - layout ottimizzato per mobile */}
+                                  <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
                                     <button
                                       onClick={() => handleGroupClick(group)}
-                                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-colors"
+                                      className="flex-1 min-w-[120px] px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors flex items-center justify-center gap-2"
                                       title="Visualizza dettagli gruppo"
                                     >
                                       👁️ Visualizza
@@ -913,7 +931,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                           e.stopPropagation();
                                           handleDeleteGroup(group.id, group.name);
                                         }}
-                                        className="px-3 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 transition-colors"
+                                        className="flex-1 min-w-[120px] px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center justify-center gap-2"
                                         title="Elimina gruppo"
                                       >
                                         🗑️ Elimina
