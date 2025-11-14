@@ -32,6 +32,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [eventsPerPage] = useState(10);
   const [groupsSearchTerm, setGroupsSearchTerm] = useState('');
+  const [usersSearchTerm, setUsersSearchTerm] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [showEditEventModal, setShowEditEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -1173,8 +1174,40 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     <p className="text-yellow-700 mb-4">
                       Gestisci account utente, assegna ruoli e controlla i permessi di accesso.
                     </p>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {users.map((userItem) => (
+                    
+                    {/* Campo di ricerca utenti */}
+                    <div className="mb-4">
+                      <input
+                        type="text"
+                        placeholder="🔍 Cerca utente per nome, cognome, email o ruolo..."
+                        value={usersSearchTerm}
+                        onChange={(e) => setUsersSearchTerm(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                      {(() => {
+                        // Filtra gli utenti in base alla ricerca
+                        let filteredUsers = users;
+                        
+                        // Applica filtro di ricerca
+                        if (usersSearchTerm.trim()) {
+                          filteredUsers = users.filter(userItem =>
+                            userItem.first_name.toLowerCase().includes(usersSearchTerm.toLowerCase()) ||
+                            userItem.last_name.toLowerCase().includes(usersSearchTerm.toLowerCase()) ||
+                            userItem.email.toLowerCase().includes(usersSearchTerm.toLowerCase()) ||
+                            userItem.role.toLowerCase().includes(usersSearchTerm.toLowerCase()) ||
+                            (userItem.phone && userItem.phone.toLowerCase().includes(usersSearchTerm.toLowerCase()))
+                          );
+                        }
+                        
+                        return filteredUsers.length === 0 ? (
+                          <div className="bg-white p-3 rounded border text-center text-gray-500">
+                            {usersSearchTerm.trim() ? 'Nessun utente trovato per la ricerca' : 'Nessun utente trovato'}
+                          </div>
+                        ) : (
+                          filteredUsers.map((userItem) => (
                         <div key={userItem.id} className={`p-4 rounded-lg border transition-colors ${
                           userItem.account_locked ? 'bg-red-50 border-red-200' : 'bg-white hover:bg-gray-50'
                         }`}>
@@ -1261,12 +1294,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                             </div>
                           </div>
                         </div>
-                      ))}
-                      {users.length === 0 && (
-                        <div className="bg-white p-3 rounded border text-center text-gray-500">
-                          Nessun utente trovato
-                        </div>
-                      )}
+                          ))
+                        );
+                      })()}
                     </div>
                     <div className="flex gap-3 mt-4">
                       <button 
