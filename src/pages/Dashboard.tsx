@@ -1175,62 +1175,90 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     </p>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {users.map((userItem) => (
-                        <div key={userItem.id} className={`p-3 rounded border flex justify-between items-center ${
-                          userItem.account_locked ? 'bg-red-50 border-red-200' : 'bg-white'
+                        <div key={userItem.id} className={`p-4 rounded-lg border transition-colors ${
+                          userItem.account_locked ? 'bg-red-50 border-red-200' : 'bg-white hover:bg-gray-50'
                         }`}>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <strong>{userItem.first_name} {userItem.last_name}</strong>
-                              <span>-</span>
-                              <span>{userItem.email}</span>
+                          {/* Layout ottimizzato per mobile */}
+                          <div className="space-y-3">
+                            {/* Nome utente e email più prominenti */}
+                            <div>
+                              <h5 className="font-semibold text-lg text-gray-900 mb-1">
+                                {userItem.first_name} {userItem.last_name}
+                              </h5>
+                              <div className="text-sm text-gray-600 mb-2">
+                                📧 {userItem.email}
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-600">
-                              Ruolo: {userItem.role}
-                              {userItem.phone && ` • Tel: ${userItem.phone}`}
+
+                            {/* Informazioni utente organizzate */}
+                            <div className="space-y-2">
+                              {/* Ruolo e stato su riga separata */}
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  userItem.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
+                                  userItem.role === 'ARTIST' ? 'bg-blue-100 text-blue-700' :
+                                  'bg-gray-100 text-gray-700'
+                                }`}>
+                                  👤 {userItem.role}
+                                </span>
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  userItem.account_locked 
+                                    ? 'bg-red-100 text-red-800' 
+                                    : 'bg-green-100 text-green-800'
+                                }`}>
+                                  {userItem.account_locked ? '🔒 Bloccato' : '✅ Attivo'}
+                                </span>
+                              </div>
+
+                              {/* Telefono se presente */}
+                              {userItem.phone && (
+                                <div className="text-sm text-gray-600">
+                                  📱 {userItem.phone}
+                                </div>
+                              )}
+
+                              {/* Data creazione */}
+                              <div className="text-sm text-gray-500">
+                                📅 Creato: {new Date(userItem.created_at).toLocaleDateString('it-IT')}
+                              </div>
+
+                              {/* Informazioni di sicurezza */}
                               {userItem.failed_login_attempts > 0 && (
-                                <span className="text-orange-600">
-                                  {' • Tentativi falliti: '}
-                                  {userItem.failed_login_attempts}
-                                </span>
+                                <div className="text-sm text-orange-600 bg-orange-50 px-2 py-1 rounded">
+                                  ⚠️ Tentativi falliti: {userItem.failed_login_attempts}
+                                </div>
                               )}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              Creato: {new Date(userItem.created_at).toLocaleDateString('it-IT')}
+
+                              {/* Data blocco se presente */}
                               {userItem.locked_at && (
-                                <span className="text-red-600">
-                                  {' • Bloccato il: '}
-                                  {new Date(userItem.locked_at).toLocaleDateString('it-IT')} alle{' '}
+                                <div className="text-sm text-red-600 bg-red-50 px-2 py-1 rounded">
+                                  🔒 Bloccato il: {new Date(userItem.locked_at).toLocaleDateString('it-IT')} alle{' '}
                                   {new Date(userItem.locked_at).toLocaleTimeString('it-IT')}
-                                </span>
+                                </div>
                               )}
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-1 rounded text-xs ${
-                              userItem.account_locked 
-                                ? 'bg-red-100 text-red-800' 
-                                : 'bg-green-100 text-green-800'
-                            }`}>
-                              {userItem.account_locked ? 'Bloccato' : 'Attivo'}
-                            </span>
-                            {userItem.account_locked && (
-                              <button
-                                onClick={() => handleUnlockUser(userItem.id)}
-                                className="px-3 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 transition-colors"
-                                title="Sblocca utente"
-                              >
-                                🔓 Sblocca
-                              </button>
-                            )}
-                            {userItem.id !== user.id && (
-                              <button
-                                onClick={() => handleDeleteUser(userItem.id)}
-                                className="px-3 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 transition-colors"
-                                title="Elimina utente"
-                              >
-                                🗑️ Elimina
-                              </button>
-                            )}
+
+                            {/* Pulsanti sotto le informazioni - layout ottimizzato per mobile */}
+                            <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                              {userItem.account_locked && (
+                                <button
+                                  onClick={() => handleUnlockUser(userItem.id)}
+                                  className="flex-1 min-w-[120px] px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors flex items-center justify-center gap-2"
+                                  title="Sblocca utente"
+                                >
+                                  🔓 Sblocca
+                                </button>
+                              )}
+                              {userItem.id !== user.id && (
+                                <button
+                                  onClick={() => handleDeleteUser(userItem.id)}
+                                  className="flex-1 min-w-[120px] px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center justify-center gap-2"
+                                  title="Elimina utente"
+                                >
+                                  🗑️ Elimina
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
