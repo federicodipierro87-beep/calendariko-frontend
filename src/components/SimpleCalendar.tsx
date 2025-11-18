@@ -182,9 +182,9 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
     const hours = Array.from({ length: 24 }, (_, i) => i);
 
     return (
-      <div className="flex flex-col h-full">
+      <>
         {/* Header giorni della settimana */}
-        <div className="flex border-b bg-gray-50 flex-shrink-0">
+        <div className="flex border-b bg-gray-50 flex-shrink-0 h-16">
           <div className="w-16 flex-shrink-0 border-r"></div>
           {weekDates.map((date, index) => (
             <div key={index} className="flex-1 p-2 border-r text-center">
@@ -202,10 +202,10 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           ))}
         </div>
 
-        {/* Grid ore e eventi */}
-        <div className="flex-1 overflow-y-auto min-h-0">
-          <div className="flex min-h-full">
-            {/* Colonna ore */}
+        {/* Grid ore e eventi - Fixed height container */}
+        <div className="flex-1 overflow-y-scroll" style={{ height: 'calc(100% - 64px)' }}>
+          <div className="flex">
+            {/* Colonna ore - Fixed content height */}
             <div className="w-16 flex-shrink-0 border-r bg-gray-50">
               {hours.map(hour => (
                 <div key={hour} className="h-12 border-b flex items-start justify-end pr-2 pt-1">
@@ -216,7 +216,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
               ))}
             </div>
 
-            {/* Colonne giorni */}
+            {/* Colonne giorni - Fixed content height */}
             {weekDates.map((date, dayIndex) => {
               const dayEvents = getEventsForDate(date);
               console.log(`Week Day ${dayIndex}:`, date.toISOString().split('T')[0], 'Events:', dayEvents);
@@ -270,7 +270,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
             })}
           </div>
         </div>
-      </div>
+      </>
     );
   };
 
@@ -280,10 +280,10 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
     console.log('Day view events:', dayEvents);
 
     return (
-      <div className="flex flex-col h-full">
+      <>
         {/* Header giorno */}
-        <div className="flex border-b bg-gray-50 p-4 flex-shrink-0">
-          <div className="text-center">
+        <div className="flex border-b bg-gray-50 p-4 flex-shrink-0 h-20">
+          <div className="text-center w-full">
             <div className="text-sm text-gray-500 uppercase">
               {weekDays[currentDate.getDay()]}
             </div>
@@ -297,10 +297,10 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           </div>
         </div>
 
-        {/* Grid ore e eventi */}
-        <div className="flex-1 overflow-y-auto min-h-0">
-          <div className="flex min-h-full">
-            {/* Colonna ore */}
+        {/* Grid ore e eventi - Fixed height container */}
+        <div className="flex-1 overflow-y-scroll" style={{ height: 'calc(100% - 80px)' }}>
+          <div className="flex">
+            {/* Colonna ore - Fixed content height */}
             <div className="w-20 flex-shrink-0 border-r bg-gray-50">
               {hours.map(hour => (
                 <div key={hour} className="h-16 border-b flex items-start justify-end pr-2 pt-1">
@@ -311,7 +311,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
               ))}
             </div>
 
-            {/* Colonna giorno */}
+            {/* Colonna giorno - Fixed content height */}
             <div className="flex-1 relative">
               {hours.map(hour => (
                 <div 
@@ -358,7 +358,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   };
 
@@ -511,11 +511,11 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           </div>
         </>
       ) : currentView === 'week' ? (
-        <div className="border rounded-lg overflow-hidden h-[600px]">
+        <div className="border rounded-lg h-[600px] flex flex-col">
           {renderWeekView()}
         </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden h-[600px]">
+        <div className="border rounded-lg h-[600px] flex flex-col">
           {renderDayView()}
         </div>
       )}
