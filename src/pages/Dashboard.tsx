@@ -38,6 +38,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [usersWithoutGroup, setUsersWithoutGroup] = useState<any[]>([]);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  
+  // Export functionality
+  const [exportOptions, setExportOptions] = useState({
+    users: false,
+    groups: false,
+    events: false
+  });
   const [userProfile, setUserProfile] = useState({
     firstName: user.first_name || '',
     lastName: user.last_name || '',
@@ -476,6 +483,132 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     }
   };
 
+  // Export functions
+  const convertToCSV = (data: any[], headers: string[]): string => {
+    if (data.length === 0) return headers.join(',') + '\n';
+    
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row => 
+        headers.map(header => {
+          const value = row[header.toLowerCase().replace(' ', '_')] || '';
+          // Escape quotes and wrap in quotes if contains comma
+          const stringValue = String(value).replace(/"/g, '""');
+          return stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n') 
+            ? `"${stringValue}"` 
+            : stringValue;
+        }).join(',')
+      )
+    ].join('\n');
+    
+    return csvContent;
+  };
+
+  const downloadCSV = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportUsers = () => {
+    const headers = ['ID', 'Nome', 'Cognome', 'Email', 'Telefono', 'Ruolo', 'Stato', 'Data Creazione'];
+    const userData = users.map(user => ({
+      id: user.id,
+      nome: user.first_name,
+      cognome: user.last_name,
+      email: user.email,
+      telefono: user.phone || '',
+      ruolo: user.role,
+      stato: user.is_locked ? 'Bloccato' : 'Attivo',
+      data_creazione: user.created_at ? new Date(user.created_at).toLocaleDateString('it-IT') : ''
+    }));
+    
+    const csv = convertToCSV(userData, headers);
+    downloadCSV(csv, `utenti_${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
+  const exportGroups = () => {
+    const headers = ['ID', 'Nome', 'Tipo', 'Genere', 'Descrizione', 'Email Contatto', 'Telefono', 'Membri'];
+    const groupsData = groups.map(group => ({
+      id: group.id,
+      nome: group.name,
+      tipo: group.type,
+      genere: group.genre || '',
+      descrizione: group.description || '',
+      email_contatto: group.contact_email || '',
+      telefono: group.contact_phone || '',
+      membri: group.user_groups ? group.user_groups.length : 0
+    }));
+    
+    const csv = convertToCSV(groupsData, headers);
+    downloadCSV(csv, `gruppi_${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
+  const exportFutureEvents = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const futureEvents = events.filter(event => {
+      if (!event.date) return false;
+      const eventDate = event.date.split('T')[0];
+      return eventDate >= today;
+    });
+
+    const headers = ['ID', 'Titolo', 'Data', 'Ora Inizio', 'Ora Fine', 'Tipo', 'Locale', 'Città', 'Gruppo', 'Cachet', 'Contatto', 'Note'];
+    const eventsData = futureEvents.map(event => {
+      const group = groups.find(g => g.id === event.group_id);
+      return {
+        id: event.id,
+        titolo: event.title,
+        data: event.date ? new Date(event.date).toLocaleDateString('it-IT') : '',
+        ora_inizio: event.start_time || event.time || '',
+        ora_fine: event.end_time || event.endTime || '',
+        tipo: event.event_type || event.type || '',
+        locale: event.venue_name || event.venue || '',
+        città: event.venue_city || '',
+        gruppo: group ? group.name : '',
+        cachet: event.fee ? `€${event.fee}` : '',
+        contatto: event.contact_responsible || '',
+        note: event.notes || ''
+      };
+    });
+    
+    const csv = convertToCSV(eventsData, headers);
+    downloadCSV(csv, `eventi_futuri_${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
+  const handleExport = () => {
+    const selectedCount = Object.values(exportOptions).filter(Boolean).length;
+    
+    if (selectedCount === 0) {
+      alert('⚠️ Seleziona almeno una opzione da esportare');
+      return;
+    }
+
+    let exportedItems: string[] = [];
+
+    if (exportOptions.users) {
+      exportUsers();
+      exportedItems.push('Utenti');
+    }
+
+    if (exportOptions.groups) {
+      exportGroups();
+      exportedItems.push('Gruppi');
+    }
+
+    if (exportOptions.events) {
+      exportFutureEvents();
+      exportedItems.push('Eventi futuri');
+    }
+
+    alert(`✅ Export completato per: ${exportedItems.join(', ')}`);
+  };
+
   const handleApplySchema = async () => {
     if (!window.confirm('Applicare lo schema delle notifiche al database? Questa operazione creerà la tabella notifications se non esiste.')) {
       return;
@@ -786,6 +919,92 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Blocco Esporta */}
+                  {user.role === 'ADMIN' && (
+                    <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6">
+                      <h4 className="text-blue-800 font-medium text-lg mb-3">📊 Esporta Dati</h4>
+                      <p className="text-blue-700 mb-4 text-sm">
+                        Esporta i dati del sistema in formato CSV per analisi esterne o backup.
+                      </p>
+                      
+                      <div className="space-y-4">
+                        {/* Opzioni di esportazione */}
+                        <div className="space-y-3">
+                          <h5 className="font-medium text-gray-900 text-sm">Seleziona cosa esportare:</h5>
+                          
+                          <div className="space-y-2">
+                            <label className="flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border hover:bg-blue-25 transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={exportOptions.users}
+                                onChange={(e) => setExportOptions({...exportOptions, users: e.target.checked})}
+                                className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              />
+                              <div className="flex-1">
+                                <div className="font-medium text-gray-900">👥 Lista Utenti</div>
+                                <div className="text-sm text-gray-600">
+                                  Esporta tutti gli utenti registrati ({users.length} totali)
+                                </div>
+                              </div>
+                            </label>
+                            
+                            <label className="flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border hover:bg-blue-25 transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={exportOptions.groups}
+                                onChange={(e) => setExportOptions({...exportOptions, groups: e.target.checked})}
+                                className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              />
+                              <div className="flex-1">
+                                <div className="font-medium text-gray-900">🎵 Lista Gruppi</div>
+                                <div className="text-sm text-gray-600">
+                                  Esporta tutti i gruppi musicali ({groups.length} totali)
+                                </div>
+                              </div>
+                            </label>
+                            
+                            <label className="flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border hover:bg-blue-25 transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={exportOptions.events}
+                                onChange={(e) => setExportOptions({...exportOptions, events: e.target.checked})}
+                                className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              />
+                              <div className="flex-1">
+                                <div className="font-medium text-gray-900">📅 Eventi Futuri</div>
+                                <div className="text-sm text-gray-600">
+                                  Esporta solo eventi che devono ancora svolgersi ({events.filter(e => e.date && e.date.split('T')[0] >= new Date().toISOString().split('T')[0]).length} totali)
+                                </div>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                        
+                        {/* Pulsante Export */}
+                        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-blue-200">
+                          <button
+                            onClick={handleExport}
+                            disabled={!Object.values(exportOptions).some(Boolean)}
+                            className="flex-1 sm:flex-none bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium text-base flex items-center justify-center gap-2"
+                          >
+                            <span>📥</span>
+                            Esporta Selezionati
+                          </button>
+                          <button
+                            onClick={() => setExportOptions({users: false, groups: false, events: false})}
+                            className="flex-1 sm:flex-none bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors font-medium text-base"
+                          >
+                            🔄 Deseleziona Tutto
+                          </button>
+                        </div>
+                        
+                        <div className="text-xs text-blue-600 bg-blue-100 p-3 rounded-lg">
+                          💡 I file CSV verranno scaricati nella cartella Downloads del tuo browser
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Stato Sistema */}
                   <div className="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-4">
