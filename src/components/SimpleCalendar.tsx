@@ -21,8 +21,6 @@ type CalendarView = 'month' | 'week' | 'day';
 const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick, userRole }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState<CalendarView>('month');
-  
-  // FORCE UPDATE: 2025-11-18-16:45
 
   const monthNames = [
     'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -506,11 +504,8 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           </div>
         </>
       ) : currentView === 'week' ? (
-        <div className="border rounded-lg overflow-hidden bg-white">
-          <div className="bg-red-100 p-2 text-red-800 text-xs border-b">
-            🔴 WEEK VIEW LOADED - Eventi: {getWeekDays().reduce((total, date) => total + getEventsForDate(date).length, 0)} - Update: 2025-11-18-16:45
-          </div>
-          <div className="h-[600px] flex flex-col">
+        <div className="border rounded-lg bg-white" style={{ height: '600px' }}>
+          <div className="h-full flex flex-col">
             {/* Header settimana */}
             <div className="flex bg-gray-50 border-b h-16 flex-shrink-0">
               <div className="w-20 border-r flex items-center justify-center text-xs font-medium">Ora</div>
@@ -529,8 +524,8 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
             </div>
 
             {/* Content area con eventi */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="flex">
+            <div className="flex-1 overflow-y-auto" style={{ height: 'calc(100% - 64px)' }}>
+              <div className="flex" style={{ minHeight: '576px' }}>
                 {/* Time column */}
                 <div className="w-20 border-r bg-gray-50 flex-shrink-0">
                   {Array.from({ length: 24 }, (_, hour) => (
@@ -596,11 +591,8 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           </div>
         </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden bg-white">
-          <div className="bg-red-100 p-2 text-red-800 text-xs border-b">
-            🔴 DAY VIEW LOADED - Eventi: {getEventsForDate(currentDate).length} - Update: 2025-11-18-16:45
-          </div>
-          <div className="h-[600px] flex flex-col">
+        <div className="border rounded-lg bg-white" style={{ height: '600px' }}>
+          <div className="h-full flex flex-col">
             {/* Header giorno */}
             <div className="bg-gray-50 border-b h-20 flex-shrink-0 flex items-center justify-center">
               <div className="text-center">
@@ -616,8 +608,8 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
             </div>
 
             {/* Content area con eventi */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="flex">
+            <div className="flex-1 overflow-y-auto" style={{ height: 'calc(100% - 80px)' }}>
+              <div className="flex" style={{ minHeight: '520px' }}>
                 {/* Time column */}
                 <div className="w-20 border-r bg-gray-50 flex-shrink-0">
                   {Array.from({ length: 24 }, (_, hour) => (
