@@ -486,12 +486,19 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
       </div>
 
       {/* Debug: mostra numero di eventi */}
-      {(currentView === 'week' || currentView === 'day') && (
-        <div className="mb-2 text-xs text-gray-500">
-          Eventi trovati: {currentView === 'day' ? getEventsForDate(currentDate).length : 
-            getWeekDays().reduce((total, date) => total + getEventsForDate(date).length, 0)}
-        </div>
-      )}
+      <div className="mb-4 p-2 bg-yellow-100 border rounded text-xs">
+        <div><strong>DEBUG INFO:</strong></div>
+        <div>Vista attuale: {currentView}</div>
+        <div>Eventi totali: {events.length}</div>
+        <div>Data corrente: {currentDate.toISOString().split('T')[0]}</div>
+        {currentView === 'day' && (
+          <div>Eventi oggi: {getEventsForDate(currentDate).length}</div>
+        )}
+        {currentView === 'week' && (
+          <div>Eventi settimana: {getWeekDays().reduce((total, date) => total + getEventsForDate(date).length, 0)}</div>
+        )}
+        <div>Primi 3 eventi: {JSON.stringify(events.slice(0, 3).map(e => ({title: e.title, date: e.date, type: e.type})))}</div>
+      </div>
 
       {/* Contenuto del calendario basato sulla vista */}
       {currentView === 'month' ? (
@@ -511,12 +518,37 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           </div>
         </>
       ) : currentView === 'week' ? (
-        <div className="border rounded-lg h-[600px] flex flex-col">
-          {renderWeekView()}
+        <div className="border rounded-lg p-4 bg-gray-50">
+          <h3 className="font-bold mb-4">VISTA SETTIMANA - TEST SEMPLIFICATO</h3>
+          {getWeekDays().map((date, index) => {
+            const dayEvents = getEventsForDate(date);
+            return (
+              <div key={index} className="mb-2 p-2 border bg-white">
+                <div className="font-medium">{date.toLocaleDateString('it-IT')}</div>
+                <div>Eventi: {dayEvents.length}</div>
+                {dayEvents.map((event, i) => (
+                  <div key={i} className="text-sm text-blue-600 ml-4">
+                    • {event.title} - {event.time} - {event.type}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </div>
       ) : (
-        <div className="border rounded-lg h-[600px] flex flex-col">
-          {renderDayView()}
+        <div className="border rounded-lg p-4 bg-gray-50">
+          <h3 className="font-bold mb-4">VISTA GIORNO - TEST SEMPLIFICATO</h3>
+          <div className="mb-2 p-2 border bg-white">
+            <div className="font-medium">{currentDate.toLocaleDateString('it-IT')}</div>
+            {getEventsForDate(currentDate).map((event, i) => (
+              <div key={i} className="text-sm text-blue-600 ml-4">
+                • {event.title} - {event.time} - {event.type}
+              </div>
+            ))}
+            {getEventsForDate(currentDate).length === 0 && (
+              <div className="text-sm text-gray-500 ml-4">Nessun evento</div>
+            )}
+          </div>
         </div>
       )}
 
