@@ -593,8 +593,14 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                           cursor: 'pointer'
                         }}
                         onClick={() => onDayClick && onDayClick(date.toISOString().split('T')[0])}
-                        onMouseOver={(e) => e.target.style.backgroundColor = '#eff6ff'}
-                        onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+                        onMouseOver={(e) => {
+                          const target = e.target as HTMLElement;
+                          target.style.backgroundColor = '#eff6ff';
+                        }}
+                        onMouseOut={(e) => {
+                          const target = e.target as HTMLElement;
+                          target.style.backgroundColor = 'transparent';
+                        }}
                       />
                     ))}
 
@@ -724,8 +730,14 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       cursor: 'pointer'
                     }}
                     onClick={() => onDayClick && onDayClick(currentDate.toISOString().split('T')[0])}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#eff6ff'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+                    onMouseOver={(e) => {
+                      const target = e.target as HTMLElement;
+                      target.style.backgroundColor = '#eff6ff';
+                    }}
+                    onMouseOut={(e) => {
+                      const target = e.target as HTMLElement;
+                      target.style.backgroundColor = 'transparent';
+                    }}
                   />
                 ))}
 
