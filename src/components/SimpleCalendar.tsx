@@ -21,6 +21,8 @@ type CalendarView = 'month' | 'week' | 'day';
 const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick, userRole }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState<CalendarView>('month');
+  
+  // FORCE UPDATE: 2025-11-18-16:45
 
   const monthNames = [
     'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -505,6 +507,9 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
         </>
       ) : currentView === 'week' ? (
         <div className="border rounded-lg overflow-hidden bg-white">
+          <div className="bg-red-100 p-2 text-red-800 text-xs border-b">
+            🔴 WEEK VIEW LOADED - Eventi: {getWeekDays().reduce((total, date) => total + getEventsForDate(date).length, 0)} - Update: 2025-11-18-16:45
+          </div>
           <div className="h-[600px] flex flex-col">
             {/* Header settimana */}
             <div className="flex bg-gray-50 border-b h-16 flex-shrink-0">
@@ -592,6 +597,9 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
         </div>
       ) : (
         <div className="border rounded-lg overflow-hidden bg-white">
+          <div className="bg-red-100 p-2 text-red-800 text-xs border-b">
+            🔴 DAY VIEW LOADED - Eventi: {getEventsForDate(currentDate).length} - Update: 2025-11-18-16:45
+          </div>
           <div className="h-[600px] flex flex-col">
             {/* Header giorno */}
             <div className="bg-gray-50 border-b h-20 flex-shrink-0 flex items-center justify-center">
