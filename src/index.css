@@ -119,5 +119,31 @@
       transform: translateZ(0);
       -webkit-transform: translateZ(0);
     }
+
+    /* Lock modal from horizontal dragging */
+    .viewport-stable {
+      /* Prevent horizontal scrolling and bouncing */
+      overflow-x: hidden !important;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y !important;
+      /* Lock to vertical scrolling only */
+      scroll-behavior: smooth;
+    }
+
+    /* Prevent elastic bounce on modal container */
+    .mobile-modal-container {
+      overscroll-behavior: none;
+      -webkit-overscroll-behavior: none;
+      touch-action: none;
+    }
+
+    /* Prevent any horizontal movement on form elements */
+    .mobile-form-safe-area {
+      touch-action: pan-y !important;
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100%;
+    }
   }
 }
