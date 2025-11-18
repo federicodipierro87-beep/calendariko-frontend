@@ -1328,28 +1328,28 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                   <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                     👤 Il Tuo Profilo
                   </h3>
-                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-6">
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 sm:p-6">
                     <h4 className="text-slate-800 font-medium text-lg mb-3">I Tuoi Dati</h4>
                     <p className="text-slate-700 mb-6">
                       Gestisci le tue informazioni personali, dati di fatturazione e preferenze account.
                     </p>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0">
                       {/* Informazioni Personali */}
-                      <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200">
                         <h5 className="font-medium text-gray-900 mb-4 flex items-center">
                           <span className="mr-2">📝</span>
                           Informazioni Personali
                         </h5>
                         <form className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-4 sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
                               <input
                                 type="text"
                                 value={userProfile.firstName}
                                 onChange={(e) => handleProfileChange('firstName', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                               />
                             </div>
                             <div>
@@ -1358,107 +1358,107 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                 type="text"
                                 value={userProfile.lastName}
                                 onChange={(e) => handleProfileChange('lastName', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                               />
                             </div>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">📧 Email *</label>
                             <input
                               type="email"
                               value={userProfile.email}
                               onChange={(e) => handleProfileChange('email', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Telefono</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">📱 Telefono</label>
                             <input
                               type="tel"
                               value={userProfile.phone}
                               onChange={(e) => handleProfileChange('phone', e.target.value)}
                               placeholder="+39 123 456 7890"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Data di Nascita</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">🎂 Data di Nascita</label>
                             <input
                               type="date"
                               value={userProfile.birthDate}
                               onChange={(e) => handleProfileChange('birthDate', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                             />
                           </div>
                         </form>
                       </div>
 
                       {/* Dati di Fatturazione */}
-                      <div className="bg-white rounded-lg p-6 border border-gray-200">
+                      <div className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200">
                         <h5 className="font-medium text-gray-900 mb-4 flex items-center">
                           <span className="mr-2">🧾</span>
                           Dati di Fatturazione
                         </h5>
                         <form className="space-y-4">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Ragione Sociale</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">🏢 Ragione Sociale</label>
                             <input
                               type="text"
                               value={userProfile.businessName}
                               onChange={(e) => handleProfileChange('businessName', e.target.value)}
                               placeholder="Nome azienda o nome completo"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Partita IVA / Codice Fiscale</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">🆔 Partita IVA / Codice Fiscale</label>
                             <input
                               type="text"
                               value={userProfile.vatNumber}
                               onChange={(e) => handleProfileChange('vatNumber', e.target.value)}
                               placeholder="IT12345678901"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">🏠 Indirizzo</label>
                             <input
                               type="text"
                               value={userProfile.address}
                               onChange={(e) => handleProfileChange('address', e.target.value)}
                               placeholder="Via, Piazza, ecc."
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                             />
                           </div>
-                          <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">CAP</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">📮 CAP</label>
                               <input
                                 type="text"
                                 value={userProfile.zipCode}
                                 onChange={(e) => handleProfileChange('zipCode', e.target.value)}
                                 placeholder="20100"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">Città</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">🏙️ Città</label>
                               <input
                                 type="text"
                                 value={userProfile.city}
                                 onChange={(e) => handleProfileChange('city', e.target.value)}
                                 placeholder="Milano"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">🗺️ Provincia</label>
                               <input
                                 type="text"
                                 value={userProfile.province}
                                 onChange={(e) => handleProfileChange('province', e.target.value)}
                                 placeholder="MI"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                               />
                             </div>
                           </div>
@@ -1467,53 +1467,56 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     </div>
 
                     {/* Sezione Gruppi (Solo Visualizzazione) */}
-                    <div className="mt-8 bg-white rounded-lg p-6 border border-gray-200">
-                      <h5 className="font-medium text-gray-900 mb-4 flex items-center">
-                        <span className="mr-2">👥</span>
-                        I Tuoi Gruppi
-                        <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Solo visualizzazione</span>
+                    <div className="mt-6 bg-white rounded-lg p-4 sm:p-6 border border-gray-200">
+                      <h5 className="font-medium text-gray-900 mb-4 flex flex-col sm:flex-row sm:items-center">
+                        <span className="flex items-center">
+                          <span className="mr-2">👥</span>
+                          I Tuoi Gruppi
+                        </span>
+                        <span className="mt-1 sm:mt-0 sm:ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded w-fit">Solo visualizzazione</span>
                       </h5>
                       <div className="space-y-3">
                         {groups.filter(group => 
                           group.user_groups?.some((ug: any) => ug.user_id === user.id)
                         ).map(group => (
-                          <div key={group.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div>
-                              <div className="font-medium text-gray-900">{group.name}</div>
-                              <div className="text-sm text-gray-600">
-                                {group.type === 'BAND' ? 'Band' : group.type === 'DJ' ? 'DJ' : 'Solista'} 
+                          <div key={group.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-lg space-y-2 sm:space-y-0">
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900 text-base">{group.name}</div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                {group.type === 'BAND' ? '🎸 Band' : group.type === 'DJ' ? '🎧 DJ' : '🎤 Solista'} 
                                 {group.genre && ` • ${group.genre}`}
                               </div>
                             </div>
-                            <div className="text-sm text-gray-500">
-                              Membro
+                            <div className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium w-fit">
+                              ✅ Membro
                             </div>
                           </div>
                         ))}
                         {groups.filter(group => 
                           group.user_groups?.some((ug: any) => ug.user_id === user.id)
                         ).length === 0 && (
-                          <div className="text-center py-4 text-gray-500">
-                            Non fai ancora parte di nessun gruppo
+                          <div className="text-center py-8 text-gray-500">
+                            <div className="text-4xl mb-2">🎵</div>
+                            <p>Non fai ancora parte di nessun gruppo</p>
                           </div>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 mt-3">
-                        Per modificare i tuoi gruppi di appartenenza, contatta l'amministratore del sistema.
+                      <p className="text-xs text-gray-500 mt-4 p-3 bg-blue-50 rounded-lg">
+                        💡 Per modificare i tuoi gruppi di appartenenza, contatta l'amministratore del sistema.
                       </p>
                     </div>
 
                     {/* Pulsanti Azione */}
-                    <div className="mt-8 flex gap-4">
+                    <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 pb-20 sm:pb-0">
                       <button 
                         onClick={handleSaveProfile}
-                        className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                        className="flex-1 sm:flex-none bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium text-base"
                       >
                         💾 Salva Modifiche
                       </button>
                       <button 
                         onClick={() => window.location.reload()}
-                        className="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 transition-colors"
+                        className="flex-1 sm:flex-none bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors font-medium text-base"
                       >
                         🔄 Annulla
                       </button>
