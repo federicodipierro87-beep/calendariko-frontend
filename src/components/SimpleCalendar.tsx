@@ -504,167 +504,272 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           </div>
         </>
       ) : currentView === 'week' ? (
-        <div className="border rounded-lg bg-white" style={{ height: '600px' }}>
-          <div className="h-full flex flex-col">
-            {/* Header settimana */}
-            <div className="flex bg-gray-50 border-b h-16 flex-shrink-0">
-              <div className="w-20 border-r flex items-center justify-center text-xs font-medium">Ora</div>
-              {getWeekDays().map((date, index) => (
-                <div key={index} className="flex-1 border-r p-2 text-center">
-                  <div className="text-xs text-gray-500 uppercase">{weekDays[date.getDay()]}</div>
-                  <div className={`text-sm font-medium ${
-                    date.toDateString() === new Date().toDateString() 
-                      ? 'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center mx-auto' 
-                      : 'text-gray-900'
-                  }`}>
-                    {date.getDate()}
-                  </div>
-                </div>
-              ))}
+        <div style={{
+          border: '1px solid #e5e7eb',
+          borderRadius: '8px',
+          height: '500px',
+          overflow: 'hidden',
+          backgroundColor: 'white'
+        }}>
+          {/* Header settimana */}
+          <div style={{
+            display: 'flex',
+            height: '60px',
+            borderBottom: '1px solid #e5e7eb',
+            backgroundColor: '#f9fafb'
+          }}>
+            <div style={{width: '80px', borderRight: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold'}}>
+              Ora
             </div>
-
-            {/* Content area con eventi */}
-            <div className="flex-1 overflow-y-auto" style={{ height: 'calc(100% - 64px)' }}>
-              <div className="flex" style={{ minHeight: '576px' }}>
-                {/* Time column */}
-                <div className="w-20 border-r bg-gray-50 flex-shrink-0">
-                  {Array.from({ length: 24 }, (_, hour) => (
-                    <div key={hour} className="h-12 border-b flex items-center justify-end pr-2">
-                      <span className="text-xs text-gray-500">{hour.toString().padStart(2, '0')}:00</span>
-                    </div>
-                  ))}
+            {getWeekDays().map((date, index) => (
+              <div key={index} style={{
+                flex: 1,
+                borderRight: '1px solid #e5e7eb',
+                padding: '8px',
+                textAlign: 'center'
+              }}>
+                <div style={{fontSize: '10px', color: '#6b7280', textTransform: 'uppercase'}}>
+                  {weekDays[date.getDay()]}
                 </div>
-
-                {/* Days columns */}
-                {getWeekDays().map((date, dayIndex) => {
-                  const dayEvents = getEventsForDate(date);
-                  return (
-                    <div key={dayIndex} className="flex-1 border-r relative">
-                      {/* Hour grid */}
-                      {Array.from({ length: 24 }, (_, hour) => (
-                        <div 
-                          key={hour} 
-                          className="h-12 border-b hover:bg-blue-50 cursor-pointer"
-                          onClick={() => onDayClick && onDayClick(date.toISOString().split('T')[0])}
-                        />
-                      ))}
-
-                      {/* Events */}
-                      {dayEvents.map((event, eventIndex) => {
-                        const timeStr = event.time || '09:00';
-                        const [hourStr, minuteStr] = timeStr.split(':');
-                        const startHour = parseInt(hourStr) || 9;
-                        const startMinute = parseInt(minuteStr) || 0;
-                        const topPosition = (startHour * 48) + (startMinute * 48 / 60);
-
-                        const getEventColor = (type: string) => {
-                          switch(type) {
-                            case 'availability-busy': return 'bg-red-500';
-                            case 'availability': return 'bg-green-500'; 
-                            case 'rehearsal': return 'bg-blue-500';
-                            default: return 'bg-purple-500';
-                          }
-                        };
-
-                        return (
-                          <div
-                            key={`${event.id}-${eventIndex}`}
-                            className={`absolute left-1 right-1 ${getEventColor(event.type)} text-white text-xs p-1 rounded shadow-sm z-10`}
-                            style={{ 
-                              top: `${topPosition}px`,
-                              height: '36px'
-                            }}
-                            title={`${event.title} - ${formatTime(event.time)}`}
-                          >
-                            <div className="font-medium truncate text-xs">
-                              {event.type === 'availability-busy' ? 'Indisponibile' : event.title}
-                            </div>
-                            <div className="text-xs opacity-90">{formatTime(event.time)}</div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
+                <div style={{
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  color: date.toDateString() === new Date().toDateString() ? 'white' : '#111827',
+                  backgroundColor: date.toDateString() === new Date().toDateString() ? '#3b82f6' : 'transparent',
+                  borderRadius: '50%',
+                  width: '24px',
+                  height: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto'
+                }}>
+                  {date.getDate()}
+                </div>
               </div>
+            ))}
+          </div>
+
+          {/* Content con eventi */}
+          <div style={{
+            height: '440px',
+            overflow: 'auto'
+          }}>
+            <div style={{display: 'flex'}}>
+              {/* Time column */}
+              <div style={{width: '80px', borderRight: '1px solid #e5e7eb', backgroundColor: '#f9fafb'}}>
+                {Array.from({ length: 24 }, (_, hour) => (
+                  <div key={hour} style={{
+                    height: '40px',
+                    borderBottom: '1px solid #e5e7eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    paddingRight: '8px',
+                    fontSize: '10px',
+                    color: '#6b7280'
+                  }}>
+                    {hour.toString().padStart(2, '0')}:00
+                  </div>
+                ))}
+              </div>
+
+              {/* Days columns */}
+              {getWeekDays().map((date, dayIndex) => {
+                const dayEvents = getEventsForDate(date);
+                return (
+                  <div key={dayIndex} style={{
+                    flex: 1,
+                    borderRight: '1px solid #e5e7eb',
+                    position: 'relative'
+                  }}>
+                    {/* Hour grid */}
+                    {Array.from({ length: 24 }, (_, hour) => (
+                      <div 
+                        key={hour}
+                        style={{
+                          height: '40px',
+                          borderBottom: '1px solid #e5e7eb',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => onDayClick && onDayClick(date.toISOString().split('T')[0])}
+                        onMouseOver={(e) => e.target.style.backgroundColor = '#eff6ff'}
+                        onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+                      />
+                    ))}
+
+                    {/* Events */}
+                    {dayEvents.map((event, eventIndex) => {
+                      const timeStr = event.time || '09:00';
+                      const [hourStr, minuteStr] = timeStr.split(':');
+                      const startHour = parseInt(hourStr) || 9;
+                      const startMinute = parseInt(minuteStr) || 0;
+                      const topPosition = (startHour * 40) + (startMinute * 40 / 60);
+
+                      let backgroundColor = '#8b5cf6'; // default purple
+                      if (event.type === 'availability-busy') backgroundColor = '#ef4444'; // red
+                      if (event.type === 'availability') backgroundColor = '#22c55e'; // green  
+                      if (event.type === 'rehearsal') backgroundColor = '#3b82f6'; // blue
+
+                      return (
+                        <div
+                          key={`${event.id}-${eventIndex}`}
+                          style={{
+                            position: 'absolute',
+                            left: '2px',
+                            right: '2px',
+                            top: `${topPosition}px`,
+                            height: '32px',
+                            backgroundColor: backgroundColor,
+                            color: 'white',
+                            fontSize: '10px',
+                            padding: '2px 4px',
+                            borderRadius: '4px',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                            zIndex: 10,
+                            overflow: 'hidden'
+                          }}
+                          title={`${event.title} - ${formatTime(event.time)}`}
+                        >
+                          <div style={{fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                            {event.type === 'availability-busy' ? 'Indisponibile' : event.title}
+                          </div>
+                          <div style={{fontSize: '9px', opacity: 0.9}}>
+                            {formatTime(event.time)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
       ) : (
-        <div className="border rounded-lg bg-white" style={{ height: '600px' }}>
-          <div className="h-full flex flex-col">
-            {/* Header giorno */}
-            <div className="bg-gray-50 border-b h-20 flex-shrink-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-sm text-gray-500 uppercase">{weekDays[currentDate.getDay()]}</div>
-                <div className={`text-xl font-medium ${
-                  currentDate.toDateString() === new Date().toDateString()
-                    ? 'bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto'
-                    : 'text-gray-900'
-                }`}>
-                  {currentDate.getDate()}
-                </div>
+        <div style={{
+          border: '1px solid #e5e7eb',
+          borderRadius: '8px', 
+          height: '500px',
+          overflow: 'hidden',
+          backgroundColor: 'white'
+        }}>
+          {/* Header giorno */}
+          <div style={{
+            height: '80px',
+            borderBottom: '1px solid #e5e7eb',
+            backgroundColor: '#f9fafb',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{textAlign: 'center'}}>
+              <div style={{fontSize: '12px', color: '#6b7280', textTransform: 'uppercase'}}>
+                {weekDays[currentDate.getDay()]}
+              </div>
+              <div style={{
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: currentDate.toDateString() === new Date().toDateString() ? 'white' : '#111827',
+                backgroundColor: currentDate.toDateString() === new Date().toDateString() ? '#3b82f6' : 'transparent',
+                borderRadius: '50%',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto'
+              }}>
+                {currentDate.getDate()}
               </div>
             </div>
+          </div>
 
-            {/* Content area con eventi */}
-            <div className="flex-1 overflow-y-auto" style={{ height: 'calc(100% - 80px)' }}>
-              <div className="flex" style={{ minHeight: '520px' }}>
-                {/* Time column */}
-                <div className="w-20 border-r bg-gray-50 flex-shrink-0">
-                  {Array.from({ length: 24 }, (_, hour) => (
-                    <div key={hour} className="h-16 border-b flex items-center justify-end pr-2">
-                      <span className="text-sm text-gray-500">{hour.toString().padStart(2, '0')}:00</span>
-                    </div>
-                  ))}
-                </div>
+          {/* Content con eventi */}
+          <div style={{
+            height: '420px',
+            overflow: 'auto'
+          }}>
+            <div style={{display: 'flex'}}>
+              {/* Time column */}
+              <div style={{width: '80px', borderRight: '1px solid #e5e7eb', backgroundColor: '#f9fafb'}}>
+                {Array.from({ length: 24 }, (_, hour) => (
+                  <div key={hour} style={{
+                    height: '50px',
+                    borderBottom: '1px solid #e5e7eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    paddingRight: '8px',
+                    fontSize: '12px',
+                    color: '#6b7280'
+                  }}>
+                    {hour.toString().padStart(2, '0')}:00
+                  </div>
+                ))}
+              </div>
 
-                {/* Day column */}
-                <div className="flex-1 relative">
-                  {/* Hour grid */}
-                  {Array.from({ length: 24 }, (_, hour) => (
-                    <div 
-                      key={hour} 
-                      className="h-16 border-b hover:bg-blue-50 cursor-pointer"
-                      onClick={() => onDayClick && onDayClick(currentDate.toISOString().split('T')[0])}
-                    />
-                  ))}
+              {/* Day column */}
+              <div style={{
+                flex: 1,
+                position: 'relative'
+              }}>
+                {/* Hour grid */}
+                {Array.from({ length: 24 }, (_, hour) => (
+                  <div 
+                    key={hour}
+                    style={{
+                      height: '50px',
+                      borderBottom: '1px solid #e5e7eb',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => onDayClick && onDayClick(currentDate.toISOString().split('T')[0])}
+                    onMouseOver={(e) => e.target.style.backgroundColor = '#eff6ff'}
+                    onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+                  />
+                ))}
 
-                  {/* Events */}
-                  {getEventsForDate(currentDate).map((event, eventIndex) => {
-                    const timeStr = event.time || '09:00';
-                    const [hourStr, minuteStr] = timeStr.split(':');
-                    const startHour = parseInt(hourStr) || 9;
-                    const startMinute = parseInt(minuteStr) || 0;
-                    const topPosition = (startHour * 64) + (startMinute * 64 / 60);
+                {/* Events */}
+                {getEventsForDate(currentDate).map((event, eventIndex) => {
+                  const timeStr = event.time || '09:00';
+                  const [hourStr, minuteStr] = timeStr.split(':');
+                  const startHour = parseInt(hourStr) || 9;
+                  const startMinute = parseInt(minuteStr) || 0;
+                  const topPosition = (startHour * 50) + (startMinute * 50 / 60);
 
-                    const getEventColor = (type: string) => {
-                      switch(type) {
-                        case 'availability-busy': return 'bg-red-500';
-                        case 'availability': return 'bg-green-500';
-                        case 'rehearsal': return 'bg-blue-500'; 
-                        default: return 'bg-purple-500';
-                      }
-                    };
+                  let backgroundColor = '#8b5cf6'; // default purple
+                  if (event.type === 'availability-busy') backgroundColor = '#ef4444'; // red
+                  if (event.type === 'availability') backgroundColor = '#22c55e'; // green
+                  if (event.type === 'rehearsal') backgroundColor = '#3b82f6'; // blue
 
-                    return (
-                      <div
-                        key={`${event.id}-${eventIndex}`}
-                        className={`absolute left-2 right-2 ${getEventColor(event.type)} text-white p-2 rounded shadow-sm z-10`}
-                        style={{ 
-                          top: `${topPosition}px`,
-                          height: '48px'
-                        }}
-                        title={`${event.title} - ${formatTime(event.time)}`}
-                      >
-                        <div className="font-medium truncate">
-                          {event.type === 'availability-busy' ? 'Indisponibile' : event.title}
-                        </div>
-                        <div className="text-sm opacity-90">{formatTime(event.time)}</div>
+                  return (
+                    <div
+                      key={`${event.id}-${eventIndex}`}
+                      style={{
+                        position: 'absolute',
+                        left: '8px',
+                        right: '8px',
+                        top: `${topPosition}px`,
+                        height: '40px',
+                        backgroundColor: backgroundColor,
+                        color: 'white',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        zIndex: 10,
+                        overflow: 'hidden'
+                      }}
+                      title={`${event.title} - ${formatTime(event.time)}`}
+                    >
+                      <div style={{fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                        {event.type === 'availability-busy' ? 'Indisponibile' : event.title}
                       </div>
-                    );
-                  })}
-                </div>
+                      <div style={{fontSize: '12px', opacity: 0.9}}>
+                        {formatTime(event.time)}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
