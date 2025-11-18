@@ -505,88 +505,236 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
         </>
       ) : currentView === 'week' ? (
         <div style={{
-          border: '2px solid red',
-          padding: '20px',
-          backgroundColor: '#fff3cd',
-          maxHeight: '400px',
-          overflow: 'auto'
+          border: '1px solid #e5e7eb',
+          borderRadius: '8px',
+          backgroundColor: 'white',
+          padding: '16px'
         }}>
-          <h3 style={{color: 'red', fontSize: '18px', fontWeight: 'bold'}}>🔴 SETTIMANA TEST SEMPLIFICATO</h3>
-          <p style={{marginBottom: '15px'}}>Eventi totali: {events.length}</p>
+          <h3 style={{margin: '0 0 20px 0', fontSize: '18px', fontWeight: 'bold', color: '#374151'}}>
+            📅 Vista Settimana
+          </h3>
           
-          {getWeekDays().map((date, index) => {
-            const dayEvents = getEventsForDate(date);
-            return (
-              <div key={index} style={{
-                border: '1px solid #999',
-                margin: '5px 0',
-                padding: '10px',
-                backgroundColor: 'white'
-              }}>
-                <h4 style={{margin: '0 0 5px 0', fontSize: '14px', fontWeight: 'bold'}}>
-                  {date.toLocaleDateString('it-IT')} ({weekDays[date.getDay()]})
-                </h4>
-                <p style={{margin: '0 0 5px 0', fontSize: '12px'}}>Eventi: {dayEvents.length}</p>
-                {dayEvents.length === 0 ? (
-                  <p style={{margin: 0, fontSize: '12px', color: '#666'}}>Nessun evento</p>
-                ) : (
-                  dayEvents.map((event, i) => (
-                    <div key={i} style={{
-                      margin: '3px 0',
-                      padding: '5px',
-                      backgroundColor: event.type === 'rehearsal' ? '#e3f2fd' : 
-                                       event.type === 'availability' ? '#e8f5e8' : '#ffebee',
-                      borderLeft: '4px solid ' + (event.type === 'rehearsal' ? '#2196f3' : 
-                                                   event.type === 'availability' ? '#4caf50' : '#f44336'),
-                      fontSize: '11px'
+          <div style={{display: 'grid', gap: '16px'}}>
+            {getWeekDays().map((date, index) => {
+              const dayEvents = getEventsForDate(date);
+              const isToday = date.toDateString() === new Date().toDateString();
+              
+              return (
+                <div key={index} style={{
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  padding: '12px',
+                  backgroundColor: isToday ? '#eff6ff' : '#f9fafb'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '8px'
+                  }}>
+                    <h4 style={{
+                      margin: 0,
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      color: isToday ? '#1e40af' : '#374151'
                     }}>
-                      <strong>{event.title}</strong> - {event.time} ({event.type})
+                      {weekDays[date.getDay()]} {date.getDate()}/{date.getMonth() + 1}
+                      {isToday && ' (Oggi)'}
+                    </h4>
+                    <span style={{
+                      fontSize: '12px',
+                      color: '#6b7280',
+                      backgroundColor: '#e5e7eb',
+                      padding: '2px 6px',
+                      borderRadius: '4px'
+                    }}>
+                      {dayEvents.length} eventi
+                    </span>
+                  </div>
+
+                  {dayEvents.length === 0 ? (
+                    <p style={{
+                      margin: 0,
+                      fontSize: '12px',
+                      color: '#9ca3af',
+                      fontStyle: 'italic'
+                    }}>
+                      Nessun evento
+                    </p>
+                  ) : (
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
+                      {dayEvents.map((event, i) => {
+                        let bgColor = '#f3f4f6';
+                        let borderColor = '#d1d5db';
+                        let textColor = '#374151';
+                        
+                        if (event.type === 'rehearsal') {
+                          bgColor = '#dbeafe';
+                          borderColor = '#3b82f6';
+                          textColor = '#1e40af';
+                        } else if (event.type === 'availability') {
+                          bgColor = '#dcfce7';
+                          borderColor = '#22c55e';
+                          textColor = '#166534';
+                        } else if (event.type === 'availability-busy') {
+                          bgColor = '#fee2e2';
+                          borderColor = '#ef4444';
+                          textColor = '#dc2626';
+                        }
+
+                        return (
+                          <div key={i} style={{
+                            padding: '8px',
+                            backgroundColor: bgColor,
+                            borderLeft: `3px solid ${borderColor}`,
+                            borderRadius: '4px'
+                          }}>
+                            <div style={{
+                              fontWeight: 'bold',
+                              fontSize: '13px',
+                              color: textColor,
+                              marginBottom: '2px'
+                            }}>
+                              {event.type === 'availability-busy' ? 'Indisponibile' : event.title}
+                            </div>
+                            <div style={{
+                              fontSize: '12px',
+                              color: '#6b7280'
+                            }}>
+                              🕐 {event.time || '09:00'} • {event.type === 'rehearsal' ? '🎵 Prova' : 
+                                                            event.type === 'availability' ? '✅ Disponibile' : '❌ Occupato'}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))
-                )}
-              </div>
-            );
-          })}
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : (
         <div style={{
-          border: '2px solid red',
-          padding: '20px',
-          backgroundColor: '#fff3cd',
-          maxHeight: '400px',
-          overflow: 'auto'
+          border: '1px solid #e5e7eb',
+          borderRadius: '8px',
+          backgroundColor: 'white',
+          padding: '16px'
         }}>
-          <h3 style={{color: 'red', fontSize: '18px', fontWeight: 'bold'}}>🔴 GIORNO TEST SEMPLIFICATO</h3>
-          <p style={{marginBottom: '15px'}}>Data: {currentDate.toLocaleDateString('it-IT')}</p>
+          <h3 style={{margin: '0 0 20px 0', fontSize: '18px', fontWeight: 'bold', color: '#374151'}}>
+            📅 Vista Giorno - {currentDate.toLocaleDateString('it-IT')}
+          </h3>
           
           {(() => {
             const dayEvents = getEventsForDate(currentDate);
+            const isToday = currentDate.toDateString() === new Date().toDateString();
+            
             return (
               <div style={{
-                border: '1px solid #999',
-                padding: '10px',
-                backgroundColor: 'white'
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                padding: '16px',
+                backgroundColor: isToday ? '#eff6ff' : '#f9fafb'
               }}>
-                <h4 style={{margin: '0 0 10px 0'}}>Eventi: {dayEvents.length}</h4>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '16px'
+                }}>
+                  <h4 style={{
+                    margin: 0,
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: isToday ? '#1e40af' : '#374151'
+                  }}>
+                    {weekDays[currentDate.getDay()]} {currentDate.getDate()}/{currentDate.getMonth() + 1}/{currentDate.getFullYear()}
+                    {isToday && ' (Oggi)'}
+                  </h4>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#6b7280',
+                    backgroundColor: '#e5e7eb',
+                    padding: '4px 8px',
+                    borderRadius: '4px'
+                  }}>
+                    {dayEvents.length} eventi
+                  </span>
+                </div>
+
                 {dayEvents.length === 0 ? (
-                  <p style={{margin: 0, color: '#666'}}>Nessun evento oggi</p>
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '40px',
+                    color: '#9ca3af'
+                  }}>
+                    <div style={{fontSize: '48px', marginBottom: '16px'}}>📅</div>
+                    <p style={{margin: 0, fontSize: '16px', fontStyle: 'italic'}}>
+                      Nessun evento oggi
+                    </p>
+                  </div>
                 ) : (
-                  dayEvents.map((event, i) => (
-                    <div key={i} style={{
-                      margin: '5px 0',
-                      padding: '8px',
-                      backgroundColor: event.type === 'rehearsal' ? '#e3f2fd' : 
-                                       event.type === 'availability' ? '#e8f5e8' : '#ffebee',
-                      borderLeft: '4px solid ' + (event.type === 'rehearsal' ? '#2196f3' : 
-                                                   event.type === 'availability' ? '#4caf50' : '#f44336'),
-                      fontSize: '12px'
-                    }}>
-                      <div><strong>{event.title}</strong></div>
-                      <div>Orario: {event.time}</div>
-                      <div>Tipo: {event.type}</div>
-                      <div>Data: {event.date}</div>
-                    </div>
-                  ))
+                  <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                    {dayEvents.map((event, i) => {
+                      let bgColor = '#f3f4f6';
+                      let borderColor = '#d1d5db';
+                      let textColor = '#374151';
+                      
+                      if (event.type === 'rehearsal') {
+                        bgColor = '#dbeafe';
+                        borderColor = '#3b82f6';
+                        textColor = '#1e40af';
+                      } else if (event.type === 'availability') {
+                        bgColor = '#dcfce7';
+                        borderColor = '#22c55e';
+                        textColor = '#166534';
+                      } else if (event.type === 'availability-busy') {
+                        bgColor = '#fee2e2';
+                        borderColor = '#ef4444';
+                        textColor = '#dc2626';
+                      }
+
+                      return (
+                        <div key={i} style={{
+                          padding: '16px',
+                          backgroundColor: bgColor,
+                          borderLeft: `4px solid ${borderColor}`,
+                          borderRadius: '8px',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                        }}>
+                          <div style={{
+                            fontWeight: 'bold',
+                            fontSize: '16px',
+                            color: textColor,
+                            marginBottom: '8px'
+                          }}>
+                            {event.type === 'availability-busy' ? '❌ Indisponibile' : `📋 ${event.title}`}
+                          </div>
+                          <div style={{
+                            fontSize: '14px',
+                            color: '#6b7280',
+                            marginBottom: '4px'
+                          }}>
+                            🕐 Orario: {event.time || '09:00'}
+                          </div>
+                          <div style={{
+                            fontSize: '14px',
+                            color: '#6b7280',
+                            marginBottom: '4px'
+                          }}>
+                            📝 Tipo: {event.type === 'rehearsal' ? '🎵 Prova' : 
+                                     event.type === 'availability' ? '✅ Disponibile' : '❌ Occupato'}
+                          </div>
+                          <div style={{
+                            fontSize: '14px',
+                            color: '#6b7280'
+                          }}>
+                            📅 Data: {event.date}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             );
