@@ -485,20 +485,6 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
         </div>
       </div>
 
-      {/* Debug: mostra numero di eventi */}
-      <div className="mb-4 p-2 bg-yellow-100 border rounded text-xs">
-        <div><strong>DEBUG INFO:</strong></div>
-        <div>Vista attuale: {currentView}</div>
-        <div>Eventi totali: {events.length}</div>
-        <div>Data corrente: {currentDate.toISOString().split('T')[0]}</div>
-        {currentView === 'day' && (
-          <div>Eventi oggi: {getEventsForDate(currentDate).length}</div>
-        )}
-        {currentView === 'week' && (
-          <div>Eventi settimana: {getWeekDays().reduce((total, date) => total + getEventsForDate(date).length, 0)}</div>
-        )}
-        <div>Primi 3 eventi: {JSON.stringify(events.slice(0, 3).map(e => ({title: e.title, date: e.date, type: e.type})))}</div>
-      </div>
 
       {/* Contenuto del calendario basato sulla vista */}
       {currentView === 'month' ? (
@@ -518,36 +504,169 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           </div>
         </>
       ) : currentView === 'week' ? (
-        <div className="border rounded-lg p-4 bg-gray-50">
-          <h3 className="font-bold mb-4">VISTA SETTIMANA - TEST SEMPLIFICATO</h3>
-          {getWeekDays().map((date, index) => {
-            const dayEvents = getEventsForDate(date);
-            return (
-              <div key={index} className="mb-2 p-2 border bg-white">
-                <div className="font-medium">{date.toLocaleDateString('it-IT')}</div>
-                <div>Eventi: {dayEvents.length}</div>
-                {dayEvents.map((event, i) => (
-                  <div key={i} className="text-sm text-blue-600 ml-4">
-                    • {event.title} - {event.time} - {event.type}
+        <div className="border rounded-lg overflow-hidden bg-white">
+          <div className="h-[600px] flex flex-col">
+            {/* Header settimana */}
+            <div className="flex bg-gray-50 border-b h-16 flex-shrink-0">
+              <div className="w-20 border-r flex items-center justify-center text-xs font-medium">Ora</div>
+              {getWeekDays().map((date, index) => (
+                <div key={index} className="flex-1 border-r p-2 text-center">
+                  <div className="text-xs text-gray-500 uppercase">{weekDays[date.getDay()]}</div>
+                  <div className={`text-sm font-medium ${
+                    date.toDateString() === new Date().toDateString() 
+                      ? 'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center mx-auto' 
+                      : 'text-gray-900'
+                  }`}>
+                    {date.getDate()}
                   </div>
-                ))}
+                </div>
+              ))}
+            </div>
+
+            {/* Content area con eventi */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="flex">
+                {/* Time column */}
+                <div className="w-20 border-r bg-gray-50 flex-shrink-0">
+                  {Array.from({ length: 24 }, (_, hour) => (
+                    <div key={hour} className="h-12 border-b flex items-center justify-end pr-2">
+                      <span className="text-xs text-gray-500">{hour.toString().padStart(2, '0')}:00</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Days columns */}
+                {getWeekDays().map((date, dayIndex) => {
+                  const dayEvents = getEventsForDate(date);
+                  return (
+                    <div key={dayIndex} className="flex-1 border-r relative">
+                      {/* Hour grid */}
+                      {Array.from({ length: 24 }, (_, hour) => (
+                        <div 
+                          key={hour} 
+                          className="h-12 border-b hover:bg-blue-50 cursor-pointer"
+                          onClick={() => onDayClick && onDayClick(date.toISOString().split('T')[0])}
+                        />
+                      ))}
+
+                      {/* Events */}
+                      {dayEvents.map((event, eventIndex) => {
+                        const timeStr = event.time || '09:00';
+                        const [hourStr, minuteStr] = timeStr.split(':');
+                        const startHour = parseInt(hourStr) || 9;
+                        const startMinute = parseInt(minuteStr) || 0;
+                        const topPosition = (startHour * 48) + (startMinute * 48 / 60);
+
+                        const getEventColor = (type: string) => {
+                          switch(type) {
+                            case 'availability-busy': return 'bg-red-500';
+                            case 'availability': return 'bg-green-500'; 
+                            case 'rehearsal': return 'bg-blue-500';
+                            default: return 'bg-purple-500';
+                          }
+                        };
+
+                        return (
+                          <div
+                            key={`${event.id}-${eventIndex}`}
+                            className={`absolute left-1 right-1 ${getEventColor(event.type)} text-white text-xs p-1 rounded shadow-sm z-10`}
+                            style={{ 
+                              top: `${topPosition}px`,
+                              height: '36px'
+                            }}
+                            title={`${event.title} - ${formatTime(event.time)}`}
+                          >
+                            <div className="font-medium truncate text-xs">
+                              {event.type === 'availability-busy' ? 'Indisponibile' : event.title}
+                            </div>
+                            <div className="text-xs opacity-90">{formatTime(event.time)}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          </div>
         </div>
       ) : (
-        <div className="border rounded-lg p-4 bg-gray-50">
-          <h3 className="font-bold mb-4">VISTA GIORNO - TEST SEMPLIFICATO</h3>
-          <div className="mb-2 p-2 border bg-white">
-            <div className="font-medium">{currentDate.toLocaleDateString('it-IT')}</div>
-            {getEventsForDate(currentDate).map((event, i) => (
-              <div key={i} className="text-sm text-blue-600 ml-4">
-                • {event.title} - {event.time} - {event.type}
+        <div className="border rounded-lg overflow-hidden bg-white">
+          <div className="h-[600px] flex flex-col">
+            {/* Header giorno */}
+            <div className="bg-gray-50 border-b h-20 flex-shrink-0 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-sm text-gray-500 uppercase">{weekDays[currentDate.getDay()]}</div>
+                <div className={`text-xl font-medium ${
+                  currentDate.toDateString() === new Date().toDateString()
+                    ? 'bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto'
+                    : 'text-gray-900'
+                }`}>
+                  {currentDate.getDate()}
+                </div>
               </div>
-            ))}
-            {getEventsForDate(currentDate).length === 0 && (
-              <div className="text-sm text-gray-500 ml-4">Nessun evento</div>
-            )}
+            </div>
+
+            {/* Content area con eventi */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="flex">
+                {/* Time column */}
+                <div className="w-20 border-r bg-gray-50 flex-shrink-0">
+                  {Array.from({ length: 24 }, (_, hour) => (
+                    <div key={hour} className="h-16 border-b flex items-center justify-end pr-2">
+                      <span className="text-sm text-gray-500">{hour.toString().padStart(2, '0')}:00</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Day column */}
+                <div className="flex-1 relative">
+                  {/* Hour grid */}
+                  {Array.from({ length: 24 }, (_, hour) => (
+                    <div 
+                      key={hour} 
+                      className="h-16 border-b hover:bg-blue-50 cursor-pointer"
+                      onClick={() => onDayClick && onDayClick(currentDate.toISOString().split('T')[0])}
+                    />
+                  ))}
+
+                  {/* Events */}
+                  {getEventsForDate(currentDate).map((event, eventIndex) => {
+                    const timeStr = event.time || '09:00';
+                    const [hourStr, minuteStr] = timeStr.split(':');
+                    const startHour = parseInt(hourStr) || 9;
+                    const startMinute = parseInt(minuteStr) || 0;
+                    const topPosition = (startHour * 64) + (startMinute * 64 / 60);
+
+                    const getEventColor = (type: string) => {
+                      switch(type) {
+                        case 'availability-busy': return 'bg-red-500';
+                        case 'availability': return 'bg-green-500';
+                        case 'rehearsal': return 'bg-blue-500'; 
+                        default: return 'bg-purple-500';
+                      }
+                    };
+
+                    return (
+                      <div
+                        key={`${event.id}-${eventIndex}`}
+                        className={`absolute left-2 right-2 ${getEventColor(event.type)} text-white p-2 rounded shadow-sm z-10`}
+                        style={{ 
+                          top: `${topPosition}px`,
+                          height: '48px'
+                        }}
+                        title={`${event.title} - ${formatTime(event.time)}`}
+                      >
+                        <div className="font-medium truncate">
+                          {event.type === 'availability-busy' ? 'Indisponibile' : event.title}
+                        </div>
+                        <div className="text-sm opacity-90">{formatTime(event.time)}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
