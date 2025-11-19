@@ -630,12 +630,33 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
 
                     {/* Eventi */}
                     {dayEvents.map((event, eventIndex) => {
-                      const timeStr = event.time || '09:00';
-                      const [hourStr, minuteStr] = timeStr.split(':');
-                      const startHour = parseInt(hourStr) || 9;
-                      const startMinute = parseInt(minuteStr) || 0;
+                      // Fix per il parsing dell'orario
+                      let timeStr = event.time || '09:00';
                       
-                      console.log('Rendering event:', event.title, 'at', timeStr, 'hour:', startHour);
+                      // Debug: mostra il valore raw
+                      console.log('Raw event time:', event.time, 'for event:', event.title);
+                      
+                      // Se timeStr non è nel formato HH:MM, usa un default
+                      if (!timeStr || !timeStr.includes(':') || timeStr.length > 5) {
+                        timeStr = '09:00';
+                        console.log('Invalid time format, using default:', timeStr);
+                      }
+                      
+                      const [hourStr, minuteStr] = timeStr.split(':');
+                      let startHour = parseInt(hourStr);
+                      let startMinute = parseInt(minuteStr) || 0;
+                      
+                      // Validazione extra per ore valide
+                      if (isNaN(startHour) || startHour < 0 || startHour > 23) {
+                        startHour = 9;
+                        console.log('Invalid hour, using default 9');
+                      }
+                      if (isNaN(startMinute) || startMinute < 0 || startMinute > 59) {
+                        startMinute = 0;
+                        console.log('Invalid minute, using default 0');
+                      }
+                      
+                      console.log('Parsed time:', startHour, ':', startMinute);
                       
                       // Calcola posizione solo per ore 8-19 (12 ore visibili)
                       if (startHour < 8 || startHour >= 20) {
@@ -817,12 +838,33 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
 
                 {/* Eventi */}
                 {getEventsForDate(currentDate).map((event, eventIndex) => {
-                  const timeStr = event.time || '09:00';
-                  const [hourStr, minuteStr] = timeStr.split(':');
-                  const startHour = parseInt(hourStr) || 9;
-                  const startMinute = parseInt(minuteStr) || 0;
+                  // Fix per il parsing dell'orario
+                  let timeStr = event.time || '09:00';
                   
-                  console.log('DAY - Rendering event:', event.title, 'at', timeStr, 'hour:', startHour);
+                  // Debug: mostra il valore raw
+                  console.log('DAY - Raw event time:', event.time, 'for event:', event.title);
+                  
+                  // Se timeStr non è nel formato HH:MM, usa un default
+                  if (!timeStr || !timeStr.includes(':') || timeStr.length > 5) {
+                    timeStr = '09:00';
+                    console.log('DAY - Invalid time format, using default:', timeStr);
+                  }
+                  
+                  const [hourStr, minuteStr] = timeStr.split(':');
+                  let startHour = parseInt(hourStr);
+                  let startMinute = parseInt(minuteStr) || 0;
+                  
+                  // Validazione extra per ore valide
+                  if (isNaN(startHour) || startHour < 0 || startHour > 23) {
+                    startHour = 9;
+                    console.log('DAY - Invalid hour, using default 9');
+                  }
+                  if (isNaN(startMinute) || startMinute < 0 || startMinute > 59) {
+                    startMinute = 0;
+                    console.log('DAY - Invalid minute, using default 0');
+                  }
+                  
+                  console.log('DAY - Parsed time:', startHour, ':', startMinute);
                   
                   // Calcola posizione solo per ore 8-19 (12 ore visibili)
                   if (startHour < 8 || startHour >= 20) {
