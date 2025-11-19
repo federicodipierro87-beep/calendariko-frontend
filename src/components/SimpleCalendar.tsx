@@ -637,11 +637,25 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
 
                     {/* Eventi */}
                     {dayEvents.map((event, eventIndex) => {
-                      // Fix per il parsing dell'orario
+                      // Fix per il parsing dell'orario con supporto ISO timestamps
                       let timeStr = event.time || '09:00';
                       
                       // Debug: mostra il valore raw
                       console.log('Raw event time:', event.time, 'for event:', event.title);
+                      
+                      // Se è un timestamp ISO (contiene T), estrai solo l'orario
+                      if (timeStr && timeStr.includes('T')) {
+                        try {
+                          const date = new Date(timeStr);
+                          const hours = date.getHours().toString().padStart(2, '0');
+                          const minutes = date.getMinutes().toString().padStart(2, '0');
+                          timeStr = `${hours}:${minutes}`;
+                          console.log('Extracted time from ISO:', timeStr);
+                        } catch (e) {
+                          console.log('Error parsing ISO timestamp, using default');
+                          timeStr = '09:00';
+                        }
+                      }
                       
                       // Se timeStr non è nel formato HH:MM, usa un default
                       if (!timeStr || !timeStr.includes(':') || timeStr.length > 5) {
@@ -663,7 +677,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                         console.log('Invalid minute, using default 0');
                       }
                       
-                      console.log('Parsed time:', startHour, ':', startMinute);
+                      console.log('Final parsed time:', startHour, ':', startMinute);
                       
                       // Calcola posizione solo per ore 8-19 (12 ore visibili)
                       if (startHour < 8 || startHour >= 20) {
@@ -852,11 +866,25 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
 
                 {/* Eventi */}
                 {getEventsForDate(currentDate).map((event, eventIndex) => {
-                  // Fix per il parsing dell'orario
+                  // Fix per il parsing dell'orario con supporto ISO timestamps
                   let timeStr = event.time || '09:00';
                   
                   // Debug: mostra il valore raw
                   console.log('DAY - Raw event time:', event.time, 'for event:', event.title);
+                  
+                  // Se è un timestamp ISO (contiene T), estrai solo l'orario
+                  if (timeStr && timeStr.includes('T')) {
+                    try {
+                      const date = new Date(timeStr);
+                      const hours = date.getHours().toString().padStart(2, '0');
+                      const minutes = date.getMinutes().toString().padStart(2, '0');
+                      timeStr = `${hours}:${minutes}`;
+                      console.log('DAY - Extracted time from ISO:', timeStr);
+                    } catch (e) {
+                      console.log('DAY - Error parsing ISO timestamp, using default');
+                      timeStr = '09:00';
+                    }
+                  }
                   
                   // Se timeStr non è nel formato HH:MM, usa un default
                   if (!timeStr || !timeStr.includes(':') || timeStr.length > 5) {
@@ -878,7 +906,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                     console.log('DAY - Invalid minute, using default 0');
                   }
                   
-                  console.log('DAY - Parsed time:', startHour, ':', startMinute);
+                  console.log('DAY - Final parsed time:', startHour, ':', startMinute);
                   
                   // Calcola posizione solo per ore 8-19 (12 ore visibili)
                   if (startHour < 8 || startHour >= 20) {
