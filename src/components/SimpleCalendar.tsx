@@ -615,17 +615,24 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       />
                     ))}
 
-                    {/* DEBUG: Mostra eventi trovati */}
+                    {/* DEBUG: Mostra eventi e orari */}
                     <div style={{
                       position: 'absolute',
                       top: '5px',
                       left: '5px',
                       backgroundColor: 'yellow',
                       padding: '2px',
-                      fontSize: '9px',
-                      zIndex: 100
+                      fontSize: '8px',
+                      zIndex: 100,
+                      maxWidth: '60px',
+                      wordWrap: 'break-word'
                     }}>
-                      {dayEvents.length} eventi
+                      {dayEvents.length} eventi<br/>
+                      {dayEvents.map((e, i) => (
+                        <div key={i} style={{fontSize: '7px'}}>
+                          {e.title}: {JSON.stringify(e.time)}
+                        </div>
+                      ))}
                     </div>
 
                     {/* Eventi */}
@@ -823,17 +830,24 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                   />
                 ))}
 
-                {/* DEBUG: Mostra eventi trovati */}
+                {/* DEBUG: Mostra eventi e orari */}
                 <div style={{
                   position: 'absolute',
                   top: '5px',
                   left: '5px',
                   backgroundColor: 'yellow',
                   padding: '4px',
-                  fontSize: '11px',
-                  zIndex: 100
+                  fontSize: '10px',
+                  zIndex: 100,
+                  maxWidth: '120px',
+                  wordWrap: 'break-word'
                 }}>
-                  {getEventsForDate(currentDate).length} eventi oggi
+                  {getEventsForDate(currentDate).length} eventi oggi<br/>
+                  {getEventsForDate(currentDate).map((e, i) => (
+                    <div key={i} style={{fontSize: '8px', marginTop: '2px'}}>
+                      {e.title}: {JSON.stringify(e.time)}
+                    </div>
+                  ))}
                 </div>
 
                 {/* Eventi */}
