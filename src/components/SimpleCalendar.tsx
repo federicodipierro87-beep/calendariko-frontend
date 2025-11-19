@@ -615,6 +615,19 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       />
                     ))}
 
+                    {/* DEBUG: Mostra eventi trovati */}
+                    <div style={{
+                      position: 'absolute',
+                      top: '5px',
+                      left: '5px',
+                      backgroundColor: 'yellow',
+                      padding: '2px',
+                      fontSize: '9px',
+                      zIndex: 100
+                    }}>
+                      {dayEvents.length} eventi
+                    </div>
+
                     {/* Eventi */}
                     {dayEvents.map((event, eventIndex) => {
                       const timeStr = event.time || '09:00';
@@ -622,10 +635,28 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       const startHour = parseInt(hourStr) || 9;
                       const startMinute = parseInt(minuteStr) || 0;
                       
+                      console.log('Rendering event:', event.title, 'at', timeStr, 'hour:', startHour);
+                      
                       // Calcola posizione solo per ore 8-19 (12 ore visibili)
-                      if (startHour < 8 || startHour >= 20) return null;
+                      if (startHour < 8 || startHour >= 20) {
+                        console.log('Event outside time range:', startHour);
+                        return (
+                          <div key={`debug-${eventIndex}`} style={{
+                            position: 'absolute',
+                            top: '20px',
+                            left: '5px',
+                            backgroundColor: 'orange',
+                            padding: '2px',
+                            fontSize: '8px',
+                            zIndex: 101
+                          }}>
+                            {event.title} fuori orario ({startHour}:00)
+                          </div>
+                        );
+                      }
                       
                       const topPosition = ((startHour - 8) * 60) + startMinute;
+                      console.log('Event position:', topPosition);
 
                       let backgroundColor = '#8b5cf6';
                       if (event.type === 'availability-busy') backgroundColor = '#ef4444';
@@ -771,6 +802,19 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                   />
                 ))}
 
+                {/* DEBUG: Mostra eventi trovati */}
+                <div style={{
+                  position: 'absolute',
+                  top: '5px',
+                  left: '5px',
+                  backgroundColor: 'yellow',
+                  padding: '4px',
+                  fontSize: '11px',
+                  zIndex: 100
+                }}>
+                  {getEventsForDate(currentDate).length} eventi oggi
+                </div>
+
                 {/* Eventi */}
                 {getEventsForDate(currentDate).map((event, eventIndex) => {
                   const timeStr = event.time || '09:00';
@@ -778,10 +822,28 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                   const startHour = parseInt(hourStr) || 9;
                   const startMinute = parseInt(minuteStr) || 0;
                   
+                  console.log('DAY - Rendering event:', event.title, 'at', timeStr, 'hour:', startHour);
+                  
                   // Calcola posizione solo per ore 8-19 (12 ore visibili)
-                  if (startHour < 8 || startHour >= 20) return null;
+                  if (startHour < 8 || startHour >= 20) {
+                    console.log('DAY - Event outside time range:', startHour);
+                    return (
+                      <div key={`debug-day-${eventIndex}`} style={{
+                        position: 'absolute',
+                        top: '25px',
+                        left: '5px',
+                        backgroundColor: 'orange',
+                        padding: '2px',
+                        fontSize: '10px',
+                        zIndex: 101
+                      }}>
+                        {event.title} fuori orario ({startHour}:00)
+                      </div>
+                    );
+                  }
                   
                   const topPosition = ((startHour - 8) * 80) + (startMinute * 80 / 60);
+                  console.log('DAY - Event position:', topPosition);
 
                   let backgroundColor = '#8b5cf6';
                   if (event.type === 'availability-busy') backgroundColor = '#ef4444';
