@@ -13,12 +13,13 @@ interface Event {
 interface SimpleCalendarProps {
   events?: Event[];
   onDayClick?: (date: string) => void;
+  onEventClick?: (event: Event) => void;
   userRole?: string;
 }
 
 type CalendarView = 'month' | 'week' | 'day';
 
-const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick, userRole }) => {
+const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick, onEventClick, userRole }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState<CalendarView>('month');
 
@@ -96,6 +97,13 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
     if (onDayClick) {
       const clickedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       onDayClick(clickedDate);
+    }
+  };
+
+  const handleEventClick = (event: Event, e: React.MouseEvent) => {
+    e.stopPropagation(); // Previene il click sul giorno
+    if (onEventClick) {
+      onEventClick(event);
     }
   };
 
@@ -219,7 +227,6 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
             {/* Colonne giorni - Fixed content height */}
             {weekDates.map((date, dayIndex) => {
               const dayEvents = getEventsForDate(date);
-              console.log(`Week Day ${dayIndex}:`, date.toISOString().split('T')[0], 'Events:', dayEvents);
               
               return (
                 <div key={dayIndex} className="flex-1 border-r relative">
@@ -277,7 +284,6 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
   const renderDayView = () => {
     const hours = Array.from({ length: 24 }, (_, i) => i);
     const dayEvents = getEventsForDate(currentDate);
-    console.log('Day view events:', dayEvents);
 
     return (
       <>
@@ -395,7 +401,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
             {dayEvents.slice(0, 2).map((event, index) => (
               <div
                 key={event.id}
-                className="text-xs mb-1 px-1 py-0.5 rounded"
+                className="text-xs mb-1 px-1 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
                 style={{
                   backgroundColor: event.type === 'availability-busy' ? '#fee2e2' :
                                    event.type === 'availability' ? '#dcfce7' :
@@ -404,6 +410,8 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                          event.type === 'availability' ? '#166534' :
                          '#1e40af'
                 }}
+                onClick={(e) => handleEventClick(event, e)}
+                title={`Clicca per visualizzare dettagli: ${event.title}`}
               >
                 {event.type === 'availability-busy' ? 'Indisponibile' : event.title}
               </div>
@@ -560,7 +568,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
 
           {/* Griglia calendario */}
           <div style={{
-            height: '440px',
+            height: '700px',
             overflow: 'auto'
           }}>
             <div style={{
@@ -569,8 +577,8 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
             }}>
               {/* Colonna ore */}
               <div style={{borderRight: '1px solid #e5e7eb', backgroundColor: '#f8fafc'}}>
-                {Array.from({ length: 12 }, (_, hour) => (
-                  <div key={hour + 8} style={{
+                {Array.from({ length: 17 }, (_, hour) => (
+                  <div key={hour + 7} style={{
                     height: '60px',
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -581,7 +589,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                     fontSize: '11px',
                     color: '#6b7280'
                   }}>
-                    {(hour + 8).toString().padStart(2, '0')}:00
+                    {(hour + 7).toString().padStart(2, '0')}:00
                   </div>
                 ))}
               </div>
@@ -595,9 +603,9 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                     position: 'relative'
                   }}>
                     {/* Griglia ore */}
-                    {Array.from({ length: 12 }, (_, hour) => (
+                    {Array.from({ length: 17 }, (_, hour) => (
                       <div 
-                        key={hour + 8}
+                        key={hour + 7}
                         style={{
                           height: '60px',
                           borderBottom: '1px solid #e5e7eb',
@@ -615,33 +623,11 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       />
                     ))}
 
-                    {/* DEBUG: Mostra eventi e orari */}
-                    <div style={{
-                      position: 'absolute',
-                      top: '5px',
-                      left: '5px',
-                      backgroundColor: 'yellow',
-                      padding: '2px',
-                      fontSize: '8px',
-                      zIndex: 100,
-                      maxWidth: '60px',
-                      wordWrap: 'break-word'
-                    }}>
-                      {dayEvents.length} eventi<br/>
-                      {dayEvents.map((e, i) => (
-                        <div key={i} style={{fontSize: '7px'}}>
-                          {e.title}: {JSON.stringify(e.time)}
-                        </div>
-                      ))}
-                    </div>
 
                     {/* Eventi */}
                     {dayEvents.map((event, eventIndex) => {
                       // Fix per il parsing dell'orario con supporto ISO timestamps
                       let timeStr = event.time || '09:00';
-                      
-                      // Debug: mostra il valore raw
-                      console.log('Raw event time:', event.time, 'for event:', event.title);
                       
                       // Se è un timestamp ISO (contiene T), estrai solo l'orario
                       if (timeStr && timeStr.includes('T')) {
@@ -650,9 +636,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                           const hours = date.getHours().toString().padStart(2, '0');
                           const minutes = date.getMinutes().toString().padStart(2, '0');
                           timeStr = `${hours}:${minutes}`;
-                          console.log('Extracted time from ISO:', timeStr);
                         } catch (e) {
-                          console.log('Error parsing ISO timestamp, using default');
                           timeStr = '09:00';
                         }
                       }
@@ -660,7 +644,6 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       // Se timeStr non è nel formato HH:MM, usa un default
                       if (!timeStr || !timeStr.includes(':') || timeStr.length > 5) {
                         timeStr = '09:00';
-                        console.log('Invalid time format, using default:', timeStr);
                       }
                       
                       const [hourStr, minuteStr] = timeStr.split(':');
@@ -670,35 +653,17 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       // Validazione extra per ore valide
                       if (isNaN(startHour) || startHour < 0 || startHour > 23) {
                         startHour = 9;
-                        console.log('Invalid hour, using default 9');
                       }
                       if (isNaN(startMinute) || startMinute < 0 || startMinute > 59) {
                         startMinute = 0;
-                        console.log('Invalid minute, using default 0');
                       }
                       
-                      console.log('Final parsed time:', startHour, ':', startMinute);
-                      
-                      // Calcola posizione solo per ore 8-19 (12 ore visibili)
-                      if (startHour < 8 || startHour >= 20) {
-                        console.log('Event outside time range:', startHour);
-                        return (
-                          <div key={`debug-${eventIndex}`} style={{
-                            position: 'absolute',
-                            top: '20px',
-                            left: '5px',
-                            backgroundColor: 'orange',
-                            padding: '2px',
-                            fontSize: '8px',
-                            zIndex: 101
-                          }}>
-                            {event.title} fuori orario ({startHour}:00)
-                          </div>
-                        );
+                      // Calcola posizione solo per ore 7-23:30 (17 ore visibili)
+                      if (startHour < 7 || startHour >= 24) {
+                        return null;
                       }
                       
-                      const topPosition = ((startHour - 8) * 60) + startMinute;
-                      console.log('Event position:', topPosition);
+                      const topPosition = ((startHour - 7) * 60) + startMinute;
 
                       let backgroundColor = '#8b5cf6';
                       if (event.type === 'availability-busy') backgroundColor = '#ef4444';
@@ -724,7 +689,8 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                             overflow: 'hidden',
                             cursor: 'pointer'
                           }}
-                          title={`${event.title} - ${formatTime(event.time)}`}
+                          title={`Clicca per dettagli: ${event.title} - ${formatTime(event.time)}`}
+                          onClick={(e) => handleEventClick(event, e)}
                         >
                           <div style={{fontWeight: 'bold', lineHeight: '1.2'}}>
                             {event.type === 'availability-busy' ? 'Indisponibile' : event.title}
@@ -795,7 +761,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
 
           {/* Griglia calendario */}
           <div style={{
-            height: '440px',
+            height: '900px',
             overflow: 'auto'
           }}>
             <div style={{
@@ -804,8 +770,8 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
             }}>
               {/* Colonna ore */}
               <div style={{borderRight: '1px solid #e5e7eb', backgroundColor: '#f8fafc'}}>
-                {Array.from({ length: 12 }, (_, hour) => (
-                  <div key={hour + 8} style={{
+                {Array.from({ length: 17 }, (_, hour) => (
+                  <div key={hour + 7} style={{
                     height: '80px',
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -816,7 +782,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                     fontSize: '12px',
                     color: '#6b7280'
                   }}>
-                    {(hour + 8).toString().padStart(2, '0')}:00
+                    {(hour + 7).toString().padStart(2, '0')}:00
                   </div>
                 ))}
               </div>
@@ -824,9 +790,9 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
               {/* Colonna giorno */}
               <div style={{position: 'relative'}}>
                 {/* Griglia ore */}
-                {Array.from({ length: 12 }, (_, hour) => (
+                {Array.from({ length: 17 }, (_, hour) => (
                   <div 
-                    key={hour + 8}
+                    key={hour + 7}
                     style={{
                       height: '80px',
                       borderBottom: '1px solid #e5e7eb',
@@ -844,33 +810,11 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                   />
                 ))}
 
-                {/* DEBUG: Mostra eventi e orari */}
-                <div style={{
-                  position: 'absolute',
-                  top: '5px',
-                  left: '5px',
-                  backgroundColor: 'yellow',
-                  padding: '4px',
-                  fontSize: '10px',
-                  zIndex: 100,
-                  maxWidth: '120px',
-                  wordWrap: 'break-word'
-                }}>
-                  {getEventsForDate(currentDate).length} eventi oggi<br/>
-                  {getEventsForDate(currentDate).map((e, i) => (
-                    <div key={i} style={{fontSize: '8px', marginTop: '2px'}}>
-                      {e.title}: {JSON.stringify(e.time)}
-                    </div>
-                  ))}
-                </div>
 
                 {/* Eventi */}
                 {getEventsForDate(currentDate).map((event, eventIndex) => {
                   // Fix per il parsing dell'orario con supporto ISO timestamps
                   let timeStr = event.time || '09:00';
-                  
-                  // Debug: mostra il valore raw
-                  console.log('DAY - Raw event time:', event.time, 'for event:', event.title);
                   
                   // Se è un timestamp ISO (contiene T), estrai solo l'orario
                   if (timeStr && timeStr.includes('T')) {
@@ -879,9 +823,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       const hours = date.getHours().toString().padStart(2, '0');
                       const minutes = date.getMinutes().toString().padStart(2, '0');
                       timeStr = `${hours}:${minutes}`;
-                      console.log('DAY - Extracted time from ISO:', timeStr);
                     } catch (e) {
-                      console.log('DAY - Error parsing ISO timestamp, using default');
                       timeStr = '09:00';
                     }
                   }
@@ -889,7 +831,6 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                   // Se timeStr non è nel formato HH:MM, usa un default
                   if (!timeStr || !timeStr.includes(':') || timeStr.length > 5) {
                     timeStr = '09:00';
-                    console.log('DAY - Invalid time format, using default:', timeStr);
                   }
                   
                   const [hourStr, minuteStr] = timeStr.split(':');
@@ -899,35 +840,17 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                   // Validazione extra per ore valide
                   if (isNaN(startHour) || startHour < 0 || startHour > 23) {
                     startHour = 9;
-                    console.log('DAY - Invalid hour, using default 9');
                   }
                   if (isNaN(startMinute) || startMinute < 0 || startMinute > 59) {
                     startMinute = 0;
-                    console.log('DAY - Invalid minute, using default 0');
                   }
                   
-                  console.log('DAY - Final parsed time:', startHour, ':', startMinute);
-                  
-                  // Calcola posizione solo per ore 8-19 (12 ore visibili)
-                  if (startHour < 8 || startHour >= 20) {
-                    console.log('DAY - Event outside time range:', startHour);
-                    return (
-                      <div key={`debug-day-${eventIndex}`} style={{
-                        position: 'absolute',
-                        top: '25px',
-                        left: '5px',
-                        backgroundColor: 'orange',
-                        padding: '2px',
-                        fontSize: '10px',
-                        zIndex: 101
-                      }}>
-                        {event.title} fuori orario ({startHour}:00)
-                      </div>
-                    );
+                  // Calcola posizione solo per ore 7-23:30 (17 ore visibili)
+                  if (startHour < 7 || startHour >= 24) {
+                    return null;
                   }
                   
-                  const topPosition = ((startHour - 8) * 80) + (startMinute * 80 / 60);
-                  console.log('DAY - Event position:', topPosition);
+                  const topPosition = ((startHour - 7) * 80) + (startMinute * 80 / 60);
 
                   let backgroundColor = '#8b5cf6';
                   if (event.type === 'availability-busy') backgroundColor = '#ef4444';
@@ -953,7 +876,8 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                         overflow: 'hidden',
                         cursor: 'pointer'
                       }}
-                      title={`${event.title} - ${formatTime(event.time)}`}
+                      title={`Clicca per dettagli: ${event.title} - ${formatTime(event.time)}`}
+                      onClick={(e) => handleEventClick(event, e)}
                     >
                       <div style={{fontWeight: 'bold', lineHeight: '1.3', marginBottom: '4px'}}>
                         {event.type === 'availability-busy' ? 'Indisponibile' : event.title}
