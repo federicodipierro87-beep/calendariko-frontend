@@ -175,22 +175,31 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
     }
   };
 
-  const handleDeleteUser = async (userId: string, userName: string) => {
-    if (!confirm(`Sei sicuro di voler eliminare l'utente ${userName}? Questa azione non può essere annullata.`)) return;
+  const handleDeleteUserNotification = async (userId: string, userName: string) => {
+    if (!confirm(`Sei sicuro di voler eliminare la notifica per l'utente ${userName}?`)) return;
 
     try {
-      await usersApi.delete(userId);
-      
-      // Ricarica la lista degli utenti senza gruppo
-      await loadUsersWithoutGroup();
-      
-      // Aggiorna il contatore nel Dashboard
-      onNotificationsChange?.();
-      
-      alert(`L'utente ${userName} è stato eliminato con successo.`);
+      // Trova la notifica relativa a questo utente
+      const userNotification = notifications.find(
+        n => n.type === 'NEW_USER_REGISTRATION' && n.data?.newUserId === userId
+      );
+
+      if (userNotification) {
+        await notificationsApi.delete(userNotification.id);
+        
+        // Ricarica le notifiche
+        await loadNotifications();
+        
+        // Aggiorna il contatore nel Dashboard
+        onNotificationsChange?.();
+        
+        alert(`Notifica per ${userName} eliminata con successo.`);
+      } else {
+        alert(`Nessuna notifica trovata per ${userName}.`);
+      }
     } catch (error) {
-      console.error('Error deleting user:', error);
-      alert('Errore nell\'eliminazione dell\'utente');
+      console.error('Error deleting user notification:', error);
+      alert('Errore nell\'eliminazione della notifica');
     }
   };
 
@@ -263,10 +272,10 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
                       👥 Assegna a Gruppo
                     </button>
                     <button
-                      onClick={() => handleDeleteUser(user.id, `${user.first_name} ${user.last_name}`)}
+                      onClick={() => handleDeleteUserNotification(user.id, `${user.first_name} ${user.last_name}`)}
                       className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
                     >
-                      🗑️ Elimina
+                      🗑️ Elimina Notifica
                     </button>
                   </div>
                 </div>
