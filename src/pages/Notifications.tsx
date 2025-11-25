@@ -175,31 +175,20 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
     }
   };
 
-  const handleDeleteUserNotification = async (userId: string, userName: string) => {
-    if (!confirm(`Sei sicuro di voler eliminare la notifica per l'utente ${userName}?`)) return;
+  const handleRemoveUserFromList = async (userId: string, userName: string) => {
+    if (!confirm(`Sei sicuro di voler rimuovere ${userName} dalla lista degli utenti da assegnare?`)) return;
 
     try {
-      // Trova la notifica relativa a questo utente
-      const userNotification = notifications.find(
-        n => n.type === 'NEW_USER_REGISTRATION' && n.data?.newUserId === userId
-      );
-
-      if (userNotification) {
-        await notificationsApi.delete(userNotification.id);
-        
-        // Ricarica le notifiche
-        await loadNotifications();
-        
-        // Aggiorna il contatore nel Dashboard
-        onNotificationsChange?.();
-        
-        alert(`Notifica per ${userName} eliminata con successo.`);
-      } else {
-        alert(`Nessuna notifica trovata per ${userName}.`);
-      }
+      // Rimuovi l'utente dalla lista locale
+      setUsersWithoutGroup(prev => prev.filter(user => user.id !== userId));
+      
+      // Aggiorna il contatore nel Dashboard
+      onNotificationsChange?.();
+      
+      alert(`${userName} rimosso dalla lista con successo.`);
     } catch (error) {
-      console.error('Error deleting user notification:', error);
-      alert('Errore nell\'eliminazione della notifica');
+      console.error('Error removing user from list:', error);
+      alert('Errore nella rimozione dell\'utente dalla lista');
     }
   };
 
@@ -272,10 +261,10 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
                       👥 Assegna a Gruppo
                     </button>
                     <button
-                      onClick={() => handleDeleteUserNotification(user.id, `${user.firstName} ${user.lastName}`)}
+                      onClick={() => handleRemoveUserFromList(user.id, `${user.firstName} ${user.lastName}`)}
                       className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
                     >
-                      🗑️ Elimina Notifica
+                      ❌ Rimuovi dalla Lista
                     </button>
                   </div>
                 </div>
