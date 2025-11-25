@@ -7,6 +7,7 @@ import GroupDetailModal from '../components/GroupDetailModal';
 import AvailabilityModal from '../components/AvailabilityModal';
 import EditEventModal from '../components/EditEventModal';
 import EventDetailsModal from '../components/EventDetailsModal';
+import EditUserModal from '../components/EditUserModal';
 import Notifications from './Notifications';
 import { groupsApi, eventsApi, usersApi, availabilityApi, notificationsApi, adminApi } from '../utils/api';
 
@@ -41,6 +42,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const [showEventDetailsModal, setShowEventDetailsModal] = useState(false);
   const [selectedEventForDetails, setSelectedEventForDetails] = useState<any>(null);
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   
   // Export functionality
   const [exportOptions, setExportOptions] = useState({
@@ -441,6 +444,38 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     } catch (error: any) {
       console.error('Errore nello sblocco dell\'utente:', error);
       alert(`Errore nello sblocco dell'utente: ${error.message}`);
+    }
+  };
+
+  const handleEditUser = (userItem: any) => {
+    if (user.role !== 'ADMIN') {
+      alert('⚠️ Solo gli admin possono modificare gli utenti');
+      return;
+    }
+    
+    setSelectedUser(userItem);
+    setShowEditUserModal(true);
+  };
+
+  const handleSaveUserChanges = async (userData: any) => {
+    try {
+      console.log('💾 Salvando modifiche utente:', userData);
+      
+      // Chiama l'API per aggiornare l'utente
+      await usersApi.update(selectedUser.id, userData);
+      
+      // Ricarica la lista degli utenti
+      const updatedUsers = await usersApi.getAll();
+      setUsers(updatedUsers);
+      
+      // Chiudi il modal
+      setShowEditUserModal(false);
+      setSelectedUser(null);
+      
+      alert('✅ Dati utente aggiornati con successo!');
+    } catch (error: any) {
+      console.error('Errore nella modifica dell\'utente:', error);
+      alert(`Errore nel salvataggio: ${error.message}`);
     }
   };
 
@@ -1512,6 +1547,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
                             {/* Pulsanti sotto le informazioni - layout ottimizzato per mobile */}
                             <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                              {user.role === 'ADMIN' && (
+                                <button
+                                  onClick={() => handleEditUser(userItem)}
+                                  className="flex-1 min-w-[120px] px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors flex items-center justify-center gap-2"
+                                  title="Modifica dati utente"
+                                >
+                                  ✏️ Modifica
+                                </button>
+                              )}
                               {userItem.account_locked && (
                                 <button
                                   onClick={() => handleUnlockUser(userItem.id)}
@@ -1921,6 +1965,20 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           setSelectedEventForDetails(null);
         }}
       />
+
+      {/* Modal per modifica utenti */}
+      {selectedUser && (
+        <EditUserModal
+          isOpen={showEditUserModal}
+          onClose={() => {
+            setShowEditUserModal(false);
+            setSelectedUser(null);
+          }}
+          onSaveUser={handleSaveUserChanges}
+          user={selectedUser}
+          groups={groups}
+        />
+      )}
     </div>
   );
 };
