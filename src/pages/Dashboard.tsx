@@ -1159,9 +1159,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                                         group.type === 'BAND' ? 'bg-purple-100 text-purple-700' :
                                         group.type === 'DJ' ? 'bg-blue-100 text-blue-700' :
-                                        'bg-green-100 text-green-700'
+                                        'bg-gray-100 text-gray-700'
                                       }`}>
-                                        {group.type === 'BAND' ? 'Band' : group.type === 'DJ' ? 'DJ' : 'Solista'}
+                                        {group.type === 'BAND' ? 'Band' : 
+                                         group.type === 'DJ' ? 'DJ' : 
+                                         group.type ? group.type : 'Tipo non specificato'}
                                       </span>
                                       {group.genre && (
                                         <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
@@ -1765,7 +1767,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                             <div className="flex-1">
                               <div className="font-medium text-gray-900 text-base">{group.name}</div>
                               <div className="text-sm text-gray-600 mt-1">
-                                {group.type === 'BAND' ? '🎸 Band' : group.type === 'DJ' ? '🎧 DJ' : '🎤 Solista'} 
+                                {group.type === 'BAND' ? '🎸 Band' : 
+                                 group.type === 'DJ' ? '🎧 DJ' : 
+                                 group.type ? `🎤 ${group.type}` : '❓ Tipo non specificato'} 
                                 {group.genre && ` • ${group.genre}`}
                               </div>
                             </div>
