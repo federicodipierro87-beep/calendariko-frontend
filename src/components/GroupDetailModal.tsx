@@ -8,6 +8,7 @@ interface GroupDetailModalProps {
   group: any;
   currentUser: any;
   onGroupUpdated: () => void;
+  onEditGroup?: (group: any) => void;
 }
 
 const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
@@ -15,7 +16,8 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   onClose,
   group,
   currentUser,
-  onGroupUpdated
+  onGroupUpdated,
+  onEditGroup
 }) => {
   // Use body scroll lock when modal is open
   useBodyScrollLock(isOpen);
@@ -407,6 +409,14 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
         )}
 
         <div className="flex justify-end gap-3 mt-6">
+          {currentUser.role === 'ADMIN' && onEditGroup && (
+            <button
+              onClick={() => onEditGroup(group)}
+              className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              ✏️ Modifica Gruppo
+            </button>
+          )}
           <button
             onClick={onClose}
             className="bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"

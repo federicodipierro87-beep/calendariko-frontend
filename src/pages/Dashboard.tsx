@@ -8,6 +8,7 @@ import AvailabilityModal from '../components/AvailabilityModal';
 import EditEventModal from '../components/EditEventModal';
 import EventDetailsModal from '../components/EventDetailsModal';
 import EditUserModal from '../components/EditUserModal';
+import EditGroupModal from '../components/EditGroupModal';
 import Notifications from './Notifications';
 import { groupsApi, eventsApi, usersApi, availabilityApi, notificationsApi, adminApi } from '../utils/api';
 
@@ -44,6 +45,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [selectedEventForDetails, setSelectedEventForDetails] = useState<any>(null);
   const [showEditUserModal, setShowEditUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [showEditGroupModal, setShowEditGroupModal] = useState(false);
+  const [selectedGroupForEdit, setSelectedGroupForEdit] = useState<any>(null);
   
   // Export functionality
   const [exportOptions, setExportOptions] = useState({
@@ -490,6 +493,39 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       setGroups(updatedGroups);
     } catch (error) {
       console.error('Errore nel ricaricamento dei gruppi:', error);
+    }
+  };
+
+  const handleEditGroup = (group: any) => {
+    if (user.role !== 'ADMIN') {
+      alert('⚠️ Solo gli admin possono modificare i gruppi');
+      return;
+    }
+    
+    setSelectedGroupForEdit(group);
+    setShowEditGroupModal(true);
+    setShowGroupDetailModal(false); // Chiudi il modal dettagli
+  };
+
+  const handleSaveGroupChanges = async (groupData: any) => {
+    try {
+      console.log('💾 Salvando modifiche gruppo:', groupData);
+      
+      // Chiama l'API per aggiornare il gruppo
+      await groupsApi.update(selectedGroupForEdit.id, groupData);
+      
+      // Ricarica la lista dei gruppi
+      const updatedGroups = await groupsApi.getAll();
+      setGroups(updatedGroups);
+      
+      // Chiudi il modal
+      setShowEditGroupModal(false);
+      setSelectedGroupForEdit(null);
+      
+      alert('✅ Gruppo aggiornato con successo!');
+    } catch (error: any) {
+      console.error('Errore nella modifica del gruppo:', error);
+      alert(`Errore nel salvataggio: ${error.message}`);
     }
   };
 
@@ -1855,6 +1891,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         group={selectedGroup}
         currentUser={user}
         onGroupUpdated={handleGroupUpdated}
+        onEditGroup={handleEditGroup}
       />
 
       <AvailabilityModal
@@ -1983,6 +2020,19 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           onSaveUser={handleSaveUserChanges}
           user={selectedUser}
           groups={groups}
+        />
+      )}
+
+      {/* Modal per modifica gruppi */}
+      {selectedGroupForEdit && (
+        <EditGroupModal
+          isOpen={showEditGroupModal}
+          onClose={() => {
+            setShowEditGroupModal(false);
+            setSelectedGroupForEdit(null);
+          }}
+          onSaveGroup={handleSaveGroupChanges}
+          group={selectedGroupForEdit}
         />
       )}
     </div>

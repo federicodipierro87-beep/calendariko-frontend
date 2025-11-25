@@ -131,6 +131,10 @@ export const groupsApi = {
   leaveGroup: (groupId: string) => apiCall(`/groups/${groupId}/leave`, {
     method: 'DELETE',
   }),
+  update: (groupId: string, groupData: any) => apiCall(`/groups/${groupId}`, {
+    method: 'PUT',
+    body: JSON.stringify(groupData),
+  }),
   delete: (groupId: string) => apiCall(`/groups/${groupId}`, {
     method: 'DELETE',
   }),
