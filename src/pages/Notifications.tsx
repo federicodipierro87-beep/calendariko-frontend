@@ -27,9 +27,23 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
   const [assigning, setAssigning] = useState(false);
   const [usersWithGroups, setUsersWithGroups] = useState<Set<string>>(new Set());
   const [usersWithoutGroup, setUsersWithoutGroup] = useState<any[]>([]);
+  const [hiddenUsers, setHiddenUsers] = useState<Set<string>>(new Set());
 
   // Use body scroll lock when modal is open
   useBodyScrollLock(showAssignModal);
+
+  // Carica la lista degli utenti nascosti dal localStorage
+  useEffect(() => {
+    const savedHiddenUsers = localStorage.getItem('hiddenUsersFromNotifications');
+    if (savedHiddenUsers) {
+      try {
+        const hiddenUserIds = JSON.parse(savedHiddenUsers);
+        setHiddenUsers(new Set(hiddenUserIds));
+      } catch (error) {
+        console.error('Error parsing hidden users from localStorage:', error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     loadNotifications();
@@ -37,6 +51,13 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
     loadUsersWithGroups();
     loadUsersWithoutGroup();
   }, []);
+
+  // Ricarica gli utenti quando cambia la lista degli utenti nascosti
+  useEffect(() => {
+    if (hiddenUsers.size >= 0) { // Sempre vero, ma assicura che hiddenUsers sia stato inizializzato
+      loadUsersWithoutGroup();
+    }
+  }, [hiddenUsers]);
 
   const loadNotifications = async () => {
     try {
@@ -81,7 +102,9 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
   const loadUsersWithoutGroup = async () => {
     try {
       const data = await usersApi.getUsersWithoutGroup();
-      setUsersWithoutGroup(data);
+      // Filtra gli utenti nascosti
+      const filteredData = data.filter((user: any) => !hiddenUsers.has(user.id));
+      setUsersWithoutGroup(filteredData);
     } catch (error) {
       console.error('Error loading users without group:', error);
     }
@@ -179,6 +202,13 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
     if (!confirm(`Sei sicuro di voler rimuovere ${userName} dalla lista degli utenti da assegnare?`)) return;
 
     try {
+      // Aggiungi l'utente alla lista degli utenti nascosti
+      const newHiddenUsers = new Set([...hiddenUsers, userId]);
+      setHiddenUsers(newHiddenUsers);
+      
+      // Salva nel localStorage
+      localStorage.setItem('hiddenUsersFromNotifications', JSON.stringify([...newHiddenUsers]));
+      
       // Rimuovi l'utente dalla lista locale
       setUsersWithoutGroup(prev => prev.filter(user => user.id !== userId));
       
@@ -232,17 +262,44 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
       )}
 
       {/* Sezione Utenti da Assegnare */}
-      {usersWithoutGroup.length > 0 && (
+      {(usersWithoutGroup.length > 0 || hiddenUsers.size > 0) && (
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            👤 Utenti da Assegnare ai Gruppi
-            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-              {usersWithoutGroup.length}
-            </span>
-          </h2>
-          <div className="space-y-3">
-            {usersWithoutGroup.map(user => (
-              <div key={user.id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              👤 Utenti da Assegnare ai Gruppi
+              {usersWithoutGroup.length > 0 && (
+                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                  {usersWithoutGroup.length}
+                </span>
+              )}
+            </h2>
+            {hiddenUsers.size > 0 && (
+              <button
+                onClick={() => {
+                  if (confirm(`Vuoi ripristinare ${hiddenUsers.size} utenti nascosti nella lista?`)) {
+                    setHiddenUsers(new Set());
+                    localStorage.removeItem('hiddenUsersFromNotifications');
+                  }
+                }}
+                className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 transition-colors"
+              >
+                🔄 Ripristina {hiddenUsers.size} nascosti
+              </button>
+            )}
+          </div>
+          {usersWithoutGroup.length === 0 && hiddenUsers.size > 0 ? (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center text-gray-600">
+              <p className="text-sm">
+                Tutti gli utenti sono stati nascosti dalla lista ({hiddenUsers.size} nascosti).
+              </p>
+              <p className="text-xs mt-1 text-gray-500">
+                Usa il pulsante "Ripristina" per mostrarli nuovamente.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {usersWithoutGroup.map(user => (
+                <div key={user.id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-gray-900 text-lg">
@@ -275,7 +332,8 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
