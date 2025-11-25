@@ -175,6 +175,25 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
     }
   };
 
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`Sei sicuro di voler eliminare l'utente ${userName}? Questa azione non può essere annullata.`)) return;
+
+    try {
+      await usersApi.delete(userId);
+      
+      // Ricarica la lista degli utenti senza gruppo
+      await loadUsersWithoutGroup();
+      
+      // Aggiorna il contatore nel Dashboard
+      onNotificationsChange?.();
+      
+      alert(`L'utente ${userName} è stato eliminato con successo.`);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Errore nell\'eliminazione dell\'utente');
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString('it-IT', {
@@ -236,12 +255,20 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
                       Ruolo: {user.role} • Creato: {formatDate(user.createdAt || user.created_at)}
                     </div>
                   </div>
-                  <button
-                    onClick={() => openAssignModalForUser(user)}
-                    className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
-                  >
-                    👥 Assegna a Gruppo
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      onClick={() => openAssignModalForUser(user)}
+                      className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                    >
+                      👥 Assegna a Gruppo
+                    </button>
+                    <button
+                      onClick={() => handleDeleteUser(user.id, `${user.first_name} ${user.last_name}`)}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+                    >
+                      🗑️ Elimina
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
