@@ -573,7 +573,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       telefono: user.phone || '',
       ruolo: user.role,
       stato: user.is_locked ? 'Bloccato' : 'Attivo',
-      data_creazione: user.created_at ? new Date(user.created_at).toLocaleDateString('it-IT') : ''
+      data_creazione: user.createdAt || user.created_at ? new Date(user.createdAt || user.created_at).toLocaleDateString('it-IT') : ''
     }));
     
     const csv = convertToCSV(userData, headers);
@@ -1526,7 +1526,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
                               {/* Data creazione */}
                               <div className="text-sm text-gray-500">
-                                📅 Creato: {new Date(userItem.created_at).toLocaleDateString('it-IT')}
+                                📅 Creato: {userItem.createdAt || userItem.created_at ? 
+                                  new Date(userItem.createdAt || userItem.created_at).toLocaleDateString('it-IT') : 
+                                  'Data non disponibile'}
                               </div>
 
                               {/* Informazioni di sicurezza */}
