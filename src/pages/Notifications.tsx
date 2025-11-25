@@ -166,7 +166,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
       // Aggiorna il contatore nel Dashboard (importante: la notifica è stata marcata come letta dal backend)
       onNotificationsChange?.();
       
-      alert(`${selectedUser.first_name} ${selectedUser.last_name} è stato aggiunto al gruppo!`);
+      alert(`${selectedUser.firstName} ${selectedUser.lastName} è stato aggiunto al gruppo!`);
     } catch (error) {
       console.error('Error assigning user to group:', error);
       alert('Errore nell\'assegnazione al gruppo');
@@ -257,7 +257,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   <div className="flex-1">
                     <div className="font-medium text-gray-900">
-                      {user.first_name} {user.last_name}
+                      {user.firstName} {user.lastName}
                     </div>
                     <div className="text-sm text-gray-600">{user.email}</div>
                     <div className="text-xs text-gray-500 mt-1">
@@ -272,7 +272,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
                       👥 Assegna a Gruppo
                     </button>
                     <button
-                      onClick={() => handleDeleteUserNotification(user.id, `${user.first_name} ${user.last_name}`)}
+                      onClick={() => handleDeleteUserNotification(user.id, `${user.firstName} ${user.lastName}`)}
                       className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
                     >
                       🗑️ Elimina Notifica
@@ -383,7 +383,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="space-y-2">
                   <h4 className="font-medium text-blue-900">
-                    {selectedUser.first_name} {selectedUser.last_name}
+                    {selectedUser.firstName} {selectedUser.lastName}
                   </h4>
                   <p className="text-sm text-blue-700">
                     📧 {selectedUser.email}
