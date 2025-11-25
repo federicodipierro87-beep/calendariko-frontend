@@ -1226,26 +1226,38 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                     )}
                                   </div>
 
-                                  {/* Pulsanti sotto il nome - layout ottimizzato per mobile */}
-                                  <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                                  {/* Pulsanti con layout ottimizzato per desktop */}
+                                  <div className="flex flex-col sm:flex-row gap-2 lg:gap-3 pt-2 border-t border-gray-100 lg:justify-start">
                                     <button
                                       onClick={() => handleGroupClick(group)}
-                                      className="flex-1 min-w-[120px] px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors flex items-center justify-center gap-2"
+                                      className="flex-1 sm:flex-initial px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors flex items-center justify-center gap-2 lg:min-w-[120px] lg:max-w-[150px]"
                                       title="Visualizza dettagli gruppo"
                                     >
                                       👁️ Visualizza
                                     </button>
                                     {user.role === 'ADMIN' && (
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleDeleteGroup(group.id, group.name);
-                                        }}
-                                        className="flex-1 min-w-[120px] px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center justify-center gap-2"
-                                        title="Elimina gruppo"
-                                      >
-                                        🗑️ Elimina
-                                      </button>
+                                      <>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleEditGroup(group);
+                                          }}
+                                          className="flex-1 sm:flex-initial px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-200 transition-colors flex items-center justify-center gap-2 lg:min-w-[120px] lg:max-w-[150px]"
+                                          title="Modifica gruppo"
+                                        >
+                                          ✏️ Modifica
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteGroup(group.id, group.name);
+                                          }}
+                                          className="flex-1 sm:flex-initial px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center justify-center gap-2 lg:min-w-[120px] lg:max-w-[150px]"
+                                          title="Elimina gruppo"
+                                        >
+                                          🗑️ Elimina
+                                        </button>
+                                      </>
                                     )}
                                   </div>
                                 </div>
@@ -1523,9 +1535,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                 userItem.account_locked ? 'bg-red-50 border-red-200 hover:bg-red-100' : 'bg-white border-gray-200 hover:bg-gray-50'
                               }`}
                             >
-                          {/* Layout ottimizzato per mobile */}
+                          {/* Layout ottimizzato per desktop e mobile */}
                           <div className="space-y-3">
-                            {/* Nome utente più grande e prominente - come nei gruppi */}
+                            {/* Nome utente più grande e prominente */}
                             <div>
                               <h5 className="font-semibold text-lg text-gray-900 mb-2">{userItem.first_name} {userItem.last_name}</h5>
                               
@@ -1585,12 +1597,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                               )}
                             </div>
 
-                            {/* Pulsanti sotto le informazioni - layout ottimizzato per mobile */}
-                            <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                            {/* Pulsanti con layout ottimizzato per desktop */}
+                            <div className="flex flex-col sm:flex-row gap-2 lg:gap-3 pt-2 border-t border-gray-100 lg:justify-start">
                               {user.role === 'ADMIN' && (
                                 <button
                                   onClick={() => handleEditUser(userItem)}
-                                  className="flex-1 min-w-[120px] px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors flex items-center justify-center gap-2"
+                                  className="flex-1 sm:flex-initial px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors flex items-center justify-center gap-2 lg:min-w-[120px] lg:max-w-[150px]"
                                   title="Modifica dati utente"
                                 >
                                   ✏️ Modifica
@@ -1599,7 +1611,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                               {userItem.account_locked && (
                                 <button
                                   onClick={() => handleUnlockUser(userItem.id)}
-                                  className="flex-1 min-w-[120px] px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors flex items-center justify-center gap-2"
+                                  className="flex-1 sm:flex-initial px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors flex items-center justify-center gap-2 lg:min-w-[120px] lg:max-w-[150px]"
                                   title="Sblocca utente"
                                 >
                                   🔓 Sblocca
@@ -1608,7 +1620,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                               {userItem.id !== user.id && (
                                 <button
                                   onClick={() => handleDeleteUser(userItem.id)}
-                                  className="flex-1 min-w-[120px] px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center justify-center gap-2"
+                                  className="flex-1 sm:flex-initial px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center justify-center gap-2 lg:min-w-[120px] lg:max-w-[150px]"
                                   title="Elimina utente"
                                 >
                                   🗑️ Elimina

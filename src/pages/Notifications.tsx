@@ -243,26 +243,31 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
           <div className="space-y-3">
             {usersWithoutGroup.map(user => (
               <div key={user.id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 text-lg">
                       {user.firstName} {user.lastName}
                     </div>
-                    <div className="text-sm text-gray-600">{user.email}</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      Ruolo: {user.role} • Creato: {formatDate(user.createdAt || user.created_at)}
+                    <div className="text-sm text-gray-600 mt-1">{user.email}</div>
+                    <div className="text-xs text-gray-500 mt-2 flex flex-wrap items-center gap-2">
+                      <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
+                        👤 {user.role}
+                      </span>
+                      <span className="text-gray-500">
+                        📅 {formatDate(user.createdAt || user.created_at)}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex flex-col sm:flex-row lg:flex-row gap-2 lg:gap-3 lg:shrink-0">
                     <button
                       onClick={() => openAssignModalForUser(user)}
-                      className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                      className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2 lg:min-w-[140px]"
                     >
                       👥 Assegna a Gruppo
                     </button>
                     <button
                       onClick={() => handleRemoveUserFromList(user.id, `${user.firstName} ${user.lastName}`)}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors flex items-center justify-center gap-2 lg:min-w-[140px]"
                     >
                       ❌ Rimuovi dalla Lista
                     </button>
