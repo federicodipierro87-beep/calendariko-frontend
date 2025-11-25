@@ -26,6 +26,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
   const [selectedGroupId, setSelectedGroupId] = useState<string>('');
   const [assigning, setAssigning] = useState(false);
   const [usersWithGroups, setUsersWithGroups] = useState<Set<string>>(new Set());
+  const [usersWithoutGroup, setUsersWithoutGroup] = useState<any[]>([]);
 
   // Use body scroll lock when modal is open
   useBodyScrollLock(showAssignModal);
@@ -34,6 +35,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
     loadNotifications();
     loadGroups();
     loadUsersWithGroups();
+    loadUsersWithoutGroup();
   }, []);
 
   const loadNotifications = async () => {
@@ -73,6 +75,15 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
       setUsersWithGroups(usersInGroups);
     } catch (error) {
       console.error('Error loading users with groups:', error);
+    }
+  };
+
+  const loadUsersWithoutGroup = async () => {
+    try {
+      const data = await usersApi.getUsersWithoutGroup();
+      setUsersWithoutGroup(data);
+    } catch (error) {
+      console.error('Error loading users without group:', error);
     }
   };
 
@@ -143,7 +154,8 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
       // Ricarica le notifiche e la lista degli utenti con gruppi
       await Promise.all([
         loadNotifications(),
-        loadUsersWithGroups()
+        loadUsersWithGroups(),
+        loadUsersWithoutGroup()
       ]);
       
       // Aggiorna il contatore nel Dashboard (importante: la notifica è stata marcata come letta dal backend)
@@ -196,6 +208,46 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
           {error}
         </div>
       )}
+
+      {/* Sezione Utenti da Assegnare */}
+      {usersWithoutGroup.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            👤 Utenti da Assegnare ai Gruppi
+            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+              {usersWithoutGroup.length}
+            </span>
+          </h2>
+          <div className="space-y-3">
+            {usersWithoutGroup.map(user => (
+              <div key={user.id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">
+                      {user.first_name} {user.last_name}
+                    </div>
+                    <div className="text-sm text-gray-600">{user.email}</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Ruolo: {user.role} • Creato: {formatDate(user.createdAt || user.created_at)}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => openAssignModal({ data: user })}
+                    className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                  >
+                    👥 Assegna a Gruppo
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Sezione Notifiche */}
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">📬 Notifiche di Sistema</h2>
+      </div>
 
       {notifications.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
