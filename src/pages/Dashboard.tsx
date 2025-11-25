@@ -72,17 +72,21 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         const transformedEvents = eventsData.map((event: any) => ({
           id: event.id,
           title: event.title,
-          date: event.date ? event.date.split('T')[0] : '', // Estrae solo la data con controllo
-          time: event.start_time || '',
-          endTime: event.end_time || '',               // AGGIUNTO: mappa end_time a endTime
-          type: event.event_type || 'event',
-          venue: event.venue_name || '',
-          notes: event.notes || '',
-          contact_responsible: event.contact_responsible || '',  // AGGIUNTO: mappa contact_responsible
-          group_id: event.group_id,
+          date: event.startTime ? event.startTime.split('T')[0] : '', // Estrae data da startTime
+          time: event.startTime ? event.startTime.split('T')[1].substring(0, 5) : '', // Estrae orario da startTime
+          endTime: event.endTime ? event.endTime.split('T')[1].substring(0, 5) : '', // Estrae orario da endTime
+          type: event.description || 'event',
+          venue: event.location || '',
+          notes: event.description || '',
+          contact_responsible: event.contact_responsible || '',
+          group_id: event.groupId,
           group: event.group,
           fee: event.fee || 0
         }));
+        
+        console.log('📥 Eventi ricevuti dal backend:', eventsData.length, eventsData);
+        console.log('✅ Eventi trasformati per il calendario:', transformedEvents.length, transformedEvents);
+        setEvents(transformedEvents);
         
         // Carica gruppi
         const groupsData = await groupsApi.getAll();
