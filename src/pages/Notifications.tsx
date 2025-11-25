@@ -139,6 +139,11 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
     }
   };
 
+  const openAssignModalForUser = (user: any) => {
+    setSelectedUser(user);
+    setShowAssignModal(true);
+  };
+
   const handleAssignToGroup = async () => {
     if (!selectedUser || !selectedGroupId) return;
 
@@ -232,7 +237,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
                     </div>
                   </div>
                   <button
-                    onClick={() => openAssignModal({ data: user })}
+                    onClick={() => openAssignModalForUser(user)}
                     className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
                   >
                     👥 Assegna a Gruppo
