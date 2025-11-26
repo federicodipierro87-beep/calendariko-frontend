@@ -191,13 +191,6 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
       
       alert(`${selectedUser.firstName} ${selectedUser.lastName} è stato aggiunto al gruppo!`);
     } catch (error: any) {
-      console.error('Error assigning user to group:', error);
-      console.log('Error details:', {
-        message: error?.message,
-        responseData: error?.response?.data,
-        responseDataMessage: error?.response?.data?.message
-      });
-      
       // Se l'utente è già membro del gruppo, rimuovilo dalla lista
       const errorMessage = error?.message || error?.response?.data?.message || '';
       if (errorMessage.includes('Utente già membro del gruppo')) {
@@ -243,6 +236,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
         alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro di un gruppo. Rimosso dalla lista.`);
       
       } else {
+        console.error('Error assigning user to group:', error);
         alert('Errore nell\'assegnazione al gruppo');
       }
     } finally {
