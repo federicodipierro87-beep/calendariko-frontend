@@ -4,13 +4,19 @@ import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 interface Event {
   id: string;
   title: string;
+  description?: string;
+  startTime?: string | Date;
+  endTime?: string | Date;
+  location?: string;
+  groupId?: string;
+  // Campi legacy per compatibilità
   event_type?: string;
-  date: string;
-  start_time: string;
-  end_time: string;
-  venue_name: string;
+  date?: string;
+  start_time?: string;
+  end_time?: string;
+  venue_name?: string;
   venue_address?: string;
-  venue_city: string;
+  venue_city?: string;
   group_id?: string;
   fee?: number;
   status?: string;
@@ -42,6 +48,43 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   // Use body scroll lock when modal is open
   useBodyScrollLock(isOpen);
 
+  // Funzione helper per estrarre data
+  const getDatePart = (dateStr: string | Date) => {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date:', dateStr);
+        return '';
+      }
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      console.error('Error parsing date:', dateStr, error);
+      return '';
+    }
+  };
+
+  // Funzione helper per estrarre tempo  
+  const getTimePart = (dateStr: string | Date | undefined | null) => {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date for time extraction:', dateStr);
+        return '';
+      }
+      // Usa toLocaleTimeString per formattazione più sicura
+      return date.toLocaleTimeString('it-IT', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false 
+      });
+    } catch (error) {
+      console.error('Error parsing time from date:', dateStr, error);
+      return '';
+    }
+  };
+
   const [formData, setFormData] = useState({
     title: '',
     type: 'rehearsal',
@@ -60,32 +103,18 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
       console.log('EditEventModal - Event data received:', event);
       console.log('EditEventModal - Available fields:', Object.keys(event));
       
-      // Funzione helper per estrarre data
-      const getDatePart = (dateStr: string | Date) => {
-        if (!dateStr) return '';
-        const date = new Date(dateStr);
-        return date.toISOString().split('T')[0];
-      };
-      
-      // Funzione helper per estrarre tempo
-      const getTimePart = (dateStr: string | Date) => {
-        if (!dateStr) return '';
-        const date = new Date(dateStr);
-        return date.toTimeString().substring(0, 5);
-      };
-      
       // Cast per bypassare TypeScript e accedere ai campi dinamicamente
       const eventData = event as any;
       
       const newFormData = {
         title: eventData.title || '',
-        type: eventData.type || eventData.event_type || 'rehearsal',
-        time: getTimePart(eventData.time || eventData.start_time),
+        type: eventData.description || eventData.type || eventData.event_type || 'rehearsal',
+        time: getTimePart(eventData.startTime || eventData.start_time),
         endTime: getTimePart(eventData.endTime || eventData.end_time),
-        venue: eventData.venue || eventData.venue_name || '',
-        group_id: eventData.group_id || '',
+        venue: eventData.location || eventData.venue || eventData.venue_name || '',
+        group_id: eventData.groupId || eventData.group_id || '',
         fee: eventData.fee?.toString() || '',
-        notes: eventData.notes || '',
+        notes: eventData.notes || eventData.description || '',
         contact_responsible: eventData.contact_responsible || ''
       };
       
@@ -107,17 +136,28 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Costruisci l'oggetto con le modifiche mappando ai nomi API corretti
+    // Ottieni la data dall'evento esistente o usa oggi se non disponibile
+    const eventDate = getDatePart(event.startTime || event.date || new Date());
+    
+    // Costruisci DateTime completi per i nuovi campi API
+    const startDateTime = eventDate && formData.time ? `${eventDate}T${formData.time}:00` : undefined;
+    const endDateTime = eventDate && formData.endTime ? `${eventDate}T${formData.endTime}:00` : undefined;
+    
+    // Costruisci l'oggetto con le modifiche per la nuova API Prisma
     const eventUpdates = {
       id: event.id,
       title: formData.title,
-      event_type: formData.type,           // Mappa 'type' a 'event_type'
-      date: event.date,                    // Usa la data originale dell'evento (non modificabile nel modal di modifica)
-      start_time: formData.time,           // Mappa 'time' a 'start_time' 
-      end_time: formData.endTime,          // Mappa 'endTime' a 'end_time'
-      venue_name: formData.venue,          // Mappa 'venue' a 'venue_name'
-      venue_address: '',                   // Campi non presenti nel modal semplificato
-      venue_city: 'Milano',                // Default
+      description: formData.notes || formData.type,
+      startTime: startDateTime,
+      endTime: endDateTime, 
+      location: formData.venue,
+      groupId: formData.group_id || undefined,
+      // Mantieni i campi legacy per compatibilità
+      event_type: formData.type,
+      date: eventDate,
+      start_time: formData.time,
+      end_time: formData.endTime,
+      venue_name: formData.venue,
       group_id: formData.group_id,
       fee: formData.fee ? parseFloat(formData.fee) : undefined,
       notes: formData.notes,
