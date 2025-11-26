@@ -206,7 +206,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
           // Ricarica le notifiche per aggiornare la lista
           await loadNotifications();
           
-          alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro di un gruppo. Notifiche eliminate definitivamente.`);
+          alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro di questo gruppo. Notifiche eliminate definitivamente.`);
         } catch (notificationError) {
           console.log('Error deleting registration notifications:', notificationError);
           alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro di un gruppo, ma errore nell'eliminazione delle notifiche.`);

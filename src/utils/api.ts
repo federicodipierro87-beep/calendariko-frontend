@@ -188,7 +188,10 @@ export const usersApi = {
   unlock: (id: string) => apiCall(`/users/${id}/unlock`, {
     method: 'POST',
   }),
-  getUsersWithoutGroup: () => apiCall('/users/without-group'),
+  getUsersWithoutGroup: (excludeGroupId?: string) => {
+    const params = excludeGroupId ? `?excludeGroupId=${excludeGroupId}` : '';
+    return apiCall(`/users/without-group${params}`);
+  },
 };
 
 export const availabilityApi = {
