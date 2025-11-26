@@ -67,6 +67,12 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   // Funzione helper per estrarre tempo  
   const getTimePart = (dateStr: string | Date | undefined | null) => {
     if (!dateStr) return '';
+    
+    // Se è già una stringa in formato HH:MM, usala direttamente
+    if (typeof dateStr === 'string' && /^\d{2}:\d{2}$/.test(dateStr)) {
+      return dateStr;
+    }
+    
     try {
       const date = new Date(dateStr);
       if (isNaN(date.getTime())) {
@@ -109,8 +115,8 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
       const newFormData = {
         title: eventData.title || '',
         type: eventData.description || eventData.type || eventData.event_type || 'rehearsal',
-        time: getTimePart(eventData.startTime || eventData.start_time),
-        endTime: getTimePart(eventData.endTime || eventData.end_time),
+        time: getTimePart(eventData.startTime || eventData.start_time || eventData.time),
+        endTime: getTimePart(eventData.endTime || eventData.end_time || eventData.endTime),
         venue: eventData.location || eventData.venue || eventData.venue_name || '',
         group_id: eventData.groupId || eventData.group_id || '',
         fee: eventData.fee?.toString() || '',
