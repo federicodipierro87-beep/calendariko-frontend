@@ -198,64 +198,50 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
         responseDataMessage: error?.response?.data?.message
       });
       
-      // Se l'utente è già membro del gruppo, elimina la notifica correlata
+      // Se l'utente è già membro del gruppo, rimuovilo dalla lista
       const errorMessage = error?.message || error?.response?.data?.message || '';
       if (errorMessage.includes('Utente già membro del gruppo')) {
         
-        console.log('Detected user already in group error');
-        console.log('Selected user:', selectedUser);
+        console.log('User already in group - removing from list');
         
+        // Rimuovi l'utente dalla lista locale immediatamente
+        setUsersWithoutGroup(prev => prev.filter(user => user.id !== selectedUser.id));
+        
+        // Aggiungi l'utente alla lista degli utenti nascosti per non farlo riapparire
+        const newHiddenUsers = new Set([...hiddenUsers, selectedUser.id]);
+        setHiddenUsers(newHiddenUsers);
+        localStorage.setItem('hiddenUsersFromNotifications', JSON.stringify([...newHiddenUsers]));
+        
+        // Prova a eliminare eventuali notifiche correlate (se esistono)
         try {
-          // Ricarica tutte le notifiche dal backend per essere sicuri di avere i dati aggiornati
-          console.log('Reloading notifications from backend to find related notification...');
           const freshNotifications = await notificationsApi.getAll();
-          console.log('Fresh notifications from backend:', freshNotifications);
-          
-          // Trova la notifica correlata a questo utente nelle notifiche fresche
           const relatedNotification = freshNotifications.find((n: Notification) => 
             n.type === 'NEW_USER_REGISTRATION' && n.data?.newUserId === selectedUser.id
           );
           
-          console.log('Found related notification:', relatedNotification);
-          
           if (relatedNotification) {
-            try {
-              console.log('Attempting to delete notification:', relatedNotification.id);
-              await notificationsApi.delete(relatedNotification.id);
-              
-              // Aggiorna lo stato locale rimuovendo la notifica eliminata
-              setNotifications(prev => prev.filter(n => n.id !== relatedNotification.id));
-              
-              // Chiudi modal
-              setShowAssignModal(false);
-              setSelectedUser(null);
-              setSelectedGroupId('');
-              
-              // Ricarica le notifiche per essere sicuri
-              await loadNotifications();
-              
-              // Aggiorna il contatore nel Dashboard
-              onNotificationsChange?.();
-              
-              alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro del gruppo. La notifica è stata eliminata.`);
-            } catch (deleteError) {
-              console.error('Error deleting notification:', deleteError);
-              alert('L\'utente è già membro del gruppo, ma non è stato possibile eliminare la notifica.');
-            }
-          } else {
-            console.log('No related notification found for user:', selectedUser.id);
-            alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro del gruppo. Nessuna notifica correlata trovata.`);
-            setShowAssignModal(false);
-            setSelectedUser(null);
-            setSelectedGroupId('');
+            console.log('Found and deleting related notification:', relatedNotification.id);
+            await notificationsApi.delete(relatedNotification.id);
+            setNotifications(prev => prev.filter(n => n.id !== relatedNotification.id));
+            await loadNotifications();
           }
-        } catch (reloadError) {
-          console.error('Error reloading notifications:', reloadError);
-          alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro del gruppo, ma non è stato possibile verificare/eliminare la notifica.`);
-          setShowAssignModal(false);
-          setSelectedUser(null);
-          setSelectedGroupId('');
+        } catch (notificationError) {
+          console.log('No notification to delete or error deleting:', notificationError);
         }
+        
+        // Aggiorna lo stato degli utenti con gruppi
+        await loadUsersWithGroups();
+        
+        // Chiudi modal
+        setShowAssignModal(false);
+        setSelectedUser(null);
+        setSelectedGroupId('');
+        
+        // Aggiorna il contatore nel Dashboard
+        onNotificationsChange?.();
+        
+        alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro di un gruppo. Rimosso dalla lista.`);
+      
       } else {
         alert('Errore nell\'assegnazione al gruppo');
       }
