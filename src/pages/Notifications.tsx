@@ -192,18 +192,30 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
       alert(`${selectedUser.firstName} ${selectedUser.lastName} è stato aggiunto al gruppo!`);
     } catch (error: any) {
       console.error('Error assigning user to group:', error);
+      console.log('Error details:', {
+        message: error?.message,
+        responseData: error?.response?.data,
+        responseDataMessage: error?.response?.data?.message
+      });
       
       // Se l'utente è già membro del gruppo, elimina la notifica correlata
-      if (error?.message?.includes('Utente già membro del gruppo') || 
-          error?.response?.data?.message?.includes('Utente già membro del gruppo')) {
+      const errorMessage = error?.message || error?.response?.data?.message || '';
+      if (errorMessage.includes('Utente già membro del gruppo')) {
+        
+        console.log('Detected user already in group error');
+        console.log('Selected user:', selectedUser);
+        console.log('All notifications:', notifications);
         
         // Trova la notifica correlata a questo utente
         const relatedNotification = notifications.find(n => 
           n.type === 'NEW_USER_REGISTRATION' && n.data?.newUserId === selectedUser.id
         );
         
+        console.log('Found related notification:', relatedNotification);
+        
         if (relatedNotification) {
           try {
+            console.log('Attempting to delete notification:', relatedNotification.id);
             await notificationsApi.delete(relatedNotification.id);
             setNotifications(prev => prev.filter(n => n.id !== relatedNotification.id));
             
@@ -221,7 +233,8 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
             alert('L\'utente è già membro del gruppo, ma non è stato possibile eliminare la notifica.');
           }
         } else {
-          alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro del gruppo.`);
+          console.log('No related notification found for user:', selectedUser.id);
+          alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro del gruppo. Nessuna notifica correlata trovata.`);
           setShowAssignModal(false);
           setSelectedUser(null);
           setSelectedGroupId('');
