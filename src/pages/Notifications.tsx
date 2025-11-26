@@ -195,15 +195,7 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
       const errorMessage = error?.message || error?.response?.data?.message || '';
       if (errorMessage.includes('Utente già membro del gruppo')) {
         
-        console.log('User already in group - removing from list');
-        
-        // Rimuovi l'utente dalla lista locale immediatamente
-        setUsersWithoutGroup(prev => prev.filter(user => user.id !== selectedUser.id));
-        
-        // Aggiungi l'utente alla lista degli utenti nascosti per non farlo riapparire
-        const newHiddenUsers = new Set([...hiddenUsers, selectedUser.id]);
-        setHiddenUsers(newHiddenUsers);
-        localStorage.setItem('hiddenUsersFromNotifications', JSON.stringify([...newHiddenUsers]));
+        console.log('User already in group - deleting notifications only');
         
         // Elimina definitivamente tutte le notifiche di registrazione per questo utente
         try {
@@ -213,12 +205,12 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
           
           // Ricarica le notifiche per aggiornare la lista
           await loadNotifications();
+          
+          alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro di un gruppo. Notifiche eliminate definitivamente.`);
         } catch (notificationError) {
           console.log('Error deleting registration notifications:', notificationError);
+          alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro di un gruppo, ma errore nell'eliminazione delle notifiche.`);
         }
-        
-        // Aggiorna lo stato degli utenti con gruppi
-        await loadUsersWithGroups();
         
         // Chiudi modal
         setShowAssignModal(false);
@@ -227,8 +219,6 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
         
         // Aggiorna il contatore nel Dashboard
         onNotificationsChange?.();
-        
-        alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro di un gruppo. Rimosso dalla lista.`);
       
       } else {
         console.error('Error assigning user to group:', error);
