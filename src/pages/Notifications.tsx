@@ -190,9 +190,45 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
       onNotificationsChange?.();
       
       alert(`${selectedUser.firstName} ${selectedUser.lastName} è stato aggiunto al gruppo!`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error assigning user to group:', error);
-      alert('Errore nell\'assegnazione al gruppo');
+      
+      // Se l'utente è già membro del gruppo, elimina la notifica correlata
+      if (error?.message?.includes('Utente già membro del gruppo') || 
+          error?.response?.data?.message?.includes('Utente già membro del gruppo')) {
+        
+        // Trova la notifica correlata a questo utente
+        const relatedNotification = notifications.find(n => 
+          n.type === 'NEW_USER_REGISTRATION' && n.data?.newUserId === selectedUser.id
+        );
+        
+        if (relatedNotification) {
+          try {
+            await notificationsApi.delete(relatedNotification.id);
+            setNotifications(prev => prev.filter(n => n.id !== relatedNotification.id));
+            
+            // Chiudi modal
+            setShowAssignModal(false);
+            setSelectedUser(null);
+            setSelectedGroupId('');
+            
+            // Aggiorna il contatore nel Dashboard
+            onNotificationsChange?.();
+            
+            alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro del gruppo. La notifica è stata eliminata.`);
+          } catch (deleteError) {
+            console.error('Error deleting notification:', deleteError);
+            alert('L\'utente è già membro del gruppo, ma non è stato possibile eliminare la notifica.');
+          }
+        } else {
+          alert(`${selectedUser.firstName} ${selectedUser.lastName} è già membro del gruppo.`);
+          setShowAssignModal(false);
+          setSelectedUser(null);
+          setSelectedGroupId('');
+        }
+      } else {
+        alert('Errore nell\'assegnazione al gruppo');
+      }
     } finally {
       setAssigning(false);
     }
