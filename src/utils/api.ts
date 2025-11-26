@@ -230,6 +230,9 @@ export const notificationsApi = {
   delete: (id: string) => apiCall(`/notifications/${id}`, {
     method: 'DELETE',
   }),
+  deleteUserRegistrations: (userId: string) => apiCall(`/notifications/user/${userId}/registration`, {
+    method: 'DELETE',
+  }),
   getUnreadCount: () => apiCall('/notifications/unread-count'),
 };
 

@@ -205,21 +205,16 @@ const Notifications: React.FC<NotificationsProps> = ({ onNotificationsChange }) 
         setHiddenUsers(newHiddenUsers);
         localStorage.setItem('hiddenUsersFromNotifications', JSON.stringify([...newHiddenUsers]));
         
-        // Prova a eliminare eventuali notifiche correlate (se esistono)
+        // Elimina definitivamente tutte le notifiche di registrazione per questo utente
         try {
-          const freshNotifications = await notificationsApi.getAll();
-          const relatedNotification = freshNotifications.find((n: Notification) => 
-            n.type === 'NEW_USER_REGISTRATION' && n.data?.newUserId === selectedUser.id
-          );
+          console.log('Deleting registration notifications for user:', selectedUser.id);
+          const deleteResult = await notificationsApi.deleteUserRegistrations(selectedUser.id);
+          console.log('Delete result:', deleteResult);
           
-          if (relatedNotification) {
-            console.log('Found and deleting related notification:', relatedNotification.id);
-            await notificationsApi.delete(relatedNotification.id);
-            setNotifications(prev => prev.filter(n => n.id !== relatedNotification.id));
-            await loadNotifications();
-          }
+          // Ricarica le notifiche per aggiornare la lista
+          await loadNotifications();
         } catch (notificationError) {
-          console.log('No notification to delete or error deleting:', notificationError);
+          console.log('Error deleting registration notifications:', notificationError);
         }
         
         // Aggiorna lo stato degli utenti con gruppi
