@@ -220,12 +220,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     window.location.reload();
   };
 
-  const handleForceReauth = () => {
-    if (window.confirm('Questo rimuoverà tutti i token e farà un nuovo login. Continuare?')) {
-      localStorage.clear();
-      window.location.reload();
-    }
-  };
 
   const handleSectionClick = (section: string) => {
     setActiveSection(section);
@@ -713,22 +707,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     alert(`✅ Export completato per: ${exportedItems.join(', ')}`);
   };
 
-  const handleApplySchema = async () => {
-    if (!window.confirm('Applicare lo schema delle notifiche al database? Questa operazione creerà la tabella notifications se non esiste.')) {
-      return;
-    }
-
-    try {
-      const result = await adminApi.applySchema();
-      alert(`✅ ${result.message}`);
-      
-      // Ricarica i dati per aggiornare le notifiche
-      window.location.reload();
-    } catch (error: any) {
-      console.error('Errore nell\'applicazione dello schema:', error);
-      alert(`❌ Errore nell'applicazione dello schema: ${error.message}`);
-    }
-  };
 
   const reloadNotificationsCount = async () => {
     if (user.role === 'ADMIN') {
@@ -757,21 +735,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               <span className="text-sm text-gray-700">
                 Benvenuto, {user.first_name} {user.last_name}
               </span>
-              {user.role === 'ADMIN' && (
-                <button
-                  onClick={handleApplySchema}
-                  className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded text-xs"
-                  title="Applica schema notifiche al database"
-                >
-                  🔧 Fix DB
-                </button>
-              )}
               <button
-                onClick={handleForceReauth}
-                className="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-xs"
-                title="Debug: Forza nuovo login"
+                onClick={() => handleSectionClick('user')}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeSection === 'user'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
+                }`}
               >
-                🔄 Re-auth
+                ⚙️ Profilo
               </button>
               <button
                 onClick={handleLogout}
@@ -795,21 +767,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               <span className="text-xs text-gray-600">
                 {user.first_name}
               </span>
-              {user.role === 'ADMIN' && (
-                <button
-                  onClick={handleApplySchema}
-                  className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs"
-                  title="Fix DB"
-                >
-                  🔧
-                </button>
-              )}
               <button
-                onClick={handleForceReauth}
-                className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs"
-                title="Re-auth"
+                onClick={() => handleSectionClick('user')}
+                className={`px-2 py-1 rounded text-xs transition-colors ${
+                  activeSection === 'user'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
+                }`}
               >
-                🔄
+                ⚙️ Profilo
               </button>
               <button
                 onClick={handleLogout}
@@ -887,16 +853,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     )}
                   </button>
                 )}
-                <button
-                  onClick={() => handleSectionClick('user')}
-                  className={`px-3 py-2 rounded-md text-sm font-medium ${
-                    activeSection === 'user'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  ⚙️ Profilo
-                </button>
               </nav>
             </div>
           </div>
@@ -944,12 +900,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                             </p>
                           </div>
 
-                          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleSectionClick('user')}>
-                            <h5 className="text-slate-800 font-medium mb-1">👤 Profilo</h5>
-                            <p className="text-slate-700 text-sm">
-                              Aggiorna dati personali
-                            </p>
-                          </div>
 
                           <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100 transition-colors" onClick={() => handleSectionClick('events')}>
                             <h5 className="text-purple-800 font-medium mb-1">🎤 Eventi</h5>
