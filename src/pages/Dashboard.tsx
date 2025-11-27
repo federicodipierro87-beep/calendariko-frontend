@@ -479,12 +479,28 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const handleSaveUserChanges = async (userData: any) => {
     try {
       console.log('💾 Salvando modifiche utente:', userData);
+      console.log('📝 ID utente da modificare:', selectedUser.id);
+      console.log('📝 Dati utente originali:', selectedUser);
+      
+      // Mappa i campi dal formato frontend al formato backend
+      const mappedUserData = {
+        firstName: userData.first_name,
+        lastName: userData.last_name,
+        email: userData.email,
+        role: userData.role
+        // Note: phone field non esiste nel database, quindi lo escludiamo
+        // Note: selectedGroups sarà gestito separatamente se necessario
+      };
+      
+      console.log('📝 Dati mappati per backend:', mappedUserData);
       
       // Chiama l'API per aggiornare l'utente
-      await usersApi.update(selectedUser.id, userData);
+      const updatedUserResponse = await usersApi.update(selectedUser.id, mappedUserData);
+      console.log('✅ Risposta dall\'API aggiornamento:', updatedUserResponse);
       
       // Ricarica la lista degli utenti
       const updatedUsers = await usersApi.getAll();
+      console.log('🔄 Lista utenti ricaricata:', updatedUsers);
       setUsers(updatedUsers);
       
       // Chiudi il modal
@@ -493,7 +509,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       
       alert('✅ Dati utente aggiornati con successo!');
     } catch (error: any) {
-      console.error('Errore nella modifica dell\'utente:', error);
+      console.error('❌ Errore nell\'aggiornamento dell\'utente:', error);
+      console.error('❌ Stack trace:', error.stack);
       alert(`Errore nel salvataggio: ${error.message}`);
     }
   };

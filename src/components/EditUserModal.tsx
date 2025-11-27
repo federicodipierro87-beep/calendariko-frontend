@@ -20,7 +20,6 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     email: '',
     first_name: '',
     last_name: '',
-    phone: '',
     role: 'ARTIST' as 'ADMIN' | 'ARTIST',
     selectedGroups: [] as string[]
   });
@@ -31,11 +30,12 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
   // Popola il form quando l'utente cambia
   useEffect(() => {
     if (user) {
+      console.log('🔄 EditUserModal - Caricamento dati utente:', user);
       setFormData({
         email: user.email || '',
-        first_name: user.first_name || '',
-        last_name: user.last_name || '',
-        phone: user.phone || '',
+        // Mappa dai campi backend (firstName/lastName) ai campi frontend (first_name/last_name)
+        first_name: user.firstName || user.first_name || '',
+        last_name: user.lastName || user.last_name || '',
         role: user.role || 'ARTIST',
         selectedGroups: user.group_ids || []
       });
@@ -46,8 +46,19 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('📝 EditUserModal - Dati form da inviare:', formData);
+    console.log('📝 EditUserModal - Validazione campi:', {
+      email: !!formData.email,
+      first_name: !!formData.first_name,
+      last_name: !!formData.last_name
+    });
+    
     if (formData.email && formData.first_name && formData.last_name) {
+      console.log('✅ EditUserModal - Validazione passata, chiamando onSaveUser');
       onSaveUser(formData);
+    } else {
+      console.error('❌ EditUserModal - Validazione fallita, campi mancanti');
+      alert('Per favore compila tutti i campi obbligatori');
     }
   };
 
@@ -124,18 +135,6 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               />
             </div>
 
-            {/* Telefono */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Telefono
-              </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
 
             {/* Ruolo */}
             <div>
