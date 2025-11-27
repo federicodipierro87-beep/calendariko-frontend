@@ -1457,8 +1457,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                 </div>
                               )}
                             </div>
-                            {upcomingEvents.length === 0 ? (
-                              <p className="text-gray-500 text-center py-4">Nessun evento futuro programmato</p>
+                            {filteredEvents.length === 0 ? (
+                              <p className="text-gray-500 text-center py-4">
+                                {eventsFilter === 'upcoming' ? 'Nessun evento futuro programmato' :
+                                 eventsFilter === 'completed' ? 'Nessun evento completato' :
+                                 eventsFilter === 'pending' ? 'Nessun evento in sospeso' :
+                                 'Nessun evento trovato'}
+                              </p>
                             ) : (
                               <div className="space-y-3">
                                 {paginatedEvents.map(event => (
