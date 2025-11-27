@@ -9,6 +9,7 @@ interface GroupDetailModalProps {
   currentUser: any;
   onGroupUpdated: () => void;
   onEditGroup?: (group: any) => void;
+  onEditEvent?: (event: any) => void;
 }
 
 const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
@@ -17,7 +18,8 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
   group,
   currentUser,
   onGroupUpdated,
-  onEditGroup
+  onEditGroup,
+  onEditEvent
 }) => {
   // Use body scroll lock when modal is open
   useBodyScrollLock(isOpen);
@@ -373,7 +375,7 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                               return (
                                 <div key={event.id} className="bg-green-50 border border-green-200 rounded p-3">
                                   <div className="flex justify-between items-start">
-                                    <div>
+                                    <div className="flex-1">
                                       <h4 className="font-medium text-gray-900">{event.title}</h4>
                                       <p className="text-sm text-gray-600">
                                         📅 {eventDate ? new Date(eventDate).toLocaleDateString('it-IT') : 'Data non disponibile'}
@@ -391,12 +393,23 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                         <p className="text-sm text-gray-600">👤 Contatto: {event.contact_responsible}</p>
                                       )}
                                     </div>
-                                    <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
-                                      {event.status === 'CONFIRMED' ? 'Confermato' : 
-                                       event.status === 'PROPOSED' ? 'Proposto' : 
-                                       event.status === 'PENDING' ? 'In attesa' :
-                                       event.status || 'Stato sconosciuto'}
-                                    </span>
+                                    <div className="flex flex-col items-end gap-2">
+                                      <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
+                                        {event.status === 'CONFIRMED' ? 'Confermato' : 
+                                         event.status === 'PROPOSED' ? 'Proposto' : 
+                                         event.status === 'PENDING' ? 'In attesa' :
+                                         event.status || 'Stato sconosciuto'}
+                                      </span>
+                                      {currentUser.role === 'ADMIN' && onEditEvent && (
+                                        <button
+                                          onClick={() => onEditEvent(event)}
+                                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-colors"
+                                          title="Modifica evento"
+                                        >
+                                          ✏️ Modifica
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               );
@@ -425,7 +438,7 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                               return (
                                 <div key={event.id} className="bg-gray-50 border border-gray-200 rounded p-3 opacity-75">
                                   <div className="flex justify-between items-start">
-                                    <div>
+                                    <div className="flex-1">
                                       <h4 className="font-medium text-gray-700">{event.title}</h4>
                                       <p className="text-sm text-gray-500">
                                         📅 {eventDate ? new Date(eventDate).toLocaleDateString('it-IT') : 'Data non disponibile'}
@@ -443,9 +456,20 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                                         <p className="text-sm text-gray-500">👤 Contatto: {event.contact_responsible}</p>
                                       )}
                                     </div>
-                                    <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                                      Completato
-                                    </span>
+                                    <div className="flex flex-col items-end gap-2">
+                                      <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                                        Completato
+                                      </span>
+                                      {currentUser.role === 'ADMIN' && onEditEvent && (
+                                        <button
+                                          onClick={() => onEditEvent(event)}
+                                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-colors opacity-100"
+                                          title="Modifica evento"
+                                        >
+                                          ✏️ Modifica
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               );

@@ -1941,6 +1941,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         currentUser={user}
         onGroupUpdated={handleGroupUpdated}
         onEditGroup={handleEditGroup}
+        onEditEvent={handleEditEvent}
       />
 
       <AvailabilityModal
