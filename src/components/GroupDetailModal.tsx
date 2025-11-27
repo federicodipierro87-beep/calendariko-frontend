@@ -50,7 +50,17 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
 
       // Carica eventi del gruppo
       const allEvents = await eventsApi.getAll();
-      const groupEvents = allEvents.filter((event: any) => event.group_id === group.id);
+      console.log('🔍 All events loaded:', allEvents);
+      console.log('🔍 Group ID to filter:', group.id);
+      
+      // Filtra eventi per groupId o group_id (supporta entrambi i formati)
+      const groupEvents = allEvents.filter((event: any) => {
+        const eventGroupId = event.groupId || event.group_id;
+        console.log(`🔍 Event ${event.id}: groupId=${event.groupId}, group_id=${event.group_id}, match=${eventGroupId === group.id}`);
+        return eventGroupId === group.id;
+      });
+      
+      console.log('🔍 Filtered group events:', groupEvents);
       setEvents(groupEvents);
 
       // Se admin, carica tutti gli utenti per gestione membri
@@ -317,8 +327,29 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
               <div>
                 {(() => {
                   const now = new Date();
-                  const pastEvents = events.filter(e => new Date(e.date) < now);
-                  const upcomingEvents = events.filter(e => new Date(e.date) >= now);
+                  console.log('🔍 Processing events for time filtering:', events);
+                  
+                  const pastEvents = events.filter(e => {
+                    // Supporta sia startTime che date
+                    const eventDate = e.startTime || e.date;
+                    if (!eventDate) return false;
+                    
+                    const eventDateTime = new Date(eventDate);
+                    console.log(`🔍 Event ${e.id}: date=${eventDate}, parsed=${eventDateTime}, isPast=${eventDateTime < now}`);
+                    return eventDateTime < now;
+                  });
+                  
+                  const upcomingEvents = events.filter(e => {
+                    // Supporta sia startTime che date
+                    const eventDate = e.startTime || e.date;
+                    if (!eventDate) return false;
+                    
+                    const eventDateTime = new Date(eventDate);
+                    return eventDateTime >= now;
+                  });
+                  
+                  console.log('🔍 Past events:', pastEvents.length);
+                  console.log('🔍 Upcoming events:', upcomingEvents.length);
                   
                   return (
                     <div className="space-y-6">
@@ -333,31 +364,43 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                               Nessun evento futuro programmato
                             </div>
                           ) : (
-                            upcomingEvents.map(event => (
-                              <div key={event.id} className="bg-green-50 border border-green-200 rounded p-3">
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <h4 className="font-medium text-gray-900">{event.title}</h4>
-                                    <p className="text-sm text-gray-600">
-                                      📅 {new Date(event.date).toLocaleDateString('it-IT')} - ⏰ {event.start_time}
-                                    </p>
-                                    <p className="text-sm text-gray-600">
-                                      📍 {event.venue_name}, {event.venue_city}
-                                    </p>
-                                    {event.fee && (
-                                      <p className="text-sm text-green-600 font-medium">💰 €{event.fee}</p>
-                                    )}
-                                    {event.contact_responsible && (
-                                      <p className="text-sm text-gray-600">👤 Contatto: {event.contact_responsible}</p>
-                                    )}
+                            upcomingEvents.map(event => {
+                              const eventDate = event.startTime || event.date;
+                              const eventTime = event.start_time || (event.startTime ? new Date(event.startTime).toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'}) : '');
+                              const eventLocation = event.location || event.venue_name || '';
+                              const eventCity = event.venue_city || '';
+                              
+                              return (
+                                <div key={event.id} className="bg-green-50 border border-green-200 rounded p-3">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <h4 className="font-medium text-gray-900">{event.title}</h4>
+                                      <p className="text-sm text-gray-600">
+                                        📅 {eventDate ? new Date(eventDate).toLocaleDateString('it-IT') : 'Data non disponibile'}
+                                        {eventTime && ` - ⏰ ${eventTime}`}
+                                      </p>
+                                      {(eventLocation || eventCity) && (
+                                        <p className="text-sm text-gray-600">
+                                          📍 {eventLocation}{eventCity && eventLocation ? `, ${eventCity}` : eventCity}
+                                        </p>
+                                      )}
+                                      {event.fee && (
+                                        <p className="text-sm text-green-600 font-medium">💰 €{event.fee}</p>
+                                      )}
+                                      {event.contact_responsible && (
+                                        <p className="text-sm text-gray-600">👤 Contatto: {event.contact_responsible}</p>
+                                      )}
+                                    </div>
+                                    <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
+                                      {event.status === 'CONFIRMED' ? 'Confermato' : 
+                                       event.status === 'PROPOSED' ? 'Proposto' : 
+                                       event.status === 'PENDING' ? 'In attesa' :
+                                       event.status || 'Stato sconosciuto'}
+                                    </span>
                                   </div>
-                                  <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
-                                    {event.status === 'CONFIRMED' ? 'Confermato' : 
-                                     event.status === 'PROPOSED' ? 'Proposto' : event.status}
-                                  </span>
                                 </div>
-                              </div>
-                            ))
+                              );
+                            })
                           )}
                         </div>
                       </div>
@@ -373,30 +416,40 @@ const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                               Nessun evento passato
                             </div>
                           ) : (
-                            pastEvents.map(event => (
-                              <div key={event.id} className="bg-gray-50 border border-gray-200 rounded p-3 opacity-75">
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <h4 className="font-medium text-gray-700">{event.title}</h4>
-                                    <p className="text-sm text-gray-500">
-                                      📅 {new Date(event.date).toLocaleDateString('it-IT')} - ⏰ {event.start_time}
-                                    </p>
-                                    <p className="text-sm text-gray-500">
-                                      📍 {event.venue_name}, {event.venue_city}
-                                    </p>
-                                    {event.fee && (
-                                      <p className="text-sm text-gray-600">💰 €{event.fee}</p>
-                                    )}
-                                    {event.contact_responsible && (
-                                      <p className="text-sm text-gray-500">👤 Contatto: {event.contact_responsible}</p>
-                                    )}
+                            pastEvents.map(event => {
+                              const eventDate = event.startTime || event.date;
+                              const eventTime = event.start_time || (event.startTime ? new Date(event.startTime).toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'}) : '');
+                              const eventLocation = event.location || event.venue_name || '';
+                              const eventCity = event.venue_city || '';
+                              
+                              return (
+                                <div key={event.id} className="bg-gray-50 border border-gray-200 rounded p-3 opacity-75">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <h4 className="font-medium text-gray-700">{event.title}</h4>
+                                      <p className="text-sm text-gray-500">
+                                        📅 {eventDate ? new Date(eventDate).toLocaleDateString('it-IT') : 'Data non disponibile'}
+                                        {eventTime && ` - ⏰ ${eventTime}`}
+                                      </p>
+                                      {(eventLocation || eventCity) && (
+                                        <p className="text-sm text-gray-500">
+                                          📍 {eventLocation}{eventCity && eventLocation ? `, ${eventCity}` : eventCity}
+                                        </p>
+                                      )}
+                                      {event.fee && (
+                                        <p className="text-sm text-gray-600">💰 €{event.fee}</p>
+                                      )}
+                                      {event.contact_responsible && (
+                                        <p className="text-sm text-gray-500">👤 Contatto: {event.contact_responsible}</p>
+                                      )}
+                                    </div>
+                                    <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                                      Completato
+                                    </span>
                                   </div>
-                                  <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                                    Completato
-                                  </span>
                                 </div>
-                              </div>
-                            ))
+                              );
+                            })
                           )}
                         </div>
                       </div>
