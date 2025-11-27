@@ -56,8 +56,8 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 pb-24 sm:pb-4" style={{touchAction: 'none', overscrollBehavior: 'none'}}>
-      <div className="bg-white rounded-lg p-4 sm:p-6 max-w-md w-full max-h-[75vh] sm:max-h-[90vh] overflow-y-auto shadow-xl" style={{touchAction: 'pan-y', overflowX: 'hidden', position: 'relative', maxWidth: '100%'}}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" style={{touchAction: 'none', overscrollBehavior: 'none'}}>
+      <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-sm sm:max-w-lg max-h-[85vh] overflow-y-auto shadow-xl" style={{touchAction: 'pan-y', overflowX: 'hidden', position: 'relative'}}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-900">
             ✏️ Modifica Gruppo
@@ -74,7 +74,7 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
           {/* Nome Gruppo */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nome Gruppo *
+              👥 Nome Gruppo *
             </label>
             <input
               type="text"
@@ -82,110 +82,110 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({
               onChange={(e) => handleInputChange('name', e.target.value)}
               required
               placeholder="es. The Beatles, DJ Marco, Solo Artist..."
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
             />
           </div>
 
           {/* Tipo */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tipo
+              🎯 Tipo
             </label>
             <select
               value={formData.type}
               onChange={(e) => handleInputChange('type', e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
             >
               <option value="">Seleziona tipo</option>
-              <option value="BAND">Band</option>
-              <option value="DJ">DJ</option>
-              <option value="SOLO">Solista</option>
+              <option value="BAND">🎸 Band</option>
+              <option value="DJ">🎧 DJ</option>
+              <option value="SOLO">🎤 Solista</option>
             </select>
           </div>
 
           {/* Descrizione */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Descrizione
+              📝 Descrizione
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               rows={3}
               placeholder="Breve descrizione del gruppo..."
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
             />
           </div>
 
           {/* Genere */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Genere Musicale
+              🎵 Genere Musicale
             </label>
             <input
               type="text"
               value={formData.genre}
               onChange={(e) => handleInputChange('genre', e.target.value)}
               placeholder="es. Rock, Pop, Elettronica, Jazz..."
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
             />
           </div>
 
           {/* Colore */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Colore Gruppo
+              🎨 Colore Gruppo
             </label>
             <input
               type="color"
               value={formData.color || '#3B82F6'}
               onChange={(e) => handleInputChange('color', e.target.value)}
-              className="w-full h-10 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full h-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* Email Contatto */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email di Contatto
+              📧 Email di Contatto
             </label>
             <input
               type="email"
               value={formData.contact_email}
               onChange={(e) => handleInputChange('contact_email', e.target.value)}
               placeholder="gruppo@email.com"
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
             />
           </div>
 
           {/* Telefono */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Telefono di Contatto
+              📱 Telefono di Contatto
             </label>
             <input
               type="tel"
               value={formData.contact_phone}
               onChange={(e) => handleInputChange('contact_phone', e.target.value)}
               placeholder="+39 xxx xxx xxxx"
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
             />
           </div>
 
           {/* Pulsanti */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 mt-6 border-t border-gray-200">
+            <button
+              type="submit"
+              className="flex-1 bg-blue-600 text-white py-4 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-base"
+            >
+              💾 Salva Modifiche
+            </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+              className="flex-1 bg-gray-300 text-gray-700 py-4 px-4 rounded-lg hover:bg-gray-400 transition-colors font-medium text-base"
             >
-              Annulla
-            </button>
-            <button
-              type="submit"
-              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-            >
-              💾 Salva Modifiche
+              ❌ Annulla
             </button>
           </div>
         </form>
