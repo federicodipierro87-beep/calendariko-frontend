@@ -175,14 +175,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       const transformedEvents = eventsData.map((event: any) => ({
         id: event.id,
         title: event.title,
-        date: event.date ? event.date.split('T')[0] : '',
-        time: event.start_time || '',
-        endTime: event.end_time || '',               // AGGIUNTO: mappa end_time a endTime
-        type: event.event_type || 'event',
-        venue: event.venue_name || '',
-        notes: event.notes || '',
-        contact_responsible: event.contact_responsible || '',  // AGGIUNTO: mappa contact_responsible
-        group_id: event.group_id,
+        // Supporta sia il formato nuovo (startTime/endTime) che quello vecchio (date/start_time)
+        date: event.date ? event.date.split('T')[0] : (event.startTime ? event.startTime.split('T')[0] : ''),
+        time: event.start_time || (event.startTime ? new Date(event.startTime).toTimeString().substring(0, 5) : ''),
+        endTime: event.end_time || (event.endTime ? new Date(event.endTime).toTimeString().substring(0, 5) : ''),
+        type: event.event_type || event.description || 'event',
+        venue: event.venue_name || event.location || '',
+        notes: event.notes || event.description || '',
+        contact_responsible: event.contact_responsible || '',
+        group_id: event.group_id || event.groupId,
         group: event.group,
         fee: event.fee || 0
       }));
@@ -304,16 +305,36 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const handleSaveEventChanges = async (eventData: any) => {
     try {
       // Aggiorna l'evento tramite API
-      await eventsApi.update(eventData.id, eventData);
+      const updatedEvent = await eventsApi.update(eventData.id, eventData);
       
-      // Ricarica gli eventi
-      await reloadData();
+      // Aggiorna solo l'evento modificato nello stato locale invece di ricaricare tutto
+      const transformedEvent = {
+        id: updatedEvent.id,
+        title: updatedEvent.title,
+        date: updatedEvent.date ? updatedEvent.date.split('T')[0] : (updatedEvent.startTime ? updatedEvent.startTime.split('T')[0] : ''),
+        time: updatedEvent.start_time || (updatedEvent.startTime ? new Date(updatedEvent.startTime).toTimeString().substring(0, 5) : ''),
+        endTime: updatedEvent.end_time || (updatedEvent.endTime ? new Date(updatedEvent.endTime).toTimeString().substring(0, 5) : ''),
+        type: updatedEvent.event_type || updatedEvent.description || 'event',
+        venue: updatedEvent.venue_name || updatedEvent.location || '',
+        notes: updatedEvent.notes || updatedEvent.description || '',
+        contact_responsible: updatedEvent.contact_responsible || '',
+        group_id: updatedEvent.group_id || updatedEvent.groupId,
+        group: updatedEvent.group,
+        fee: updatedEvent.fee || 0
+      };
+      
+      // Aggiorna lo stato degli eventi sostituendo solo quello modificato
+      setEvents(prevEvents => 
+        prevEvents.map(event => 
+          event.id === updatedEvent.id ? transformedEvent : event
+        )
+      );
       
       // Chiudi il modal
       setShowEditEventModal(false);
       setSelectedEvent(null);
       
-      alert('✅ Evento modificato con successo! I membri del gruppo riceveranno una notifica via email.');
+      alert('✅ Evento modificato con successo!');
     } catch (error: any) {
       console.error('Errore nella modifica dell\'evento:', error);
       alert(`❌ Errore nella modifica dell'evento: ${error.message}`);
