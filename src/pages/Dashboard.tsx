@@ -951,13 +951,25 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                       {/* Prossimi eventi */}
                       <div>
                         <h4 className="text-lg font-medium text-gray-900 mb-4">⏰ Prossimi Eventi</h4>
-                        <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                        <div 
+                          className="bg-white border border-gray-200 rounded-lg p-4 space-y-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                          onClick={() => {
+                            setShowEventsList(!showEventsList);
+                            if (showEventsList) setCurrentPage(1); // Reset pagina quando si chiude
+                          }}
+                          title="Clicca per visualizzare tutti i prossimi eventi"
+                        >
                           {events.slice(0, 3).map(event => (
                             <div key={event.id} className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-b-0">
                               <div>
                                 <div 
                                   className={`font-medium text-sm ${user.role === 'ADMIN' ? 'cursor-pointer hover:text-blue-600 hover:underline' : ''}`}
-                                  onClick={() => user.role === 'ADMIN' && handleEditEvent(event)}
+                                  onClick={(e) => {
+                                    if (user.role === 'ADMIN') {
+                                      e.stopPropagation(); // Previeni la propagazione al container padre
+                                      handleEditEvent(event);
+                                    }
+                                  }}
                                   title={user.role === 'ADMIN' ? 'Clicca per modificare evento' : ''}
                                 >
                                   {event.title}
