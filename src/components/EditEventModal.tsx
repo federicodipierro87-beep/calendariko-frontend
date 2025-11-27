@@ -165,7 +165,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
       end_time: formData.endTime,
       venue_name: formData.venue,
       group_id: formData.group_id,
-      fee: formData.fee ? parseFloat(formData.fee) : undefined,
+      fee: formData.fee ? parseInt(formData.fee, 10) : undefined,
       notes: formData.notes,
       contact_responsible: formData.contact_responsible
     };
@@ -286,12 +286,11 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
             </label>
             <input
               type="number"
-              step="0.01"
               min="0"
               value={formData.fee}
               onChange={(e) => setFormData({ ...formData, fee: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Es: 500.00"
+              placeholder="Es: 500"
             />
           </div>
 

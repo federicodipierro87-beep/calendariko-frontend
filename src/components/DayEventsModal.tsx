@@ -488,12 +488,11 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                   </label>
                   <input
                     type="number"
-                    step="0.01"
                     min="0"
                     value={newEvent.fee}
                     onChange={(e) => setNewEvent({ ...newEvent, fee: e.target.value })}
                     className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
-                    placeholder="Es: 500.00"
+                    placeholder="Es: 500"
                   />
                 </div>
               )}
