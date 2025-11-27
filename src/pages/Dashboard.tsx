@@ -47,6 +47,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [showEditGroupModal, setShowEditGroupModal] = useState(false);
   const [selectedGroupForEdit, setSelectedGroupForEdit] = useState<any>(null);
+  const [eventsFilter, setEventsFilter] = useState<'all' | 'upcoming' | 'completed' | 'pending'>('all');
   
   // Export functionality
   const [exportOptions, setExportOptions] = useState({
@@ -953,24 +954,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         <h4 className="text-lg font-medium text-gray-900 mb-4">⏰ Prossimi Eventi</h4>
                         <div 
                           className="bg-white border border-gray-200 rounded-lg p-4 space-y-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                          onClick={() => {
-                            setShowEventsList(!showEventsList);
-                            if (showEventsList) setCurrentPage(1); // Reset pagina quando si chiude
-                          }}
-                          title="Clicca per visualizzare tutti i prossimi eventi"
+                          onClick={() => handleSectionClick('events')}
+                          title="Clicca per andare alla sezione eventi"
                         >
                           {events.slice(0, 3).map(event => (
                             <div key={event.id} className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-b-0">
                               <div>
                                 <div 
-                                  className={`font-medium text-sm ${user.role === 'ADMIN' ? 'cursor-pointer hover:text-blue-600 hover:underline' : ''}`}
-                                  onClick={(e) => {
-                                    if (user.role === 'ADMIN') {
-                                      e.stopPropagation(); // Previeni la propagazione al container padre
-                                      handleEditEvent(event);
-                                    }
-                                  }}
-                                  title={user.role === 'ADMIN' ? 'Clicca per modificare evento' : ''}
+                                  className="font-medium text-sm"
                                 >
                                   {event.title}
                                 </div>
@@ -1281,19 +1272,49 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     {user.role === 'ADMIN' ? (
                       // Statistiche per Admin - Eventi
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white p-4 rounded border text-center">
+                        <div 
+                          className={`bg-white p-4 rounded border text-center cursor-pointer hover:bg-purple-50 transition-colors ${
+                            eventsFilter === 'upcoming' ? 'ring-2 ring-purple-500' : ''
+                          }`}
+                          onClick={() => {
+                            setEventsFilter(eventsFilter === 'upcoming' ? 'all' : 'upcoming');
+                            setShowEventsList(true);
+                            setCurrentPage(1);
+                          }}
+                          title="Clicca per filtrare gli eventi prossimi"
+                        >
                           <div className="text-2xl font-bold text-purple-600">
                             {events.filter(e => new Date(e.date) >= new Date()).length}
                           </div>
                           <div className="text-sm text-gray-600">Eventi Prossimi</div>
                         </div>
-                        <div className="bg-white p-4 rounded border text-center">
+                        <div 
+                          className={`bg-white p-4 rounded border text-center cursor-pointer hover:bg-green-50 transition-colors ${
+                            eventsFilter === 'completed' ? 'ring-2 ring-green-500' : ''
+                          }`}
+                          onClick={() => {
+                            setEventsFilter(eventsFilter === 'completed' ? 'all' : 'completed');
+                            setShowEventsList(true);
+                            setCurrentPage(1);
+                          }}
+                          title="Clicca per filtrare gli eventi completati"
+                        >
                           <div className="text-2xl font-bold text-green-600">
                             {events.filter(e => new Date(e.date) < new Date()).length}
                           </div>
                           <div className="text-sm text-gray-600">Eventi Completati</div>
                         </div>
-                        <div className="bg-white p-4 rounded border text-center">
+                        <div 
+                          className={`bg-white p-4 rounded border text-center cursor-pointer hover:bg-yellow-50 transition-colors ${
+                            eventsFilter === 'pending' ? 'ring-2 ring-yellow-500' : ''
+                          }`}
+                          onClick={() => {
+                            setEventsFilter(eventsFilter === 'pending' ? 'all' : 'pending');
+                            setShowEventsList(true);
+                            setCurrentPage(1);
+                          }}
+                          title="Clicca per filtrare gli eventi in sospeso"
+                        >
                           <div className="text-2xl font-bold text-yellow-600">
                             {events.filter(e => e.status === 'PROPOSED').length}
                           </div>
@@ -1311,7 +1332,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                           </div>
                           <div className="text-sm text-gray-600">Tuoi Gruppi</div>
                         </div>
-                        <div className="bg-white p-4 rounded border text-center">
+                        <div 
+                          className={`bg-white p-4 rounded border text-center cursor-pointer hover:bg-green-50 transition-colors ${
+                            eventsFilter === 'upcoming' ? 'ring-2 ring-green-500' : ''
+                          }`}
+                          onClick={() => {
+                            setEventsFilter(eventsFilter === 'upcoming' ? 'all' : 'upcoming');
+                            setShowEventsList(true);
+                            setCurrentPage(1);
+                          }}
+                          title="Clicca per filtrare i tuoi eventi prossimi"
+                        >
                           <div className="text-2xl font-bold text-green-600">
                             {events.filter(e => new Date(e.date) >= new Date()).length}
                           </div>
@@ -1373,18 +1404,36 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                       </div>
                       
                       {showEventsList && (() => {
-                        // Filtra solo eventi futuri
-                        const upcomingEvents = events.filter(e => new Date(e.date) >= new Date());
-                        const totalPages = Math.ceil(upcomingEvents.length / eventsPerPage);
+                        // Applica il filtro in base alla selezione
+                        let filteredEvents = events;
+                        if (eventsFilter === 'upcoming') {
+                          filteredEvents = events.filter(e => new Date(e.date) >= new Date());
+                        } else if (eventsFilter === 'completed') {
+                          filteredEvents = events.filter(e => new Date(e.date) < new Date());
+                        } else if (eventsFilter === 'pending') {
+                          filteredEvents = events.filter(e => e.status === 'PROPOSED');
+                        } else {
+                          // 'all' - mostra solo eventi futuri di default
+                          filteredEvents = events.filter(e => new Date(e.date) >= new Date());
+                        }
+                        
+                        const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
                         const startIndex = (currentPage - 1) * eventsPerPage;
-                        const paginatedEvents = upcomingEvents.slice(startIndex, startIndex + eventsPerPage);
+                        const paginatedEvents = filteredEvents.slice(startIndex, startIndex + eventsPerPage);
                         
                         return (
                           <div className="bg-white border border-gray-200 rounded-lg p-4">
                             <div className="flex justify-between items-center mb-3">
                               <h5 className="font-medium text-gray-900">
-                                {user.role === 'ADMIN' ? 'Prossimi Eventi' : 'I Tuoi Prossimi Eventi'}
-                                <span className="text-sm text-gray-500 ml-2">({upcomingEvents.length} totali)</span>
+                                {eventsFilter === 'upcoming' ? 
+                                  (user.role === 'ADMIN' ? 'Eventi Prossimi' : 'I Tuoi Eventi Prossimi') :
+                                  eventsFilter === 'completed' ?
+                                    (user.role === 'ADMIN' ? 'Eventi Completati' : 'I Tuoi Eventi Completati') :
+                                    eventsFilter === 'pending' ?
+                                      (user.role === 'ADMIN' ? 'Eventi In Sospeso' : 'I Tuoi Eventi In Sospeso') :
+                                      (user.role === 'ADMIN' ? 'Tutti gli Eventi' : 'I Tuoi Eventi')
+                                }
+                                <span className="text-sm text-gray-500 ml-2">({filteredEvents.length} totali)</span>
                               </h5>
                               {totalPages > 1 && (
                                 <div className="flex items-center space-x-2">
