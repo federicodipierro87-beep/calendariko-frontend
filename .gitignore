@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Separate repositories - should not be tracked
+backend/
+frontend/
