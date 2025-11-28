@@ -161,7 +161,7 @@ export const authApi = {
     method: 'POST',
     body: JSON.stringify(credentials),
   }),
-  publicRegister: (userData: any) => apiCall('/auth/public-register', {
+  publicRegister: (userData: any) => apiCall('/auth/register', {
     method: 'POST',
     body: JSON.stringify(userData),
   }),
