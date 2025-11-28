@@ -30,19 +30,29 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (formData.email && formData.password && formData.first_name && formData.last_name) {
-      onCreateUser(formData);
-      setFormData({
-        email: '',
-        password: '',
-        first_name: '',
-        last_name: '',
-        role: 'ARTIST',
-        selectedGroups: []
-      });
-      onClose();
+      try {
+        await onCreateUser(formData);
+        
+        setFormData({
+          email: '',
+          password: '',
+          first_name: '',
+          last_name: '',
+          role: 'ARTIST',
+          selectedGroups: []
+        });
+        onClose();
+      } catch (error: any) {
+        console.error('❌ CreateUserModal - Errore in onCreateUser:', error);
+        const errorMessage = error?.message || error || 'Errore sconosciuto nel modal';
+        alert(`Errore nel modal: ${errorMessage}`);
+      }
+    } else {
+      alert('Per favore compila tutti i campi obbligatori');
     }
   };
 
