@@ -406,7 +406,21 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   const handleCreateUser = async (userData: any) => {
     try {
-      const newUser = await usersApi.create(userData);
+      console.log('🆕 Creando nuovo utente:', userData);
+      
+      // Mappa i campi dal formato frontend al formato backend
+      const mappedUserData = {
+        email: userData.email,
+        password: userData.password,
+        firstName: userData.first_name,
+        lastName: userData.last_name,
+        role: userData.role
+        // Note: selectedGroups sarà gestito separatamente se necessario
+      };
+      
+      console.log('📝 Dati mappati per backend:', mappedUserData);
+      
+      const newUser = await usersApi.create(mappedUserData);
       
       // Ricarica la lista degli utenti
       if (user.role === 'ADMIN') {
