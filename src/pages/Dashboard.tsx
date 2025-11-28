@@ -421,11 +421,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       console.log('📝 Dati mappati per backend:', mappedUserData);
       
       const newUser = await usersApi.create(mappedUserData);
+      console.log('✅ Utente creato, risposta API:', newUser);
       
       // Ricarica la lista degli utenti
       if (user.role === 'ADMIN') {
         const updatedUsers = await usersApi.getAll();
         setUsers(updatedUsers);
+        console.log('🔄 Lista utenti aggiornata');
       }
       
       // Se l'utente è stato assegnato a dei gruppi, aggiorna la lista dei gruppi
@@ -433,12 +435,29 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         // Ricarica i gruppi per vedere i nuovi membri
         const updatedGroups = await groupsApi.getAll();
         setGroups(updatedGroups);
+        console.log('🔄 Lista gruppi aggiornata');
       }
+      
+      // Chiudi il modal
+      setShowCreateUserModal(false);
       
       alert('✅ Utente creato con successo! Le credenziali di accesso sono state inviate via email.');
     } catch (error: any) {
-      console.error('Errore nella creazione dell\'utente:', error);
-      alert(`Errore nella creazione dell'utente: ${error.message}`);
+      console.error('❌ Errore nella creazione dell\'utente:', error);
+      console.error('❌ Error object:', error);
+      
+      // Gestisci diversi tipi di errore
+      let errorMessage = 'Errore sconosciuto nella creazione dell\'utente';
+      
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.error) {
+        errorMessage = error.error;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      alert(`❌ Errore nella creazione dell'utente: ${errorMessage}`);
     }
   };
 
