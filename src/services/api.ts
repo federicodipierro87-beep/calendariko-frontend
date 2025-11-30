@@ -23,6 +23,9 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     
+    // Log error but don't show undefined alerts
+    console.error('API Error:', error);
+    
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
@@ -38,6 +41,7 @@ api.interceptors.response.use(
           
           return api(originalRequest);
         } catch (refreshError) {
+          console.error('Refresh token failed:', refreshError);
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           window.location.href = '/login';
