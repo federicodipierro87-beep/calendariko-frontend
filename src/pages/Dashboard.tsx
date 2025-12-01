@@ -2100,6 +2100,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           setShowEventDetailsModal(false);
           setSelectedEventForDetails(null);
         }}
+        onEdit={(event) => {
+          setSelectedEvent(event);
+          setShowEditEventModal(true);
+        }}
+        currentUser={user}
       />
 
       {/* Modal per modifica utenti */}

@@ -14,10 +14,21 @@ interface EventDetailsModalProps {
   event: Event | null;
   isOpen: boolean;
   onClose: () => void;
+  onEdit?: (event: Event) => void;
+  currentUser?: any;
 }
 
-const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, onClose }) => {
+const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, onClose, onEdit, currentUser }) => {
   if (!isOpen || !event) return null;
+
+  const canEditEvent = currentUser?.role === 'ADMIN' || event.type !== 'availability-busy';
+
+  const handleEditClick = () => {
+    if (onEdit && event) {
+      onEdit(event);
+      onClose();
+    }
+  };
 
   const formatTime = (timeString: string) => {
     if (!timeString) return '';
@@ -175,12 +186,25 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, on
 
         {/* Footer */}
         <div className="px-6 py-4 bg-gray-50 border-t rounded-b-lg">
-          <button
-            onClick={onClose}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium"
-          >
-            Chiudi
-          </button>
+          <div className="flex gap-3">
+            {canEditEvent && onEdit && (
+              <button
+                onClick={handleEditClick}
+                className="flex-1 bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700 transition-colors font-medium flex items-center justify-center"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Modifica
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className={`${canEditEvent && onEdit ? 'flex-1' : 'w-full'} bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors font-medium`}
+            >
+              Chiudi
+            </button>
+          </div>
         </div>
       </div>
     </div>
