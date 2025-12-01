@@ -246,8 +246,8 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
                 className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
               >
-                <option value="availability">✅ Confermata (Data fissa)</option>
                 <option value="rehearsal">🎵 Opzionata (Da confermare)</option>
+                <option value="availability">✅ Confermata (Data fissa)</option>
               </select>
             </div>
           </div>
