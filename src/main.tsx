@@ -22,12 +22,20 @@ window.addEventListener('unhandledrejection', (event) => {
 // Override alert function to filter undefined messages
 const originalAlert = window.alert;
 window.alert = function(message: any) {
+  // Log all alert attempts with stack trace for debugging
+  console.log('🚨 Alert called with:', { message, type: typeof message });
+  console.trace('Alert stack trace:');
+  
   // Only show meaningful alerts, filter out undefined/empty messages
   if (message === undefined || message === 'undefined' || message === null || message === '') {
-    console.warn('Filtered undefined alert:', message);
+    console.warn('🚫 Filtered undefined alert:', message);
     return;
   }
-  originalAlert(message);
+  
+  // Convert non-string messages to string
+  const alertMessage = String(message);
+  console.log('✅ Showing alert:', alertMessage);
+  originalAlert(alertMessage);
 };
 
 createRoot(document.getElementById('root')!).render(

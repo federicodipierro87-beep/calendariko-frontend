@@ -418,39 +418,55 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         role: userData.role
       };
       
+      console.log('📤 Chiamando API per creare utente...');
       const newUser = await usersApi.create(mappedUserData);
+      console.log('✅ Utente creato con successo:', newUser);
       
       // Ricarica la lista degli utenti
       if (user.role === 'ADMIN') {
+        console.log('🔄 Ricaricando lista utenti...');
         const updatedUsers = await usersApi.getAll();
         setUsers(updatedUsers);
+        console.log('✅ Lista utenti aggiornata');
       }
       
       // Se l'utente è stato assegnato a dei gruppi, aggiorna la lista dei gruppi
       if (userData.selectedGroups && userData.selectedGroups.length > 0) {
+        console.log('🔄 Ricaricando lista gruppi...');
         const updatedGroups = await groupsApi.getAll();
         setGroups(updatedGroups);
+        console.log('✅ Lista gruppi aggiornata');
       }
       
       // Chiudi il modal
+      console.log('🔒 Chiudendo modal...');
       setShowCreateUserModal(false);
       
+      console.log('🎉 Mostrando messaggio di successo...');
       alert('✅ Utente creato con successo! Le credenziali di accesso sono state inviate via email.');
+      console.log('✅ FINE handleCreateUser - SUCCESSO COMPLETATO');
     } catch (error: any) {
-      console.error('❌ Errore nella creazione dell\'utente:', error);
+      console.error('❌ ERRORE CATTURATO in handleCreateUser:', error);
+      console.error('❌ Tipo errore:', typeof error);
+      console.error('❌ Error keys:', Object.keys(error || {}));
       
       // Gestisci diversi tipi di errore
       let errorMessage = 'Errore sconosciuto nella creazione dell\'utente';
       
       if (error?.message) {
         errorMessage = error.message;
+        console.log('📝 Usando error.message:', errorMessage);
       } else if (error?.error) {
         errorMessage = error.error;
+        console.log('📝 Usando error.error:', errorMessage);
       } else if (typeof error === 'string') {
         errorMessage = error;
+        console.log('📝 Usando errore come stringa:', errorMessage);
       }
       
+      console.log('🚨 Mostrando alert di errore:', errorMessage);
       alert(`❌ Errore nella creazione dell'utente: ${errorMessage}`);
+      console.log('❌ FINE handleCreateUser - ERRORE GESTITO');
     }
   };
 
