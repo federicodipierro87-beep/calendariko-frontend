@@ -114,13 +114,13 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
       
       const newFormData = {
         title: eventData.title || '',
-        type: eventData.description || eventData.type || eventData.event_type || 'rehearsal',
+        type: eventData.type || eventData.event_type || 'rehearsal',
         time: getTimePart(eventData.startTime || eventData.start_time || eventData.time),
         endTime: getTimePart(eventData.endTime || eventData.end_time || eventData.endTime),
         venue: eventData.location || eventData.venue || eventData.venue_name || '',
         group_id: eventData.groupId || eventData.group_id || '',
         fee: eventData.fee?.toString() || '',
-        notes: eventData.notes || eventData.description || '',
+        notes: eventData.notes || '',
         contact_responsible: eventData.contact_responsible || ''
       };
       
@@ -153,7 +153,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
     const eventUpdates = {
       id: event.id,
       title: formData.title,
-      description: formData.notes || formData.type,
+      description: formData.notes,
       startTime: startDateTime,
       endTime: endDateTime, 
       location: formData.venue,
