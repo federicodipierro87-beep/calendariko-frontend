@@ -61,8 +61,9 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         });
         
         // Mostra popup di successo più visibile
-        alert('✅ ' + response.message);
-        setSuccess(response.message);
+        const successMessage = response.message || 'Registrazione completata con successo!';
+        alert('✅ ' + successMessage);
+        setSuccess(successMessage);
         // Pulisce il form e passa alla modalità login
         setFirstName('');
         setLastName('');

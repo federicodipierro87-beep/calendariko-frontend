@@ -36,6 +36,8 @@ window.alert = function(message: any) {
       message === 'undefined' || 
       message === null || 
       message === '' ||
+      message === '✅ undefined' ||
+      message === '❌ undefined' ||
       (typeof message === 'string' && message.includes('recaptcha'))) {
     console.warn('🚫 Filtered undefined/recaptcha alert:', message);
     return;
