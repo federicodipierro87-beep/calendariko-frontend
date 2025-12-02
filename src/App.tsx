@@ -1,12 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import SimpleLogin from './pages/SimpleLogin';
 import Dashboard from './pages/Dashboard';
+import EmailVerification from './components/EmailVerification';
 
 function App() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [currentView, setCurrentView] = useState<'login' | 'verify' | 'dashboard'>('login');
 
   useEffect(() => {
+    // Controlla se stiamo visualizzando una pagina di verifica email
+    const urlParams = new URLSearchParams(window.location.search);
+    const verifyToken = urlParams.get('token');
+    
+    if (verifyToken) {
+      setCurrentView('verify');
+      setLoading(false);
+      return;
+    }
+
+    // Controlla se l'utente è già loggato
     const savedUserData = localStorage.getItem('userData');
     const accessToken = localStorage.getItem('accessToken');
     
@@ -14,10 +27,14 @@ function App() {
       try {
         const parsedUser = JSON.parse(savedUserData);
         setUser(parsedUser);
+        setCurrentView('dashboard');
       } catch (error) {
         console.error('Error parsing saved user data:', error);
         localStorage.clear();
+        setCurrentView('login');
       }
+    } else {
+      setCurrentView('login');
     }
     
     setLoading(false);
@@ -28,6 +45,13 @@ function App() {
     localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('userData', JSON.stringify(userData));
     setUser(userData);
+    setCurrentView('dashboard');
+  };
+
+  const handleVerificationComplete = () => {
+    // Pulisce l'URL e torna al login
+    window.history.replaceState({}, document.title, window.location.pathname);
+    setCurrentView('login');
   };
 
   if (loading) {
@@ -41,7 +65,11 @@ function App() {
     );
   }
 
-  if (!user) {
+  if (currentView === 'verify') {
+    return <EmailVerification onVerificationComplete={handleVerificationComplete} />;
+  }
+
+  if (currentView === 'login' || !user) {
     return <SimpleLogin onLogin={handleLogin} />;
   }
 

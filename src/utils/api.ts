@@ -169,6 +169,14 @@ export const authApi = {
     method: 'POST',
     body: JSON.stringify({ refreshToken }),
   }),
+  verifyEmail: (token: string) => apiCall('/auth/verify-email', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  }),
+  resendVerification: (email: string) => apiCall('/auth/resend-verification', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  }),
 };
 
 export const usersApi = {

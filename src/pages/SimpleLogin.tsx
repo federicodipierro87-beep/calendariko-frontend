@@ -61,9 +61,12 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         });
         
         // Mostra popup di successo più visibile
-        const successMessage = response.message || 'Registrazione completata con successo!';
-        alert('✅ ' + successMessage);
+        const successMessage = response.message || 'Registrazione completata! Controlla la tua email per verificare l\'account.';
         setSuccess(successMessage);
+        
+        // Mostra anche un alert più specifico per la verifica email
+        alert('✅ Registrazione completata!\n\n📧 Ti abbiamo inviato una email di verifica.\nClicca sul link nella email per attivare il tuo account.');
+        
         // Pulisce il form e passa alla modalità login
         setFirstName('');
         setLastName('');
@@ -91,17 +94,33 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
       }
     } catch (err: any) {
       const errorMessage = err.message || (isRegisterMode ? 'Registrazione fallita' : 'Login fallito');
-      setError(errorMessage);
       
-      // Per il login, controlla se l'errore richiede reCAPTCHA
-      if (!isRegisterMode) {
-        const newAttempts = loginAttempts + 1;
-        setLoginAttempts(newAttempts);
+      // Controlla se l'errore è dovuto a email non verificata
+      if (errorMessage.includes('email non verificata') || errorMessage.includes('not verified')) {
+        setError('Il tuo account non è ancora verificato. Controlla la tua email e clicca sul link di verifica.');
         
-        // Mostra reCAPTCHA se l'errore lo richiede o dopo 3 tentativi
-        if (errorMessage.includes('reCAPTCHA richiesta') || newAttempts >= 3) {
-          setShowRecaptcha(true);
-          setRecaptchaToken(null); // Reset del token
+        // Offri opzione per inviare nuovamente l'email di verifica
+        if (window.confirm('Il tuo account non è verificato.\n\nVuoi che ti inviamo nuovamente l\'email di verifica?')) {
+          try {
+            await authApi.resendVerification(email);
+            alert('✅ Email di verifica inviata! Controlla la tua posta.');
+          } catch (resendError: any) {
+            alert('❌ Errore nell\'invio: ' + resendError.message);
+          }
+        }
+      } else {
+        setError(errorMessage);
+        
+        // Per il login, controlla se l'errore richiede reCAPTCHA
+        if (!isRegisterMode) {
+          const newAttempts = loginAttempts + 1;
+          setLoginAttempts(newAttempts);
+          
+          // Mostra reCAPTCHA se l'errore lo richiede o dopo 3 tentativi
+          if (errorMessage.includes('reCAPTCHA richiesta') || newAttempts >= 3) {
+            setShowRecaptcha(true);
+            setRecaptchaToken(null); // Reset del token
+          }
         }
       }
     } finally {
@@ -233,9 +252,12 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
             
             {isRegisterMode && (
               <div className="bg-blue-50 border border-blue-200 p-4 rounded-md">
+                <p className="text-sm text-blue-800 mb-2">
+                  <strong>📧 Verifica Email:</strong> Dopo la registrazione, ti invieremo una email di verifica. 
+                  Dovrai cliccare sul link nella email per attivare il tuo account.
+                </p>
                 <p className="text-sm text-blue-800">
-                  <strong>ℹ️ Nota:</strong> Dopo la registrazione, un amministratore ti assegnerà al gruppo appropriato.
-                  Riceverai una notifica via email quando il tuo account sarà attivato.
+                  <strong>ℹ️ Nota:</strong> Una volta verificato l'account, un amministratore ti assegnerà al gruppo appropriato.
                 </p>
               </div>
             )}
