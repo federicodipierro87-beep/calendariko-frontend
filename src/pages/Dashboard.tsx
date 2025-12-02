@@ -278,6 +278,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       // Ricarica i dati per sicurezza
       setTimeout(() => reloadData(), 500);
       
+      // Ricarica il contatore delle notifiche dato che potrebbero essere state create nuove notifiche
+      setTimeout(() => reloadNotificationsCount(), 1000);
+      
       alert('✅ Evento creato con successo! Le notifiche email sono state inviate ai membri del gruppo.');
     } catch (error: any) {
       console.error('❌ Errore nella creazione dell\'evento:', error);
@@ -329,6 +332,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       setShowEditEventModal(false);
       setSelectedEvent(null);
       
+      // Ricarica il contatore delle notifiche dato che potrebbero essere state create nuove notifiche
+      setTimeout(() => reloadNotificationsCount(), 1000);
+      
       alert('✅ Evento modificato con successo!');
     } catch (error: any) {
       console.error('Errore nella modifica dell\'evento:', error);
@@ -358,6 +364,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       
       // Rimuovi l'evento dalla lista locale solo dopo il successo
       setEvents(events.filter(event => event.id !== eventId));
+      
+      // Ricarica il contatore delle notifiche dato che potrebbero essere state create nuove notifiche
+      setTimeout(() => reloadNotificationsCount(), 1000);
+      
       alert(`✅ Evento "${title}" eliminato con successo! Le notifiche email sono state inviate a tutti i membri del gruppo.`);
     } catch (error: any) {
       console.error('Errore nell\'eliminazione dell\'evento:', error);
@@ -441,6 +451,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       // Chiudi il modal
       console.log('🔒 Chiudendo modal...');
       setShowCreateUserModal(false);
+      
+      // Ricarica il contatore delle notifiche dato che potrebbe essere stata creata una nuova notifica
+      console.log('🔄 Ricaricando contatore notifiche...');
+      await reloadNotificationsCount();
       
       console.log('🎉 Mostrando messaggio di successo...');
       alert('✅ Utente creato con successo! Le credenziali di accesso sono state inviate via email.');
