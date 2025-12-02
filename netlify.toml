@@ -18,3 +18,9 @@
   [headers.values]
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
+
+# SPA fallback for React Router and query parameters
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
