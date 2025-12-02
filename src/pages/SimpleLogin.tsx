@@ -54,8 +54,8 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
         const response = await authApi.publicRegister({
           email,
           password,
-          first_name: firstName,
-          last_name: lastName,
+          firstName: firstName,
+          lastName: lastName,
           phone: phone || undefined,
           recaptchaToken: recaptchaToken
         });
