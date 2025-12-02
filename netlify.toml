@@ -8,6 +8,12 @@
   VITE_API_URL = "https://calendariko-backend-production.up.railway.app/api"
   # Note: VITE_RECAPTCHA_SITE_KEY should be set in Netlify dashboard environment variables for security
 
+# SPA fallback - Must come FIRST before headers
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
 [[headers]]
   for = "/assets/*"
   [headers.values]
@@ -18,9 +24,3 @@
   [headers.values]
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
-
-# SPA fallback for React Router and query parameters
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200

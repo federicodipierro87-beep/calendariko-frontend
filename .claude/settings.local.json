@@ -9,9 +9,17 @@
       "Bash(cat:*)",
       "Bash(git submodule:*)",
       "Bash(git fetch:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npx prisma@6.18.0 migrate dev --name add_email_verification)",
+      "Bash(git commit:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm install)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\Users\\feder\\Documents\\VS CODE"
+    ]
   }
 }
