@@ -12,6 +12,7 @@ import EventDetailsModal from '../components/EventDetailsModal';
 import EditUserModal from '../components/EditUserModal';
 import EditGroupModal from '../components/EditGroupModal';
 import Notifications from './Notifications';
+import AuditLogs from '../components/AuditLogs';
 import { groupsApi, eventsApi, usersApi, availabilityApi, notificationsApi, adminApi, setUserActivityCallback } from '../utils/api';
 
 interface DashboardProps {
@@ -1040,21 +1041,33 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                   {user.role === 'ADMIN' ? '🎤 Eventi' : '📅 Disponibilità'}
                 </button>
                 {user.role === 'ADMIN' && (
-                  <button
-                    onClick={() => handleSectionClick('notifications')}
-                    className={`px-3 py-2 rounded-md text-sm font-medium relative ${
-                      activeSection === 'notifications'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    📧 Notifiche
-                    {unreadNotificationsCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1 min-w-[20px] h-5 flex items-center justify-center">
-                        {unreadNotificationsCount}
-                      </span>
-                    )}
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleSectionClick('notifications')}
+                      className={`px-3 py-2 rounded-md text-sm font-medium relative ${
+                        activeSection === 'notifications'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      📧 Notifiche
+                      {unreadNotificationsCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1 min-w-[20px] h-5 flex items-center justify-center">
+                          {unreadNotificationsCount}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleSectionClick('audit')}
+                      className={`px-3 py-2 rounded-md text-sm font-medium ${
+                        activeSection === 'audit'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      🔍 Audit Log
+                    </button>
+                  </>
                 )}
               </nav>
             </div>
@@ -1143,6 +1156,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                     ? `${usersWithoutGroup.length} utenti da assegnare` 
                                     : 'Gestisci sistema notifiche'
                                   }
+                                </p>
+                              </div>
+
+                              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 cursor-pointer hover:bg-indigo-100 transition-colors" onClick={() => handleSectionClick('audit')}>
+                                <h5 className="text-indigo-800 font-medium mb-1">🔍 Audit Log</h5>
+                                <p className="text-indigo-700 text-sm">
+                                  Tracciamento azioni amministrative
                                 </p>
                               </div>
 
@@ -1894,6 +1914,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 <Notifications onNotificationsChange={reloadNotificationsCount} />
               )}
 
+              {activeSection === 'audit' && user.role === 'ADMIN' && (
+                <div>
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                    🔍 Log Audit Sistema
+                  </h3>
+                  <AuditLogs />
+                </div>
+              )}
+
               {activeSection === 'user' && (
                 <div>
                   <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
@@ -2264,22 +2293,35 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             <span>{user.role === 'ADMIN' ? 'Eventi' : 'Disponibilità'}</span>
           </button>
           {user.role === 'ADMIN' && (
-            <button
-              onClick={() => handleSectionClick('notifications')}
-              className={`flex flex-col items-center px-2 py-2 text-xs relative ${
-                activeSection === 'notifications'
-                  ? 'text-blue-600'
-                  : 'text-gray-500'
-              }`}
-            >
-              <span className="text-lg">📧</span>
-              <span>Notifiche</span>
-              {unreadNotificationsCount > 0 && (
-                <span className="absolute top-0 right-2 bg-red-500 text-white text-xs rounded-full px-1 min-w-[18px] h-4 flex items-center justify-center text-[10px]">
-                  {unreadNotificationsCount}
-                </span>
-              )}
-            </button>
+            <>
+              <button
+                onClick={() => handleSectionClick('notifications')}
+                className={`flex flex-col items-center px-1 py-2 text-xs relative ${
+                  activeSection === 'notifications'
+                    ? 'text-blue-600'
+                    : 'text-gray-500'
+                }`}
+              >
+                <span className="text-lg">📧</span>
+                <span>Notifiche</span>
+                {unreadNotificationsCount > 0 && (
+                  <span className="absolute top-0 right-1 bg-red-500 text-white text-xs rounded-full px-1 min-w-[18px] h-4 flex items-center justify-center text-[10px]">
+                    {unreadNotificationsCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => handleSectionClick('audit')}
+                className={`flex flex-col items-center px-1 py-2 text-xs ${
+                  activeSection === 'audit'
+                    ? 'text-blue-600'
+                    : 'text-gray-500'
+                }`}
+              >
+                <span className="text-lg">🔍</span>
+                <span>Audit</span>
+              </button>
+            </>
           )}
           <button
             onClick={() => handleSectionClick('user')}

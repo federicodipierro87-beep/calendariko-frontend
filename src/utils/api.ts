@@ -269,3 +269,32 @@ export const adminApi = {
     method: 'POST',
   }),
 };
+
+export const auditApi = {
+  getLogs: (filters?: {
+    adminId?: string;
+    action?: string;
+    entity?: string;
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    limit?: number;
+  }) => {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, value.toString());
+        }
+      });
+    }
+    const queryString = params.toString();
+    return apiCall(`/audit/logs${queryString ? `?${queryString}` : ''}`);
+  },
+  getAdminActivity: (adminId?: string) => 
+    apiCall(adminId ? `/audit/activity/${adminId}` : '/audit/activity'),
+  getStats: (days?: number) => {
+    const params = days ? `?days=${days}` : '';
+    return apiCall(`/audit/stats${params}`);
+  },
+};

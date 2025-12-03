@@ -14,7 +14,10 @@
       "Bash(git commit:*)",
       "Bash(npm run dev:*)",
       "Bash(npm install)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm start)",
+      "Bash(npx ts-node:*)",
+      "Bash(npx prisma:*)"
     ],
     "deny": [],
     "ask": [],
