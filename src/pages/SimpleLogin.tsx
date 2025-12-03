@@ -109,6 +109,21 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
           }
         }
       } else {
+        // Gestione errori di rate limiting
+        if (errorMessage.includes('Troppi tentativi di login') || errorMessage.includes('RATE_LIMIT_EXCEEDED')) {
+          setError('🚫 Troppi tentativi di login. Attendi 15 minuti prima di riprovare.');
+          setLoginAttempts(0); // Reset locale perché il server sta gestendo il rate limiting
+          return;
+        }
+        
+        if (errorMessage.includes('temporaneamente bloccato') || 
+            errorMessage.includes('ACCOUNT_TEMPORARILY_BLOCKED') ||
+            errorMessage.includes('EMAIL_TEMPORARILY_BLOCKED')) {
+          setError('🔒 Account temporaneamente bloccato per troppi tentativi falliti. Riprova tra 1 ora.');
+          setLoginAttempts(0);
+          return;
+        }
+        
         setError(errorMessage);
         
         // Per il login, controlla se l'errore richiede reCAPTCHA
