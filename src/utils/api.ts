@@ -200,6 +200,10 @@ export const usersApi = {
     const params = excludeGroupId ? `?excludeGroupId=${excludeGroupId}` : '';
     return apiCall(`/users/without-group${params}`);
   },
+  changePassword: (passwordData: any) => apiCall('/users/change-password', {
+    method: 'PUT',
+    body: JSON.stringify(passwordData),
+  }),
 };
 
 export const availabilityApi = {

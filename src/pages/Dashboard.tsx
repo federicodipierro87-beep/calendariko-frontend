@@ -69,6 +69,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     province: ''
   });
 
+  // Stato separato per il cambio password
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
   // Carica dati iniziali
   React.useEffect(() => {
     const loadData = async () => {
@@ -658,6 +665,52 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     } catch (error: any) {
       console.error('Errore nel salvataggio del profilo:', error);
       alert('Errore nel salvataggio: ' + (error.message || 'Errore sconosciuto'));
+    }
+  };
+
+  // Handler per il cambio password
+  const handlePasswordChange = (field: string, value: string) => {
+    setPasswordData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleChangePassword = async () => {
+    try {
+      // Validazione
+      if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+        alert('Compila tutti i campi per cambiare la password');
+        return;
+      }
+
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        alert('La nuova password e la conferma non corrispondono');
+        return;
+      }
+
+      if (passwordData.newPassword.length < 6) {
+        alert('La nuova password deve essere di almeno 6 caratteri');
+        return;
+      }
+
+      // Chiamata API per cambiare password
+      await usersApi.changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+
+      // Reset form e successo
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+
+      alert('✅ Password cambiata con successo!');
+    } catch (error: any) {
+      console.error('Errore nel cambio password:', error);
+      alert('Errore nel cambio password: ' + (error.message || 'Password attuale non corretta'));
     }
   };
 
@@ -1954,6 +2007,64 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                       <p className="text-xs text-gray-500 mt-4 p-3 bg-blue-50 rounded-lg">
                         💡 Per modificare i tuoi gruppi di appartenenza, contatta l'amministratore del sistema.
                       </p>
+                    </div>
+
+                    {/* Sezione Sicurezza - Cambio Password */}
+                    <div className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200 mt-6">
+                      <h5 className="font-medium text-gray-900 mb-4 flex items-center">
+                        <span className="mr-2">🔐</span>
+                        Sicurezza Account
+                      </h5>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Cambia la tua password per mantenere l'account sicuro
+                      </p>
+                      <form className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Password Attuale *
+                          </label>
+                          <input
+                            type="password"
+                            value={passwordData.currentPassword}
+                            onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+                            placeholder="Inserisci la password attuale"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Nuova Password *
+                            </label>
+                            <input
+                              type="password"
+                              value={passwordData.newPassword}
+                              onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                              placeholder="Almeno 6 caratteri"
+                              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Conferma Nuova Password *
+                            </label>
+                            <input
+                              type="password"
+                              value={passwordData.confirmPassword}
+                              onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                              placeholder="Ripeti la nuova password"
+                              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleChangePassword}
+                          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium"
+                        >
+                          🔐 Cambia Password
+                        </button>
+                      </form>
                     </div>
 
                     {/* Pulsanti Azione */}
