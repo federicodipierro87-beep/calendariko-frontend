@@ -50,6 +50,13 @@ const refreshToken = async (): Promise<string | null> => {
   }
 };
 
+// Callback per notificare attività utente (per session timeout)
+let onUserActivity: (() => void) | null = null;
+
+export const setUserActivityCallback = (callback: () => void) => {
+  onUserActivity = callback;
+};
+
 // Funzione per effettuare chiamate API con gestione automatica del token
 export const apiCall = async (
   endpoint: string,
@@ -99,6 +106,12 @@ export const apiCall = async (
     }
 
     const responseData = await response.json();
+    
+    // Notifica attività utente per session timeout
+    if (onUserActivity) {
+      onUserActivity();
+    }
+    
     return responseData;
   } catch (error) {
     if (error instanceof ApiError) {

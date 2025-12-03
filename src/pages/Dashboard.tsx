@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import SimpleCalendar from '../components/SimpleCalendar';
+import { useSessionTimeout } from '../hooks/useSessionTimeout';
+import SessionTimeoutModal from '../components/SessionTimeoutModal';
 import DayEventsModal from '../components/DayEventsModal';
 import CreateGroupModal from '../components/CreateGroupModal';
 import CreateUserModal from '../components/CreateUserModal';
@@ -10,7 +12,7 @@ import EventDetailsModal from '../components/EventDetailsModal';
 import EditUserModal from '../components/EditUserModal';
 import EditGroupModal from '../components/EditGroupModal';
 import Notifications from './Notifications';
-import { groupsApi, eventsApi, usersApi, availabilityApi, notificationsApi, adminApi } from '../utils/api';
+import { groupsApi, eventsApi, usersApi, availabilityApi, notificationsApi, adminApi, setUserActivityCallback } from '../utils/api';
 
 interface DashboardProps {
   user: any;
@@ -75,6 +77,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     newPassword: '',
     confirmPassword: ''
   });
+
+  // Stato per session timeout
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(300); // 5 minuti in secondi
 
   // Carica dati iniziali
   React.useEffect(() => {
@@ -713,6 +719,70 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       alert('Errore nel cambio password: ' + (error.message || 'Password attuale non corretta'));
     }
   };
+
+  // Session timeout logic
+  const handleSessionTimeout = () => {
+    console.log('⏰ Session timeout - logging out user');
+    
+    // Pulisce i dati di sessione
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userData');
+    
+    // Ricarica la pagina per tornare al login
+    window.location.reload();
+  };
+
+  const handleSessionWarning = () => {
+    console.log('⚠️ Session timeout warning');
+    setRemainingTime(getRemainingTime()); // Usa il tempo rimanente reale
+    setShowTimeoutModal(true);
+  };
+
+  const handleExtendSession = () => {
+    console.log('🔄 Extending session');
+    setShowTimeoutModal(false);
+    // Il reset del timer è gestito automaticamente dall'hook
+  };
+
+  // Inizializza session timeout (30 minuti con warning a 5 min)
+  const { resetTimer, getRemainingTime } = useSessionTimeout({
+    onTimeout: handleSessionTimeout,
+    onWarning: handleSessionWarning,
+    timeoutMinutes: 30,
+    warningMinutes: 5
+  });
+
+  // Collega API activity callback al session timeout reset
+  React.useEffect(() => {
+    setUserActivityCallback(() => {
+      console.log('🔄 API activity detected - resetting session timer');
+      resetTimer();
+    });
+
+    // Cleanup
+    return () => {
+      setUserActivityCallback(() => {});
+    };
+  }, [resetTimer]);
+
+  // Update countdown timer quando il modal è aperto
+  React.useEffect(() => {
+    if (!showTimeoutModal) return;
+
+    const interval = setInterval(() => {
+      const remaining = getRemainingTime();
+      setRemainingTime(remaining);
+      
+      if (remaining <= 0) {
+        clearInterval(interval);
+        setShowTimeoutModal(false);
+        handleSessionTimeout();
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [showTimeoutModal, getRemainingTime]);
 
   // Export functions
   const convertToCSV = (data: any[], headers: string[]): string => {
@@ -2280,6 +2350,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           group={selectedGroupForEdit}
         />
       )}
+
+      {/* Session Timeout Modal */}
+      <SessionTimeoutModal
+        isOpen={showTimeoutModal}
+        onExtend={handleExtendSession}
+        onLogout={handleSessionTimeout}
+        remainingMinutes={remainingTime}
+      />
     </div>
   );
 };
