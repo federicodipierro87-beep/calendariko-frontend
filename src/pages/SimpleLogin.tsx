@@ -227,7 +227,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
                 type="email"
                 required
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base"
-                placeholder={isRegisterMode ? "mario.rossi@email.com" : "admin@calendariko.com"}
+                placeholder={isRegisterMode ? "mario.rossi@email.com" : "Inserisci la tua email"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -273,7 +273,7 @@ const SimpleLogin: React.FC<SimpleLoginProps> = ({ onLogin }) => {
                 required
                 autoComplete="new-password"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-base"
-                placeholder={isRegisterMode ? "Crea una password sicura" : "admin123"}
+                placeholder={isRegisterMode ? "Crea una password sicura" : "Inserisci la tua password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
