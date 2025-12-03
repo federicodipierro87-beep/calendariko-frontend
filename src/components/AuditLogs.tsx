@@ -77,6 +77,9 @@ const AuditLogs: React.FC = () => {
     { value: 'UPDATE_EVENT', label: '✏️ Modifica Evento' },
     { value: 'DELETE_EVENT', label: '🗑️ Elimina Evento' },
     { value: 'APPLY_DATABASE_SCHEMA', label: '🔧 Aggiorna Schema DB' },
+    { value: 'CREATE_DATABASE_BACKUP', label: '💾 Crea Backup DB' },
+    { value: 'RESTORE_DATABASE_BACKUP', label: '🔄 Ripristina Backup DB' },
+    { value: 'DELETE_DATABASE_BACKUP', label: '🗑️ Elimina Backup DB' },
   ];
 
   const entityOptions = [

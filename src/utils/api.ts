@@ -298,3 +298,26 @@ export const auditApi = {
     return apiCall(`/audit/stats${params}`);
   },
 };
+
+export const backupApi = {
+  getBackups: () => apiCall('/backup/list'),
+  getStats: () => apiCall('/backup/stats'),
+  getConfig: () => apiCall('/backup/config'),
+  createBackup: () => apiCall('/backup/create', {
+    method: 'POST',
+  }),
+  testBackup: () => apiCall('/backup/test', {
+    method: 'POST',
+  }),
+  cleanupBackups: () => apiCall('/backup/cleanup', {
+    method: 'POST',
+  }),
+  verifyBackup: (backupId: string) => apiCall(`/backup/${backupId}/verify`),
+  deleteBackup: (backupId: string) => apiCall(`/backup/${backupId}`, {
+    method: 'DELETE',
+  }),
+  restoreBackup: (backupId: string, confirmRestore: boolean = false) => apiCall(`/backup/${backupId}/restore`, {
+    method: 'POST',
+    body: JSON.stringify({ confirmRestore }),
+  }),
+};
