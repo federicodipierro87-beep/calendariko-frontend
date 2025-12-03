@@ -21,7 +21,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     first_name: '',
     last_name: '',
     role: 'ARTIST' as 'ADMIN' | 'ARTIST',
-    selectedGroups: [] as string[]
+    selectedGroups: [] as string[],
+    newPassword: '' // Campo opzionale per cambiare password
   });
 
   // Use body scroll lock when modal is open
@@ -37,7 +38,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
         first_name: user.firstName || user.first_name || '',
         last_name: user.lastName || user.last_name || '',
         role: user.role || 'ARTIST',
-        selectedGroups: user.group_ids || []
+        selectedGroups: user.group_ids || [],
+        newPassword: '' // Reset sempre il campo password
       });
     }
   }, [user]);
@@ -55,7 +57,15 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     
     if (formData.email && formData.first_name && formData.last_name) {
       console.log('✅ EditUserModal - Validazione passata, chiamando onSaveUser');
-      onSaveUser(formData);
+      
+      // Prepara i dati, includendo la password solo se è stata fornita
+      const dataToSave = { ...formData };
+      if (!formData.newPassword || formData.newPassword.trim() === '') {
+        // Rimuovi il campo password se vuoto
+        delete dataToSave.newPassword;
+      }
+      
+      onSaveUser(dataToSave);
     } else {
       console.error('❌ EditUserModal - Validazione fallita, campi mancanti');
       alert('Per favore compila tutti i campi obbligatori');
@@ -133,6 +143,23 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                 required
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               />
+            </div>
+
+            {/* Nuova Password (opzionale) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nuova Password (opzionale)
+              </label>
+              <input
+                type="password"
+                value={formData.newPassword}
+                onChange={(e) => handleInputChange('newPassword', e.target.value)}
+                placeholder="Lascia vuoto per non modificare la password"
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Compila solo se vuoi cambiare la password dell'utente
+              </p>
             </div>
 
 

@@ -539,7 +539,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       console.log('📝 Dati utente originali:', selectedUser);
       
       // Mappa i campi dal formato frontend al formato backend
-      const mappedUserData = {
+      const mappedUserData: any = {
         firstName: userData.first_name,
         lastName: userData.last_name,
         email: userData.email,
@@ -547,6 +547,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         // Note: phone field non esiste nel database, quindi lo escludiamo
         // Note: selectedGroups sarà gestito separatamente se necessario
       };
+      
+      // Aggiungi la password solo se è stata fornita
+      if (userData.newPassword) {
+        mappedUserData.password = userData.newPassword;
+        console.log('🔐 Password inclusa nell\'aggiornamento');
+      }
       
       console.log('📝 Dati mappati per backend:', mappedUserData);
       
