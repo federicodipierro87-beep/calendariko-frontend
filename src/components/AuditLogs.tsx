@@ -176,7 +176,10 @@ const AuditLogs: React.FC = () => {
       case 'USER': return '👤';
       case 'GROUP': return '👥';
       case 'EVENT': return '🎤';
+      case 'AVAILABILITY': return '📅';
+      case 'NOTIFICATION': return '📧';
       case 'SYSTEM': return '🔧';
+      case 'UNKNOWN': return '⚙️';
       default: return '📄';
     }
   };
@@ -391,8 +394,8 @@ const AuditLogs: React.FC = () => {
                             {log.action.replace(/_/g, ' ')}
                           </div>
                           <div className="text-xs text-gray-500">
-                            {getEntityIcon(log.entity)} {log.entity}
-                            {log.entityId && (
+                            {getEntityIcon(log.entity)} {log.entity === 'UNKNOWN' ? 'Sistema' : log.entity}
+                            {log.entityId && log.entity !== 'UNKNOWN' && (
                               <span className="ml-1 text-gray-400">#{log.entityId.slice(-8)}</span>
                             )}
                           </div>
