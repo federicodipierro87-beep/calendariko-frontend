@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { auditApi } from '../utils/api';
+import { auditApi, usersApi } from '../utils/api';
 
 interface AuditLog {
   id: string;
@@ -45,6 +45,50 @@ const AuditLogs: React.FC = () => {
     adminId: '',
   });
 
+  const [admins, setAdmins] = useState<Array<{id: string, firstName: string, lastName: string, email: string}>>([]);
+
+  const loadAdmins = async () => {
+    try {
+      const result = await usersApi.getAll();
+      // Filtra solo gli admin
+      const adminUsers = result.data.filter((user: any) => user.role === 'ADMIN');
+      setAdmins(adminUsers);
+    } catch (error: any) {
+      console.error('Error loading admins:', error);
+    }
+  };
+
+  // Liste di valori predefinite per i filtri
+  const actionOptions = [
+    { value: '', label: 'Tutte le azioni' },
+    { value: 'CREATE_USER', label: '➕ Crea Utente' },
+    { value: 'UPDATE_USER', label: '✏️ Modifica Utente' },
+    { value: 'DELETE_USER', label: '🗑️ Elimina Utente' },
+    { value: 'UNLOCK_USER', label: '🔓 Sblocca Utente' },
+    { value: 'CHANGE_USER_PASSWORD', label: '🔑 Cambia Password' },
+    { value: 'CREATE_GROUP', label: '➕ Crea Gruppo' },
+    { value: 'UPDATE_GROUP', label: '✏️ Modifica Gruppo' },
+    { value: 'DELETE_GROUP', label: '🗑️ Elimina Gruppo' },
+    { value: 'ADD_GROUP_MEMBER', label: '👥 Aggiungi Membro' },
+    { value: 'REMOVE_GROUP_MEMBER', label: '👥 Rimuovi Membro' },
+    { value: 'JOIN_GROUP', label: '🚪 Entra Gruppo' },
+    { value: 'LEAVE_GROUP', label: '🚪 Lascia Gruppo' },
+    { value: 'CREATE_EVENT', label: '➕ Crea Evento' },
+    { value: 'UPDATE_EVENT', label: '✏️ Modifica Evento' },
+    { value: 'DELETE_EVENT', label: '🗑️ Elimina Evento' },
+    { value: 'APPLY_DATABASE_SCHEMA', label: '🔧 Aggiorna Schema DB' },
+  ];
+
+  const entityOptions = [
+    { value: '', label: 'Tutte le entità' },
+    { value: 'USER', label: '👤 Utenti' },
+    { value: 'GROUP', label: '👥 Gruppi' },
+    { value: 'EVENT', label: '🎤 Eventi' },
+    { value: 'AVAILABILITY', label: '📅 Disponibilità' },
+    { value: 'NOTIFICATION', label: '📧 Notifiche' },
+    { value: 'SYSTEM', label: '🔧 Sistema' },
+  ];
+
   const logsPerPage = 20;
 
   const loadLogs = async () => {
@@ -85,6 +129,10 @@ const AuditLogs: React.FC = () => {
       loadStats();
     }
   }, [showStats]);
+
+  useEffect(() => {
+    loadAdmins();
+  }, []);
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
@@ -227,16 +275,18 @@ const AuditLogs: React.FC = () => {
       {/* Filtri */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
         <h4 className="font-medium text-gray-800 mb-4">🔍 Filtri</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Azione</label>
-            <input
-              type="text"
-              placeholder="es: CREATE_USER"
+            <select
               value={filters.action}
               onChange={(e) => handleFilterChange('action', e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
+            >
+              {actionOptions.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Entità</label>
@@ -245,11 +295,9 @@ const AuditLogs: React.FC = () => {
               onChange={(e) => handleFilterChange('entity', e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Tutte</option>
-              <option value="USER">👤 Utenti</option>
-              <option value="GROUP">👥 Gruppi</option>
-              <option value="EVENT">🎤 Eventi</option>
-              <option value="SYSTEM">🔧 Sistema</option>
+              {entityOptions.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
             </select>
           </div>
           <div>
@@ -269,6 +317,21 @@ const AuditLogs: React.FC = () => {
               onChange={(e) => handleFilterChange('endDate', e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Admin</label>
+            <select
+              value={filters.adminId}
+              onChange={(e) => handleFilterChange('adminId', e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Tutti gli admin</option>
+              {admins.map(admin => (
+                <option key={admin.id} value={admin.id}>
+                  {admin.firstName} {admin.lastName}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="flex items-end">
             <button
