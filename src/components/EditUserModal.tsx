@@ -59,11 +59,10 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
       console.log('✅ EditUserModal - Validazione passata, chiamando onSaveUser');
       
       // Prepara i dati, includendo la password solo se è stata fornita
-      const dataToSave = { ...formData };
-      if (!formData.newPassword || formData.newPassword.trim() === '') {
-        // Rimuovi il campo password se vuoto
-        delete dataToSave.newPassword;
-      }
+      const { newPassword, ...baseData } = formData;
+      const dataToSave = newPassword && newPassword.trim() !== '' 
+        ? { ...baseData, newPassword }
+        : baseData;
       
       onSaveUser(dataToSave);
     } else {
