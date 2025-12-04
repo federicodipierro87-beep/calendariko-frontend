@@ -392,7 +392,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           className={`min-h-[2rem] md:min-h-[3rem] border border-gray-200 cursor-pointer ${hoverClass} ${todayClass} ${eventClass} transition-colors p-1 flex flex-col`}
           title={onDayClick ? (
             userRole !== 'ADMIN' 
-              ? 'Clicca per gestire disponibilità/indisponibilità' 
+              ? 'Clicca per visualizzare eventi e gestire indisponibilità' 
               : 'Clicca per visualizzare/creare eventi'
           ) : ''}
         >

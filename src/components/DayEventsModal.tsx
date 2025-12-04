@@ -145,8 +145,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
         notes: newAvailability.notes || undefined
       };
 
-      // Solo per artisti aggiungiamo user_id, per admin l'indisponibilità è per tutto il gruppo
-      if (user?.role === 'ARTIST') {
+      // Solo per utenti non admin aggiungiamo user_id, per admin l'indisponibilità è per tutto il gruppo
+      if (user?.role !== 'ADMIN') {
         availabilityData.user_id = user.id;
       }
 
@@ -201,7 +201,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
             <h2 className="text-xl font-semibold text-gray-900">
               📅 {formatDate(selectedDate)}
             </h2>
-            {user?.role === 'ARTIST' && (
+            {user?.role !== 'ADMIN' && (
               <p className="text-sm text-gray-600 mt-1">
                 Gestisci eventi e aggiungi indisponibilità per questo giorno
               </p>
@@ -223,7 +223,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
               <p className="text-gray-500 mb-2">
                 Nessun evento programmato per questo giorno
               </p>
-              {user?.role === 'ARTIST' && userGroups && userGroups.length > 0 && (
+              {user?.role !== 'ADMIN' && userGroups && userGroups.length > 0 && (
                 <p className="text-sm text-green-600">
                   ✅ Puoi aggiungere una indisponibilità per questo giorno
                 </p>
@@ -325,8 +325,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
             </button>
           )}
 
-          {/* Pulsante per aggiungere indisponibilità - per artisti */}
-          {user?.role === 'ARTIST' && !isCreating && !isCreatingAvailability && userGroups && userGroups.length > 0 && (
+          {/* Pulsante per aggiungere indisponibilità - per utenti non admin */}
+          {user?.role !== 'ADMIN' && !isCreating && !isCreatingAvailability && userGroups && userGroups.length > 0 && (
             <>
               {hasRealEvents() ? (
                 <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-800 py-3 px-4 rounded-md text-center">
@@ -352,8 +352,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
             </>
           )}
 
-          {/* Messaggio se artista non ha gruppi */}
-          {user?.role === 'ARTIST' && !isCreating && !isCreatingAvailability && (!userGroups || userGroups.length === 0) && (
+          {/* Messaggio se utente non ha gruppi */}
+          {user?.role !== 'ADMIN' && !isCreating && !isCreatingAvailability && (!userGroups || userGroups.length === 0) && (
             <div className="w-full bg-yellow-50 border border-yellow-200 text-yellow-800 py-3 px-4 rounded-md text-center">
               <p className="font-medium">Non sei ancora membro di nessun gruppo</p>
               <p className="text-sm">Contatta l'amministratore per essere aggiunto a un gruppo e poter gestire le tue disponibilità</p>
@@ -560,7 +560,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                   required
                 >
                   <option value="">Seleziona gruppo</option>
-                  {(user?.role === 'ARTIST' 
+                  {(user?.role !== 'ADMIN' 
                     ? userGroups 
                     : groups?.filter(group => group.type === 'BAND' || group.type === 'DJ')
                   )?.map(group => (
