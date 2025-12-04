@@ -87,18 +87,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   // Helper per ricaricare i gruppi in modo consistente
   const reloadGroups = async () => {
     try {
-      const groupsData = await groupsApi.getAll();
-      
       if (user.role === 'ADMIN') {
-        // Admin: mostra tutti i gruppi
+        // Admin: carica tutti i gruppi
+        const groupsData = await groupsApi.getAll();
         setGroups(groupsData);
       } else {
-        // Utenti normali: filtra solo i gruppi di cui fanno parte
-        const userGroups = groupsData.filter((group: any) => 
-          group.user_groups?.some((ug: any) => ug.user_id === user.id)
-        );
-        setGroups(userGroups);
-        setUserGroups(userGroups);
+        // Utenti normali: usa endpoint dedicato
+        const userGroupsData = await groupsApi.getUserGroups();
+        setGroups(userGroupsData);
+        setUserGroups(userGroupsData);
       }
     } catch (error) {
       console.error('Errore nel ricaricamento dei gruppi:', error);
@@ -135,110 +132,26 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         }
         setEvents(transformedEvents);
         
-        // Carica gruppi - tutti gli utenti usano getAll() ma filtriamo i risultati
-        console.log('🔍 FRONTEND - Starting to load groups...');
-        console.log('🔍 FRONTEND - User:', user);
-        
-        try {
-          console.log('🔍 FRONTEND - Calling groupsApi.getAll()...');
+        // Carica gruppi in base al ruolo utente
+        if (user.role === 'ADMIN') {
+          // Admin: carica tutti i gruppi
           const groupsData = await groupsApi.getAll();
-          
-          console.log('🔍 FRONTEND - Groups API response received!');
-          console.log('🔍 FRONTEND - Groups length:', groupsData?.length ?? 'undefined');
-          console.log('🔍 FRONTEND - Groups data:', groupsData);
-          console.log('🔍 FRONTEND - Current user ID:', user.id, 'Role:', user.role);
-          
-          if (!groupsData || groupsData.length === 0) {
-            console.log('⚠️ FRONTEND - No groups returned from API!');
-            
-            // Per utenti non-admin, prova a caricare i dati dell'utente che potrebbero includere i gruppi
-            if (user.role !== 'ADMIN') {
-              console.log('🔄 FRONTEND - Trying alternative: loading user profile data...');
-              try {
-                const userProfileData = await usersApi.getById(user.id);
-                console.log('🔍 FRONTEND - User profile data:', userProfileData);
-                
-                if (userProfileData.groups && userProfileData.groups.length > 0) {
-                  console.log('✅ FRONTEND - Found groups in user profile!');
-                  setGroups(userProfileData.groups);
-                  setUserGroups(userProfileData.groups);
-                  return;
-                } else if (userProfileData.user_groups && userProfileData.user_groups.length > 0) {
-                  console.log('✅ FRONTEND - Found user_groups relationship in profile!');
-                  // Estrai i gruppi dalla relazione user_groups
-                  const userGroups = userProfileData.user_groups.map((ug: any) => ug.group).filter((g: any) => g);
-                  console.log('🔍 FRONTEND - Extracted groups:', userGroups);
-                  setGroups(userGroups);
-                  setUserGroups(userGroups);
-                  return;
-                } else {
-                  console.log('ℹ️ FRONTEND - No groups found in user profile either');
-                  console.log('🔍 FRONTEND - Profile structure:', Object.keys(userProfileData));
-                  
-                  // Check localStorage for cached group info (workaround)
-                  console.log('🔍 FRONTEND - Checking localStorage for cached groups...');
-                  const cachedGroups = localStorage.getItem(`userGroups_${user.id}`);
-                  if (cachedGroups) {
-                    try {
-                      const groups = JSON.parse(cachedGroups);
-                      console.log('✅ FRONTEND - Found cached groups in localStorage:', groups);
-                      setGroups(groups);
-                      setUserGroups(groups);
-                      return;
-                    } catch (e) {
-                      console.error('❌ FRONTEND - Failed to parse cached groups:', e);
-                    }
-                  } else {
-                    console.log('ℹ️ FRONTEND - No cached groups found');
-                  }
-                }
-              } catch (userError) {
-                console.error('❌ FRONTEND - Failed to load user profile:', userError);
-              }
-            }
-            
+          console.log('🔍 FRONTEND - Admin groups loaded:', groupsData.length);
+          setGroups(groupsData);
+        } else {
+          // Utenti normali: usa il nuovo endpoint /users/me/groups
+          try {
+            console.log('🔍 FRONTEND - Loading user groups from new endpoint...');
+            const userGroupsData = await groupsApi.getUserGroups();
+            console.log('✅ FRONTEND - User groups loaded successfully:', userGroupsData.length);
+            console.log('🔍 FRONTEND - User groups data:', userGroupsData);
+            setGroups(userGroupsData);
+            setUserGroups(userGroupsData);
+          } catch (error) {
+            console.error('❌ FRONTEND - Failed to load user groups from endpoint:', error);
             setGroups([]);
             setUserGroups([]);
-            return;
           }
-          
-          if (user.role === 'ADMIN') {
-            console.log('🔍 FRONTEND - User is ADMIN, showing all groups');
-            setGroups(groupsData);
-          } else {
-            console.log('🔍 FRONTEND - User is not admin, filtering groups...');
-            
-            // Utenti normali: filtra solo i gruppi di cui fanno parte
-            const userGroups = groupsData.filter((group: any) => {
-              console.log(`🔍 Processing group:`, group);
-              const hasUserGroups = group.user_groups && Array.isArray(group.user_groups);
-              console.log(`🔍 Group "${group.name}" has user_groups:`, hasUserGroups, group.user_groups);
-              
-              if (!hasUserGroups) {
-                console.log(`❌ Group "${group.name}" has no user_groups relationship`);
-                return false;
-              }
-              
-              const isMember = group.user_groups.some((ug: any) => {
-                console.log(`🔍 Checking membership:`, ug, 'vs user ID:', user.id);
-                return ug.user_id === user.id;
-              });
-              
-              console.log(`🔍 Group "${group.name}":`, isMember ? 'IS MEMBER ✅' : 'NOT MEMBER ❌');
-              return isMember;
-            });
-            
-            console.log('🔍 FRONTEND - Filtering complete!');
-            console.log('🔍 FRONTEND - User filtered groups:', userGroups.length);
-            console.log('🔍 FRONTEND - Filtered groups:', userGroups);
-            
-            setGroups(userGroups);
-            setUserGroups(userGroups);
-          }
-        } catch (error) {
-          console.error('❌ FRONTEND - Failed to load groups:', error);
-          setGroups([]);
-          setUserGroups([]);
         }
         
         // Carica utenti se admin

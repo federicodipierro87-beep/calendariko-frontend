@@ -125,7 +125,7 @@ export const apiCall = async (
 export const groupsApi = {
   getAll: () => apiCall('/groups'),
   getPublic: () => apiCall('/auth/public-groups'),
-  getUserGroups: () => apiCall('/groups/my-groups'),
+  getUserGroups: () => apiCall('/users/me/groups'), // Nuovo endpoint corretto
   create: (groupData: any) => apiCall('/groups', {
     method: 'POST',
     body: JSON.stringify(groupData),
