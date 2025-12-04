@@ -174,6 +174,23 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 } else {
                   console.log('ℹ️ FRONTEND - No groups found in user profile either');
                   console.log('🔍 FRONTEND - Profile structure:', Object.keys(userProfileData));
+                  
+                  // Check localStorage for cached group info (workaround)
+                  console.log('🔍 FRONTEND - Checking localStorage for cached groups...');
+                  const cachedGroups = localStorage.getItem(`userGroups_${user.id}`);
+                  if (cachedGroups) {
+                    try {
+                      const groups = JSON.parse(cachedGroups);
+                      console.log('✅ FRONTEND - Found cached groups in localStorage:', groups);
+                      setGroups(groups);
+                      setUserGroups(groups);
+                      return;
+                    } catch (e) {
+                      console.error('❌ FRONTEND - Failed to parse cached groups:', e);
+                    }
+                  } else {
+                    console.log('ℹ️ FRONTEND - No cached groups found');
+                  }
                 }
               } catch (userError) {
                 console.error('❌ FRONTEND - Failed to load user profile:', userError);
@@ -564,6 +581,21 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         console.log('🔄 Ricaricando lista gruppi...');
         await reloadGroups();
         console.log('✅ Lista gruppi aggiornata');
+        
+        // Cache dei gruppi per l'utente appena creato (workaround backend limitation)
+        try {
+          const userGroupsToCache = userData.selectedGroups.map((groupId: string) => {
+            const group = groups.find(g => g.id === groupId);
+            return group;
+          }).filter(Boolean);
+          
+          if (userGroupsToCache.length > 0) {
+            localStorage.setItem(`userGroups_${createdUser.id}`, JSON.stringify(userGroupsToCache));
+            console.log('💾 Cached groups for user:', createdUser.id, userGroupsToCache);
+          }
+        } catch (cacheError) {
+          console.error('Error caching user groups:', cacheError);
+        }
       }
       
       // Chiudi il modal
