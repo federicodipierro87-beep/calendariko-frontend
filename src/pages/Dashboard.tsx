@@ -2454,6 +2454,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           setSelectedEvent(event);
           setShowEditEventModal(true);
         }}
+        onDelete={handleDeleteEvent}
         currentUser={user}
       />
 

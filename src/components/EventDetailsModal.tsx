@@ -15,17 +15,31 @@ interface EventDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onEdit?: (event: Event) => void;
+  onDelete?: (eventId: string, eventTitle?: string) => void;
   currentUser?: any;
 }
 
-const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, onClose, onEdit, currentUser }) => {
+const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, onClose, onEdit, onDelete, currentUser }) => {
   if (!isOpen || !event) return null;
 
-  const canEditEvent = currentUser?.role === 'ADMIN' || event.type !== 'availability-busy';
+  // Admin può modificare solo eventi normali (non indisponibilità)
+  const canEditEvent = currentUser?.role === 'ADMIN' && event.type !== 'availability-busy';
+  
+  // Admin può cancellare indisponibilità, utenti normali possono cancellare le proprie
+  const canDeleteEvent = (currentUser?.role === 'ADMIN') || 
+    (event.type === 'availability-busy' && event.user?.id === currentUser?.id);
 
   const handleEditClick = () => {
     if (onEdit && event) {
       onEdit(event);
+      onClose();
+    }
+  };
+
+  const handleDeleteClick = () => {
+    if (onDelete && event) {
+      const title = event.type === 'availability-busy' ? 'Indisponibile' : event.title;
+      onDelete(event.id, title);
       onClose();
     }
   };
@@ -190,6 +204,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, on
         {/* Footer */}
         <div className="px-6 py-4 bg-gray-50 border-t rounded-b-lg">
           <div className="flex gap-3">
+            {/* Pulsante Modifica - solo per eventi normali se admin */}
             {canEditEvent && onEdit && (
               <button
                 onClick={handleEditClick}
@@ -201,9 +216,23 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, on
                 Modifica
               </button>
             )}
+            
+            {/* Pulsante Elimina - per admin o proprietari di indisponibilità */}
+            {canDeleteEvent && onDelete && (
+              <button
+                onClick={handleDeleteClick}
+                className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors font-medium flex items-center justify-center"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Elimina
+              </button>
+            )}
+            
             <button
               onClick={onClose}
-              className={`${canEditEvent && onEdit ? 'flex-1' : 'w-full'} bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors font-medium`}
+              className={`${(canEditEvent && onEdit) || (canDeleteEvent && onDelete) ? 'flex-1' : 'w-full'} bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors font-medium`}
             >
               Chiudi
             </button>
