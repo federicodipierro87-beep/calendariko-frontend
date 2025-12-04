@@ -277,7 +277,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   const handleDayClick = (date: string) => {
     setSelectedDate(date);
-    setIsModalOpen(true);
+    
+    // Se l'utente non è admin, apri il modal per le indisponibilità
+    if (user.role !== 'ADMIN') {
+      setShowAvailabilityModal(true);
+    } else {
+      // Se è admin, apri il modal per creare eventi
+      setIsModalOpen(true);
+    }
   };
 
   const handleEventClick = (event: any) => {
