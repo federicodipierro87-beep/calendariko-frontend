@@ -19,7 +19,10 @@ export const useSessionTimeout = ({
 
   // Reset del timer di inattività
   const resetTimer = useCallback(() => {
-    console.log('🔄 Session timeout reset');
+    // Solo log in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 Session timeout reset');
+    }
     lastActivityRef.current = Date.now();
 
     // Pulisce i timer esistenti
@@ -34,14 +37,18 @@ export const useSessionTimeout = ({
     if (onWarning && warningMinutes > 0) {
       const warningTime = (timeoutMinutes - warningMinutes) * 60 * 1000;
       warningRef.current = window.setTimeout(() => {
-        console.log('⚠️ Session timeout warning');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('⚠️ Session timeout warning');
+        }
         onWarning();
       }, warningTime);
     }
 
     // Imposta il timer principale
     timeoutRef.current = window.setTimeout(() => {
-      console.log('⏰ Session timeout - logging out');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('⏰ Session timeout - logging out');
+      }
       onTimeout();
     }, timeoutMinutes * 60 * 1000);
   }, [onTimeout, onWarning, timeoutMinutes, warningMinutes]);
@@ -49,9 +56,9 @@ export const useSessionTimeout = ({
   // Eventi che indicano attività dell'utente
   const handleUserActivity = useCallback(() => {
     const now = Date.now();
-    // Reset solo se è passato più di 1 minuto dall'ultima attività
-    // per evitare reset troppo frequenti
-    if (now - lastActivityRef.current > 60000) {
+    // Reset solo se è passato più di 2 minuti dall'ultima attività
+    // per evitare reset troppo frequenti durante il caricamento iniziale
+    if (now - lastActivityRef.current > 120000) {
       resetTimer();
     }
   }, [resetTimer]);

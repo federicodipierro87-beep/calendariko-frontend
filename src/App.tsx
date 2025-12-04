@@ -9,20 +9,26 @@ function App() {
   const [currentView, setCurrentView] = useState<'login' | 'verify' | 'dashboard'>('login');
 
   useEffect(() => {
-    // Debug logging
-    console.log('🔍 Current URL:', window.location.href);
-    console.log('🔍 Search params:', window.location.search);
+    // Debug logging solo in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Current URL:', window.location.href);
+      console.log('🔍 Search params:', window.location.search);
+    }
     
     // Controlla se stiamo visualizzando una pagina di verifica email
     const urlParams = new URLSearchParams(window.location.search);
     const verifyToken = urlParams.get('token');
     const email = urlParams.get('email');
     
-    console.log('🔍 Token found:', !!verifyToken);
-    console.log('🔍 Email found:', !!email);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Token found:', !!verifyToken);
+      console.log('🔍 Email found:', !!email);
+    }
     
     if (verifyToken) {
-      console.log('✅ Setting view to verify');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Setting view to verify');
+      }
       setCurrentView('verify');
       setLoading(false);
       return;
