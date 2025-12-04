@@ -1076,16 +1076,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     >
                       🔍 Audit Log
                     </button>
-                    <button
-                      onClick={() => handleSectionClick('backup')}
-                      className={`px-3 py-2 rounded-md text-sm font-medium ${
-                        activeSection === 'backup'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'text-gray-500 hover:text-gray-700'
-                      }`}
-                    >
-                      💾 Backup DB
-                    </button>
                   </>
                 )}
               </nav>
@@ -1185,12 +1175,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                                 </p>
                               </div>
 
-                              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 cursor-pointer hover:bg-emerald-100 transition-colors" onClick={() => handleSectionClick('backup')}>
-                                <h5 className="text-emerald-800 font-medium mb-1">💾 Backup Database</h5>
-                                <p className="text-emerald-700 text-sm">
-                                  Gestione backup automatici e manuali
-                                </p>
-                              </div>
 
                             </>
                           )}
@@ -1949,9 +1933,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 </div>
               )}
 
-              {activeSection === 'backup' && user.role === 'ADMIN' && (
-                <BackupManagement />
-              )}
 
               {activeSection === 'user' && (
                 <div>
@@ -2196,6 +2177,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                       </form>
                     </div>
 
+                    {/* Sezione Backup Management - Solo Admin */}
+                    {user.role === 'ADMIN' && (
+                      <div className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200 mt-6">
+                        <h5 className="font-medium text-gray-900 mb-4 flex items-center">
+                          <span className="mr-2">💾</span>
+                          Database Backup
+                        </h5>
+                        <BackupManagement />
+                      </div>
+                    )}
+
                     {/* Pulsanti Azione */}
                     <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 pb-20 sm:pb-0">
                       <button 
@@ -2350,17 +2342,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               >
                 <span className="text-lg">🔍</span>
                 <span>Audit</span>
-              </button>
-              <button
-                onClick={() => handleSectionClick('backup')}
-                className={`flex flex-col items-center px-1 py-2 text-xs ${
-                  activeSection === 'backup'
-                    ? 'text-blue-600'
-                    : 'text-gray-500'
-                }`}
-              >
-                <span className="text-lg">💾</span>
-                <span>Backup</span>
               </button>
             </>
           )}
