@@ -150,6 +150,27 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           
           if (!groupsData || groupsData.length === 0) {
             console.log('⚠️ FRONTEND - No groups returned from API!');
+            
+            // Per utenti non-admin, prova a caricare i dati dell'utente che potrebbero includere i gruppi
+            if (user.role !== 'ADMIN') {
+              console.log('🔄 FRONTEND - Trying alternative: loading user profile data...');
+              try {
+                const userProfileData = await usersApi.getById(user.id);
+                console.log('🔍 FRONTEND - User profile data:', userProfileData);
+                
+                if (userProfileData.groups && userProfileData.groups.length > 0) {
+                  console.log('✅ FRONTEND - Found groups in user profile!');
+                  setGroups(userProfileData.groups);
+                  setUserGroups(userProfileData.groups);
+                  return;
+                } else {
+                  console.log('ℹ️ FRONTEND - No groups found in user profile either');
+                }
+              } catch (userError) {
+                console.error('❌ FRONTEND - Failed to load user profile:', userError);
+              }
+            }
+            
             setGroups([]);
             setUserGroups([]);
             return;
