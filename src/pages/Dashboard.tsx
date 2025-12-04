@@ -167,7 +167,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         const availabilityData = await availabilityApi.getAvailability({});
         // Trasforma le disponibilità in eventi per il calendario
         const transformedAvailability = availabilityData
-          .filter((avail: any) => avail.type === 'UNAVAILABLE') // Solo le indisponibilità
+          .filter((avail: any) => avail.type === 'BUSY') // Solo le indisponibilità
           .map((avail: any) => ({
             id: `avail-${avail.id}`,
             title: `❌ ${avail.user?.first_name || 'Utente'} - Impegnato`,
@@ -241,7 +241,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       // Carica disponibilità
       const availabilityData = await availabilityApi.getAvailability({});
       const transformedAvailability = availabilityData
-        .filter((avail: any) => avail.type === 'UNAVAILABLE')
+        .filter((avail: any) => avail.type === 'BUSY')
         .map((avail: any) => ({
           id: `avail-${avail.id}`,
           title: `❌ ${avail.user?.first_name || 'Utente'} - Impegnato`,
