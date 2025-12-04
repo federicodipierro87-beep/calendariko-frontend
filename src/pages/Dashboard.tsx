@@ -87,34 +87,23 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   // Helper per ricaricare i gruppi in modo consistente
   const reloadGroups = async () => {
     try {
+      const groupsData = await groupsApi.getAll();
+      
       if (user.role === 'ADMIN') {
-        // Admin: carica tutti i gruppi
-        const groupsData = await groupsApi.getAll();
+        // Admin: mostra tutti i gruppi
         setGroups(groupsData);
       } else {
-        // Utenti normali: prova getUserGroups, poi fallback a getPublic
-        try {
-          const userGroupsData = await groupsApi.getUserGroups();
-          setGroups(userGroupsData);
-          setUserGroups(userGroupsData);
-        } catch (error) {
-          try {
-            // Fallback: usa l'endpoint pubblico e filtra
-            const publicGroupsData = await groupsApi.getPublic();
-            const userGroups = publicGroupsData.filter((group: any) => 
-              group.user_groups?.some((ug: any) => ug.user_id === user.id)
-            );
-            setGroups(userGroups);
-            setUserGroups(userGroups);
-          } catch (publicError) {
-            console.error('Both getUserGroups and getPublic failed:', publicError);
-            setGroups([]);
-            setUserGroups([]);
-          }
-        }
+        // Utenti normali: filtra solo i gruppi di cui fanno parte
+        const userGroups = groupsData.filter((group: any) => 
+          group.user_groups?.some((ug: any) => ug.user_id === user.id)
+        );
+        setGroups(userGroups);
+        setUserGroups(userGroups);
       }
     } catch (error) {
       console.error('Errore nel ricaricamento dei gruppi:', error);
+      setGroups([]);
+      setUserGroups([]);
     }
   };
 
@@ -146,54 +135,40 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         }
         setEvents(transformedEvents);
         
-        // Carica gruppi in base al ruolo utente
-        if (user.role === 'ADMIN') {
-          // Admin: carica tutti i gruppi
+        // Carica gruppi - tutti gli utenti usano getAll() ma filtriamo i risultati
+        try {
           const groupsData = await groupsApi.getAll();
           if (import.meta.env.DEV) {
-            console.log('🔍 FRONTEND - Admin groups received:', groupsData.length);
+            console.log('🔍 FRONTEND - All groups received:', groupsData.length);
+            console.log('🔍 FRONTEND - Groups data:', groupsData);
+            console.log('🔍 FRONTEND - Current user ID:', user.id, 'Role:', user.role);
           }
-          setGroups(groupsData);
-        } else {
-          // Utenti normali: prova prima getUserGroups, poi fallback a getPublic
-          try {
-            const userGroupsData = await groupsApi.getUserGroups();
+          
+          if (user.role === 'ADMIN') {
+            // Admin: mostra tutti i gruppi
+            setGroups(groupsData);
+          } else {
+            // Utenti normali: filtra solo i gruppi di cui fanno parte
+            const userGroups = groupsData.filter((group: any) => {
+              const isMember = group.user_groups?.some((ug: any) => ug.user_id === user.id);
+              if (import.meta.env.DEV) {
+                console.log(`🔍 Group "${group.name}":`, isMember ? 'IS MEMBER' : 'NOT MEMBER');
+                console.log(`🔍 user_groups:`, group.user_groups);
+              }
+              return isMember;
+            });
+            
             if (import.meta.env.DEV) {
-              console.log('🔍 FRONTEND - User groups from getUserGroups:', userGroupsData.length);
+              console.log('🔍 FRONTEND - User filtered groups:', userGroups.length);
             }
-            setGroups(userGroupsData);
-            setUserGroups(userGroupsData);
-          } catch (error) {
-            console.warn('getUserGroups failed, trying getPublic...');
-            try {
-              // Fallback: usa l'endpoint pubblico dei gruppi
-              const publicGroupsData = await groupsApi.getPublic();
-              if (import.meta.env.DEV) {
-                console.log('🔍 FRONTEND - Public groups received:', publicGroupsData.length);
-                console.log('🔍 FRONTEND - Filtering for user ID:', user.id);
-              }
-              
-              // Filtra solo i gruppi di cui l'utente fa parte
-              const userGroups = publicGroupsData.filter((group: any) => {
-                const isMember = group.user_groups?.some((ug: any) => ug.user_id === user.id);
-                if (import.meta.env.DEV) {
-                  console.log(`🔍 Group ${group.name}:`, isMember ? 'MEMBER' : 'NOT MEMBER', group.user_groups);
-                }
-                return isMember;
-              });
-              
-              if (import.meta.env.DEV) {
-                console.log('🔍 FRONTEND - Filtered user groups:', userGroups.length);
-              }
-              
-              setGroups(userGroups);
-              setUserGroups(userGroups);
-            } catch (publicError) {
-              console.error('Both getUserGroups and getPublic failed:', publicError);
-              setGroups([]);
-              setUserGroups([]);
-            }
+            
+            setGroups(userGroups);
+            setUserGroups(userGroups);
           }
+        } catch (error) {
+          console.error('Failed to load groups:', error);
+          setGroups([]);
+          setUserGroups([]);
         }
         
         // Carica utenti se admin
