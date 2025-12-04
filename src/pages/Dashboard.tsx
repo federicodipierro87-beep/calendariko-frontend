@@ -141,6 +141,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         const groupsData = await groupsApi.getAll();
         if (import.meta.env.DEV) {
           console.log('🔍 FRONTEND - Groups received:', groupsData.length);
+          console.log('🔍 FRONTEND - Groups data:', groupsData);
+          console.log('🔍 FRONTEND - Current user ID:', user.id);
         }
         setGroups(groupsData);
 
@@ -152,10 +154,19 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             setUserGroups(userGroupsData);
           } catch (error) {
             console.warn('Endpoint getUserGroups non disponibile, uso filtro frontend');
+            console.log('🔍 FRONTEND - Filtering groups for user:', user.id);
             // Filtra i gruppi lato frontend se l'endpoint non esiste
-            const userGroups = groupsData.filter((group: any) => 
-              group.user_groups?.some((ug: any) => ug.user_id === user.id)
-            );
+            const userGroups = groupsData.filter((group: any) => {
+              console.log(`🔍 Group ${group.name}:`, group);
+              console.log(`🔍 Group user_groups:`, group.user_groups);
+              const isMember = group.user_groups?.some((ug: any) => {
+                console.log(`🔍 Checking user_group:`, ug, 'vs user ID:', user.id);
+                return ug.user_id === user.id;
+              });
+              console.log(`🔍 Is user member of ${group.name}:`, isMember);
+              return isMember;
+            });
+            console.log('🔍 FRONTEND - Filtered user groups:', userGroups);
             setUserGroups(userGroups);
           }
         }
@@ -1383,12 +1394,19 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     
                     <div className="space-y-2">
                       {(() => {
+                        console.log('🔍 GROUPS SECTION - User role:', user.role, 'User ID:', user.id);
+                        console.log('🔍 GROUPS SECTION - All groups:', groups);
+                        
                         // Filtra i gruppi in base al ruolo e alla ricerca
                         let filteredGroups = user.role === 'ADMIN' 
                           ? groups 
-                          : groups.filter(group => 
-                              group.user_groups?.some((ug: any) => ug.user_id === user.id)
-                            );
+                          : groups.filter(group => {
+                              const isMember = group.user_groups?.some((ug: any) => ug.user_id === user.id);
+                              console.log(`🔍 GROUPS SECTION - Group ${group.name}, isMember:`, isMember, 'user_groups:', group.user_groups);
+                              return isMember;
+                            });
+                        
+                        console.log('🔍 GROUPS SECTION - Filtered groups:', filteredGroups);
                         
                         // Applica filtro di ricerca
                         if (groupsSearchTerm.trim()) {
