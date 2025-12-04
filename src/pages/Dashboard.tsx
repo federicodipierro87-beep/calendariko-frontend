@@ -163,8 +163,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                   setGroups(userProfileData.groups);
                   setUserGroups(userProfileData.groups);
                   return;
+                } else if (userProfileData.user_groups && userProfileData.user_groups.length > 0) {
+                  console.log('✅ FRONTEND - Found user_groups relationship in profile!');
+                  // Estrai i gruppi dalla relazione user_groups
+                  const userGroups = userProfileData.user_groups.map((ug: any) => ug.group).filter((g: any) => g);
+                  console.log('🔍 FRONTEND - Extracted groups:', userGroups);
+                  setGroups(userGroups);
+                  setUserGroups(userGroups);
+                  return;
                 } else {
                   console.log('ℹ️ FRONTEND - No groups found in user profile either');
+                  console.log('🔍 FRONTEND - Profile structure:', Object.keys(userProfileData));
                 }
               } catch (userError) {
                 console.error('❌ FRONTEND - Failed to load user profile:', userError);
