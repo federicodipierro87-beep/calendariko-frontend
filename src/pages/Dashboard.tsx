@@ -84,6 +84,22 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const [remainingTime, setRemainingTime] = useState(300); // 5 minuti in secondi
 
+  // Helper per ricaricare i gruppi in modo consistente
+  const reloadGroups = async () => {
+    try {
+      if (user.role === 'ADMIN') {
+        const groupsData = await groupsApi.getAll();
+        setGroups(groupsData);
+      } else {
+        const userGroupsData = await groupsApi.getUserGroups();
+        setGroups(userGroupsData);
+        setUserGroups(userGroupsData);
+      }
+    } catch (error) {
+      console.error('Errore nel ricaricamento dei gruppi:', error);
+    }
+  };
+
   // Carica dati iniziali
   React.useEffect(() => {
     const loadData = async () => {
@@ -112,17 +128,21 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         }
         setEvents(transformedEvents);
         
-        // Carica gruppi
-        const groupsData = await groupsApi.getAll();
-        if (import.meta.env.DEV) {
-          console.log('🔍 FRONTEND - Groups received:', groupsData.length);
-        }
-        setGroups(groupsData);
-
-        // Carica gruppi dell'utente corrente per le availability
-        if (user.role === 'ARTIST') {
+        // Carica gruppi in base al ruolo
+        if (user.role === 'ADMIN') {
+          // Admin: carica tutti i gruppi con relazioni complete
+          const groupsData = await groupsApi.getAll();
+          if (import.meta.env.DEV) {
+            console.log('🔍 FRONTEND - All groups received for admin:', groupsData.length);
+          }
+          setGroups(groupsData);
+        } else {
+          // Utenti normali: carica solo i propri gruppi
           const userGroupsData = await groupsApi.getUserGroups();
-          console.log('🔍 FRONTEND - User groups received:', userGroupsData.length, userGroupsData.map((g: any) => g.id));
+          if (import.meta.env.DEV) {
+            console.log('🔍 FRONTEND - User groups received:', userGroupsData.length);
+          }
+          setGroups(userGroupsData);
           setUserGroups(userGroupsData);
         }
         
@@ -464,8 +484,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       // Se l'utente è stato assegnato a dei gruppi, aggiorna la lista dei gruppi
       if (userData.selectedGroups && userData.selectedGroups.length > 0) {
         console.log('🔄 Ricaricando lista gruppi...');
-        const updatedGroups = await groupsApi.getAll();
-        setGroups(updatedGroups);
+        await reloadGroups();
         console.log('✅ Lista gruppi aggiornata');
       }
       
@@ -604,12 +623,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   };
 
   const handleGroupUpdated = async () => {
-    try {
-      const updatedGroups = await groupsApi.getAll();
-      setGroups(updatedGroups);
-    } catch (error) {
-      console.error('Errore nel ricaricamento dei gruppi:', error);
-    }
+    await reloadGroups();
   };
 
   const handleEditGroup = (group: any) => {
@@ -631,8 +645,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       await groupsApi.update(selectedGroupForEdit.id, groupData);
       
       // Ricarica la lista dei gruppi
-      const updatedGroups = await groupsApi.getAll();
-      setGroups(updatedGroups);
+      await reloadGroups();
       
       // Chiudi il modal
       setShowEditGroupModal(false);
@@ -654,8 +667,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       await groupsApi.delete(groupId);
       
       // Ricarica la lista dei gruppi
-      const updatedGroups = await groupsApi.getAll();
-      setGroups(updatedGroups);
+      await reloadGroups();
       
       alert(`✅ Gruppo "${groupName}" eliminato con successo.`);
     } catch (error: any) {
@@ -1357,12 +1369,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     
                     <div className="space-y-2">
                       {(() => {
-                        // Filtra i gruppi in base al ruolo e alla ricerca
-                        let filteredGroups = user.role === 'ADMIN' 
-                          ? groups 
-                          : groups.filter(group => 
-                              group.user_groups?.some((ug: any) => ug.user_id === user.id)
-                            );
+                        // Per gli utenti normali, groups contiene già solo i loro gruppi
+                        // Per gli admin, groups contiene tutti i gruppi
+                        let filteredGroups = groups;
                         
                         // Applica filtro di ricerca
                         if (groupsSearchTerm.trim()) {
@@ -1380,7 +1389,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         ) : (
                           <div className="space-y-3">
                             {filteredGroups.map(group => {
-                              const isUserMember = group.user_groups?.some((ug: any) => ug.user_id === user.id);
+                              // Per admin: verifica membership. Per utenti normali: sono sempre membri
+                              const isUserMember = user.role === 'ADMIN' 
+                                ? group.user_groups?.some((ug: any) => ug.user_id === user.id)
+                                : true;
                             
                             return (
                               <div 
