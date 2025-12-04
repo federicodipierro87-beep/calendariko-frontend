@@ -164,7 +164,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         }
 
         // Carica disponibilità
-        const availabilityData = await availabilityApi.getAvailability({});
+        const availabilityParams = user.role === 'ADMIN' ? {} : { userId: user.id };
+        const availabilityData = await availabilityApi.getAvailability(availabilityParams);
         // Trasforma le disponibilità in eventi per il calendario
         const transformedAvailability = availabilityData
           .filter((avail: any) => avail.type === 'BUSY') // Solo le indisponibilità
@@ -243,7 +244,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       }));
 
       // Carica disponibilità
-      const availabilityData = await availabilityApi.getAvailability({});
+      const availabilityParams = user.role === 'ADMIN' ? {} : { userId: user.id };
+      const availabilityData = await availabilityApi.getAvailability(availabilityParams);
       console.log('📊 Raw availability data:', availabilityData);
       const transformedAvailability = availabilityData
         .filter((avail: any) => avail.type === 'BUSY')
