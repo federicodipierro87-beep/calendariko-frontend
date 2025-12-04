@@ -355,38 +355,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       return;
     }
     
-    // Se è un'indisponibilità, gestiscila diversamente
-    if (event.type === 'availability-busy') {
-      handleEditAvailability(event);
-      return;
-    }
-    
     setSelectedEvent(event);
     setShowEditEventModal(true);
-  };
-
-  const handleEditAvailability = async (event: any) => {
-    const currentNotes = event.notes || '';
-    const newNotes = prompt(`Modifica le note per l'indisponibilità di ${event.group?.name || 'questo gruppo'}:`, currentNotes);
-    
-    // Se l'utente ha annullato o non ha cambiato nulla
-    if (newNotes === null || newNotes === currentNotes) {
-      return;
-    }
-    
-    try {
-      // Aggiorna l'indisponibilità
-      await availabilityApi.updateAvailability(event.availability_id, {
-        notes: newNotes
-      });
-      
-      // Ricarica i dati
-      await reloadData();
-      alert('✅ Note dell\'indisponibilità aggiornate con successo!');
-    } catch (error: any) {
-      console.error('Errore nell\'aggiornamento dell\'indisponibilità:', error);
-      alert('❌ Errore nell\'aggiornamento: ' + (error.message || 'Errore sconosciuto'));
-    }
   };
 
 
@@ -440,17 +410,34 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     
     const eventToDeleteData = events.find(event => event.id === eventId);
     const title = eventTitle || eventToDeleteData?.title || 'questo evento';
+    const isAvailability = eventToDeleteData?.type === 'availability-busy';
     
     setIsDeleting(true);
     
-    if (!window.confirm(`Sei sicuro di voler eliminare l'evento "${title}"? Questa azione non può essere annullata.`)) {
+    if (!window.confirm(`Sei sicuro di voler eliminare ${isAvailability ? 'l\'indisponibilità' : 'l\'evento'} "${title}"? Questa azione non può essere annullata.`)) {
       setIsDeleting(false);
       return;
     }
     
     try {
-      // Chiamata API per eliminare l'evento dal backend
-      await eventsApi.delete(eventId);
+      if (isAvailability) {
+        // Per le indisponibilità, usa l'API specifica
+        const availabilityId = eventToDeleteData?.availability_id;
+        if (availabilityId) {
+          await availabilityApi.deleteAvailability(availabilityId);
+          
+          // Se un admin cancella l'indisponibilità di qualcun altro, l'email viene inviata dal backend
+          if (user.role === 'ADMIN' && eventToDeleteData?.user?.id !== user.id) {
+            alert(`✅ Indisponibilità "${title}" eliminata con successo! È stata inviata una notifica email alla band.`);
+          } else {
+            alert(`✅ Indisponibilità "${title}" eliminata con successo!`);
+          }
+        }
+      } else {
+        // Per gli eventi normali
+        await eventsApi.delete(eventId);
+        alert(`✅ Evento "${title}" eliminato con successo! Le notifiche email sono state inviate a tutti i membri del gruppo.`);
+      }
       
       // Rimuovi l'evento dalla lista locale solo dopo il successo
       setEvents(events.filter(event => event.id !== eventId));
@@ -458,10 +445,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       // Ricarica il contatore delle notifiche dato che potrebbero essere state create nuove notifiche
       setTimeout(() => reloadNotificationsCount(), 1000);
       
-      alert(`✅ Evento "${title}" eliminato con successo! Le notifiche email sono state inviate a tutti i membri del gruppo.`);
     } catch (error: any) {
-      console.error('Errore nell\'eliminazione dell\'evento:', error);
-      alert(`❌ Errore nell'eliminazione dell'evento: ${error.message}`);
+      console.error(`Errore nell'eliminazione del${isAvailability ? 'l\'indisponibilità' : 'l\'evento'}:`, error);
+      alert(`❌ Errore nell'eliminazione: ${error.message}`);
     } finally {
       // Reset flag dopo un delay per permettere nuove eliminazioni
       setTimeout(() => {

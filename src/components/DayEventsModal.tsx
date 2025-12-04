@@ -294,39 +294,19 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                       </div>
                     )}
                     
-                    {/* Pulsanti per indisponibilità - admin può modificare/eliminare, user solo eliminare le proprie */}
-                    {event.type === 'availability-busy' && (
-                      <div className="flex items-center gap-2 ml-2">
-                        {/* Admin può modificare tutte le indisponibilità */}
-                        {user?.role === 'ADMIN' && (
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              onEditEvent?.(event);
-                            }}
-                            className="text-blue-500 hover:text-blue-700"
-                            title="Modifica indisponibilità"
-                          >
-                            ✏️
-                          </button>
-                        )}
-                        
-                        {/* Admin può eliminare tutte, user solo le proprie */}
-                        {(user?.role === 'ADMIN' || event.user?.id === user?.id) && (
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleDeleteEvent(event.id, 'Indisponibilità');
-                            }}
-                            className="text-red-500 hover:text-red-700"
-                            title="Rimuovi indisponibilità"
-                          >
-                            🗑️
-                          </button>
-                        )}
-                      </div>
+                    {/* Pulsante elimina per indisponibilità - admin può eliminare tutte, user solo le proprie */}
+                    {event.type === 'availability-busy' && (user?.role === 'ADMIN' || event.user?.id === user?.id) && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeleteEvent(event.id, 'Indisponibilità');
+                        }}
+                        className="text-red-500 hover:text-red-700 ml-2"
+                        title="Rimuovi indisponibilità"
+                      >
+                        🗑️
+                      </button>
                     )}
                   </div>
                 </div>
