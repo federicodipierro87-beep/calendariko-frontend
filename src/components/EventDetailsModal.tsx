@@ -135,17 +135,20 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, on
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <div className="flex-shrink-0">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            {/* Nascondi la sezione orario per le indisponibilità */}
+            {event.type !== 'availability-busy' && (
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Orario</p>
+                  <p className="text-sm text-gray-600">{formatTime(event.time)}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Orario</p>
-                <p className="text-sm text-gray-600">{formatTime(event.time)}</p>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Fee (if present) */}
