@@ -87,13 +87,22 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   // Helper per ricaricare i gruppi in modo consistente
   const reloadGroups = async () => {
     try {
-      if (user.role === 'ADMIN') {
-        const groupsData = await groupsApi.getAll();
-        setGroups(groupsData);
-      } else {
-        const userGroupsData = await groupsApi.getUserGroups();
-        setGroups(userGroupsData);
-        setUserGroups(userGroupsData);
+      const groupsData = await groupsApi.getAll();
+      setGroups(groupsData);
+      
+      // Per utenti non admin, carica anche i gruppi specifici dell'utente
+      if (user.role === 'ARTIST') {
+        try {
+          const userGroupsData = await groupsApi.getUserGroups();
+          setUserGroups(userGroupsData);
+        } catch (error) {
+          console.warn('Endpoint getUserGroups non disponibile, uso filtro frontend');
+          // Filtra i gruppi lato frontend se l'endpoint non esiste
+          const userGroups = groupsData.filter((group: any) => 
+            group.user_groups?.some((ug: any) => ug.user_id === user.id)
+          );
+          setUserGroups(userGroups);
+        }
       }
     } catch (error) {
       console.error('Errore nel ricaricamento dei gruppi:', error);
@@ -128,22 +137,27 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         }
         setEvents(transformedEvents);
         
-        // Carica gruppi in base al ruolo
-        if (user.role === 'ADMIN') {
-          // Admin: carica tutti i gruppi con relazioni complete
-          const groupsData = await groupsApi.getAll();
-          if (import.meta.env.DEV) {
-            console.log('🔍 FRONTEND - All groups received for admin:', groupsData.length);
+        // Carica gruppi
+        const groupsData = await groupsApi.getAll();
+        if (import.meta.env.DEV) {
+          console.log('🔍 FRONTEND - Groups received:', groupsData.length);
+        }
+        setGroups(groupsData);
+
+        // Carica gruppi dell'utente corrente per le availability
+        if (user.role === 'ARTIST') {
+          try {
+            const userGroupsData = await groupsApi.getUserGroups();
+            console.log('🔍 FRONTEND - User groups received:', userGroupsData.length, userGroupsData.map((g: any) => g.id));
+            setUserGroups(userGroupsData);
+          } catch (error) {
+            console.warn('Endpoint getUserGroups non disponibile, uso filtro frontend');
+            // Filtra i gruppi lato frontend se l'endpoint non esiste
+            const userGroups = groupsData.filter((group: any) => 
+              group.user_groups?.some((ug: any) => ug.user_id === user.id)
+            );
+            setUserGroups(userGroups);
           }
-          setGroups(groupsData);
-        } else {
-          // Utenti normali: carica solo i propri gruppi
-          const userGroupsData = await groupsApi.getUserGroups();
-          if (import.meta.env.DEV) {
-            console.log('🔍 FRONTEND - User groups received:', userGroupsData.length);
-          }
-          setGroups(userGroupsData);
-          setUserGroups(userGroupsData);
         }
         
         // Carica utenti se admin
@@ -1369,9 +1383,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     
                     <div className="space-y-2">
                       {(() => {
-                        // Per gli utenti normali, groups contiene già solo i loro gruppi
-                        // Per gli admin, groups contiene tutti i gruppi
-                        let filteredGroups = groups;
+                        // Filtra i gruppi in base al ruolo e alla ricerca
+                        let filteredGroups = user.role === 'ADMIN' 
+                          ? groups 
+                          : groups.filter(group => 
+                              group.user_groups?.some((ug: any) => ug.user_id === user.id)
+                            );
                         
                         // Applica filtro di ricerca
                         if (groupsSearchTerm.trim()) {
@@ -1389,10 +1406,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         ) : (
                           <div className="space-y-3">
                             {filteredGroups.map(group => {
-                              // Per admin: verifica membership. Per utenti normali: sono sempre membri
-                              const isUserMember = user.role === 'ADMIN' 
-                                ? group.user_groups?.some((ug: any) => ug.user_id === user.id)
-                                : true;
+                              const isUserMember = group.user_groups?.some((ug: any) => ug.user_id === user.id);
                             
                             return (
                               <div 
