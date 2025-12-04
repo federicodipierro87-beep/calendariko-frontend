@@ -590,8 +590,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           }).filter(Boolean);
           
           if (userGroupsToCache.length > 0) {
-            localStorage.setItem(`userGroups_${createdUser.id}`, JSON.stringify(userGroupsToCache));
-            console.log('💾 Cached groups for user:', createdUser.id, userGroupsToCache);
+            localStorage.setItem(`userGroups_${newUser.id}`, JSON.stringify(userGroupsToCache));
+            console.log('💾 Cached groups for user:', newUser.id, userGroupsToCache);
           }
         } catch (cacheError) {
           console.error('Error caching user groups:', cacheError);
