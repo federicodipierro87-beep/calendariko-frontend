@@ -182,11 +182,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           }))
           .filter((avail: any) => avail.date); // Filtra eventi senza data valida
 
+        console.log('🔄 Initial transformed availability:', transformedAvailability);
+        
         // Combina eventi e disponibilità, filtrando quelli senza data
-        setEvents([
+        const allEvents = [
           ...transformedEvents.filter((event: any) => event.date), 
           ...transformedAvailability
-        ]);
+        ];
+        console.log('📅 Initial events for calendar:', allEvents);
+        setEvents(allEvents);
 
         // Se l'utente è admin, carica le notifiche e utenti senza gruppo
         if (user.role === 'ADMIN') {
@@ -240,6 +244,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
       // Carica disponibilità
       const availabilityData = await availabilityApi.getAvailability({});
+      console.log('📊 Raw availability data:', availabilityData);
       const transformedAvailability = availabilityData
         .filter((avail: any) => avail.type === 'BUSY')
         .map((avail: any) => ({
@@ -256,8 +261,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         }))
         .filter((avail: any) => avail.date); // Filtra gli eventi senza data valida
 
+      console.log('🔄 Reload transformed availability:', transformedAvailability);
+      
       // Combina eventi e disponibilità
-      setEvents([...transformedEvents.filter((event: any) => event.date), ...transformedAvailability]);
+      const allEvents = [...transformedEvents.filter((event: any) => event.date), ...transformedAvailability];
+      console.log('📅 Reload events for calendar:', allEvents);
+      setEvents(allEvents);
     } catch (error) {
       console.error('Errore nel ricaricamento dei dati:', error);
     }
@@ -436,10 +445,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         availabilityData.user_id = user.id;
       }
       
-      await availabilityApi.createAvailability(availabilityData);
+      console.log('🔄 Creating availability:', availabilityData);
+      const result = await availabilityApi.createAvailability(availabilityData);
+      console.log('✅ Availability created:', result);
       
       // Ricarica i dati per aggiornare il calendario
+      console.log('🔄 Reloading data after availability creation...');
       await reloadData();
+      console.log('✅ Data reloaded');
       
       alert('✅ Indisponibilità aggiunta con successo!');
     } catch (error: any) {
