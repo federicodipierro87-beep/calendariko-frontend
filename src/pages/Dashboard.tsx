@@ -431,8 +431,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   const handleCreateAvailability = async (availabilityData: any) => {
     try {
-      // Se non è specificato un user_id e l'utente è un artista, usa il suo ID
-      if (!availabilityData.user_id && user.role === 'ARTIST') {
+      // Se non è specificato un user_id e l'utente non è admin, usa il suo ID
+      if (!availabilityData.user_id && user.role !== 'ADMIN') {
         availabilityData.user_id = user.id;
       }
       
@@ -1168,7 +1168,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                             </p>
                           </div>
 
-                          {user.role === 'ARTIST' && (
+                          {user.role !== 'ADMIN' && (
                             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 cursor-pointer hover:bg-orange-100 transition-colors" onClick={() => setShowAvailabilityModal(true)}>
                               <h5 className="text-orange-800 font-medium mb-1">📅 Indisponibilità</h5>
                               <p className="text-orange-700 text-sm">
@@ -2257,7 +2257,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         events={getEventsForDate(selectedDate)}
         groups={groups}
         user={user}
-        userGroups={user.role === 'ARTIST' ? groups.filter(group => 
+        userGroups={user.role !== 'ADMIN' ? groups.filter(group => 
           group.user_groups?.some((ug: any) => ug.user_id === user.id)
         ) : userGroups}
         users={users}
