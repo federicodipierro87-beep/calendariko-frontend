@@ -244,8 +244,23 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       }));
 
       // Carica disponibilità
+      // Prima proviamo senza parametri per vedere se ci sono dati
+      console.log('🔍 Trying getAvailability with no params...');
+      const allAvailabilityData = await availabilityApi.getAvailability({});
+      console.log('📊 All availability data (no params):', allAvailabilityData);
+      
+      // Poi proviamo con userId
       const availabilityParams = user.role === 'ADMIN' ? {} : { userId: user.id };
+      console.log('🔍 Calling getAvailability with params:', availabilityParams);
       const availabilityData = await availabilityApi.getAvailability(availabilityParams);
+      
+      // Se non funziona, proviamo con user_id invece di userId
+      if (availabilityData.length === 0 && user.role !== 'ADMIN') {
+        console.log('🔍 Trying with user_id parameter...');
+        const altParams = { user_id: user.id };
+        const altData = await availabilityApi.getAvailability(altParams);
+        console.log('📊 Alternative availability data:', altData);
+      }
       console.log('📊 Raw availability data:', availabilityData);
       const transformedAvailability = availabilityData
         .filter((avail: any) => avail.type === 'BUSY')
