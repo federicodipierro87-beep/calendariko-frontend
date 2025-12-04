@@ -241,7 +241,9 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                           {getEventTypeLabel(event.type)}
                         </span>
                       </div>
-                      <p className="text-sm opacity-80">⏰ {event.time}</p>
+                      {event.type !== 'availability-busy' && (
+                        <p className="text-sm opacity-80">⏰ {event.time}</p>
+                      )}
                       {event.venue && (
                         <p className="text-sm opacity-80">📍 {event.venue}</p>
                       )}
