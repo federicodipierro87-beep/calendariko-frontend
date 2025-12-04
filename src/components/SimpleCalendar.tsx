@@ -143,13 +143,27 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
 
   const getEventDisplayName = (event: Event) => {
     if (event.type === 'availability-busy') {
-      // Per admin, mostra il nome dell'utente se disponibile
-      if (userRole === 'ADMIN' && event.user) {
-        return `${event.user.first_name} ${event.user.last_name} - Indisponibile`;
-      }
-      return 'Indisponibile';
+      // L'evento ha già il titolo corretto dal backend (nome gruppo per admin, "Indisponibile" per user)
+      return event.title;
     }
     return event.title;
+  };
+
+  const getEventTime = (event: Event) => {
+    // Le indisponibilità non hanno orario
+    if (event.type === 'availability-busy') {
+      return '';
+    }
+    return formatTime(event.time);
+  };
+
+  const getEventTooltip = (event: Event) => {
+    const name = getEventDisplayName(event);
+    const time = getEventTime(event);
+    if (time) {
+      return `${name} - ${time}`;
+    }
+    return name;
   };
 
   const getEventsForDate = (date: Date) => {
@@ -283,12 +297,12 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                           top: `${topPosition}px`,
                           height: '40px'
                         }}
-                        title={`${getEventDisplayName(event)} - ${formatTime(event.time)}`}
+                        title={getEventTooltip(event)}
                       >
                         <div className="font-medium truncate">
                           {getEventDisplayName(event)}
                         </div>
-                        <div className="truncate">{formatTime(event.time)}</div>
+                        <div className="truncate">{getEventTime(event)}</div>
                       </div>
                     );
                   })}
@@ -372,12 +386,12 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       top: `${topPosition}px`,
                       height: '50px'
                     }}
-                    title={`${event.title} - ${formatTime(event.time)}`}
+                    title={getEventTooltip(event)}
                   >
                     <div className="font-medium truncate">
                       {getEventDisplayName(event)}
                     </div>
-                    <div className="text-sm truncate">{formatTime(event.time)}</div>
+                    <div className="text-sm truncate">{getEventTime(event)}</div>
                   </div>
                 );
               })}
@@ -709,14 +723,14 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                             overflow: 'hidden',
                             cursor: 'pointer'
                           }}
-                          title={`Clicca per dettagli: ${getEventDisplayName(event)} - ${formatTime(event.time)}`}
+                          title={`Clicca per dettagli: ${getEventTooltip(event)}`}
                           onClick={(e) => handleEventClick(event, e)}
                         >
                           <div style={{fontWeight: 'bold', lineHeight: '1.2'}}>
                             {getEventDisplayName(event)}
                           </div>
                           <div style={{fontSize: '10px', opacity: 0.9, lineHeight: '1.2'}}>
-                            {formatTime(event.time)}
+                            {getEventTime(event)}
                           </div>
                         </div>
                       );
@@ -896,14 +910,14 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                         overflow: 'hidden',
                         cursor: 'pointer'
                       }}
-                      title={`Clicca per dettagli: ${event.title} - ${formatTime(event.time)}`}
+                      title={`Clicca per dettagli: ${getEventTooltip(event)}`}
                       onClick={(e) => handleEventClick(event, e)}
                     >
                       <div style={{fontWeight: 'bold', lineHeight: '1.3', marginBottom: '4px'}}>
                         {getEventDisplayName(event)}
                       </div>
                       <div style={{fontSize: '12px', opacity: 0.9, lineHeight: '1.3'}}>
-                        {formatTime(event.time)}
+                        {getEventTime(event)}
                       </div>
                       <div style={{fontSize: '11px', opacity: 0.8, lineHeight: '1.3'}}>
                         {event.type === 'rehearsal' ? 'Prova' : 

@@ -171,9 +171,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           .filter((avail: any) => avail.type === 'BUSY') // Solo le indisponibilità
           .map((avail: any) => ({
             id: `avail-${avail.id}`,
-            title: `❌ ${avail.user?.first_name || 'Utente'} - Impegnato`,
+            title: `❌ ${avail.group?.name || 'Gruppo'} - Indisponibile`,
             date: avail.date ? avail.date.split('T')[0] : '',
-            time: 'Tutto il giorno',
+            time: '',  // Nessun orario per le indisponibilità
             type: 'availability-busy',
             notes: avail.notes || 'Indisponibile',
             group_id: avail.group_id,
@@ -251,9 +251,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         .filter((avail: any) => avail.type === 'BUSY')
         .map((avail: any) => ({
           id: `avail-${avail.id}`,
-          title: `❌ ${avail.user?.first_name || 'Utente'} - Impegnato`,
+          title: `❌ ${avail.group?.name || 'Gruppo'} - Indisponibile`,
           date: avail.date ? avail.date.split('T')[0] : '',
-          time: 'Tutto il giorno',
+          time: '',  // Nessun orario per le indisponibilità
           type: 'availability-busy',
           notes: avail.notes || 'Indisponibile',
           group_id: avail.group_id,
