@@ -22,12 +22,20 @@ interface EventDetailsModalProps {
 const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, onClose, onEdit, onDelete, currentUser }) => {
   if (!isOpen || !event) return null;
 
+  // Debug: controlliamo il tipo di evento
+  console.log('EventDetailsModal - Event type:', event.type);
+  console.log('EventDetailsModal - Current user role:', currentUser?.role);
+  console.log('EventDetailsModal - Event:', event);
+
   // Admin può modificare solo eventi normali (non indisponibilità)
   const canEditEvent = currentUser?.role === 'ADMIN' && event.type !== 'availability-busy';
   
   // Admin può cancellare indisponibilità, utenti normali possono cancellare le proprie
   const canDeleteEvent = (currentUser?.role === 'ADMIN') || 
     (event.type === 'availability-busy' && event.user?.id === currentUser?.id);
+
+  console.log('EventDetailsModal - canEditEvent:', canEditEvent);
+  console.log('EventDetailsModal - canDeleteEvent:', canDeleteEvent);
 
   const handleEditClick = () => {
     if (onEdit && event) {
