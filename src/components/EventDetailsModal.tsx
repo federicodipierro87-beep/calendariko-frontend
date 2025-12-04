@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface Event {
+interface CalendarEvent {
   id: string;
   title: string;
   date: string;
@@ -8,13 +8,22 @@ interface Event {
   type: 'rehearsal' | 'availability' | 'availability-busy';
   fee?: number;
   contact_responsible?: string;
+  user?: {
+    id: string;
+    first_name?: string;
+    last_name?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+  };
+  availability_id?: string;
 }
 
 interface EventDetailsModalProps {
-  event: Event | null;
+  event: CalendarEvent | null;
   isOpen: boolean;
   onClose: () => void;
-  onEdit?: (event: Event) => void;
+  onEdit?: (event: CalendarEvent) => void;
   onDelete?: (eventId: string, eventTitle?: string) => void;
   currentUser?: any;
 }
