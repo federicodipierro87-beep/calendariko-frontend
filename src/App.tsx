@@ -10,7 +10,7 @@ function App() {
 
   useEffect(() => {
     // Debug logging solo in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log('🔍 Current URL:', window.location.href);
       console.log('🔍 Search params:', window.location.search);
     }
@@ -20,13 +20,13 @@ function App() {
     const verifyToken = urlParams.get('token');
     const email = urlParams.get('email');
     
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log('🔍 Token found:', !!verifyToken);
       console.log('🔍 Email found:', !!email);
     }
     
     if (verifyToken) {
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('✅ Setting view to verify');
       }
       setCurrentView('verify');

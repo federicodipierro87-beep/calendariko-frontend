@@ -106,7 +106,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           fee: event.fee || 0
         }));
         
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.log('📥 Eventi ricevuti dal backend:', eventsData.length, eventsData);
           console.log('✅ Eventi trasformati per il calendario:', transformedEvents.length, transformedEvents);
         }
@@ -114,7 +114,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         
         // Carica gruppi
         const groupsData = await groupsApi.getAll();
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.log('🔍 FRONTEND - Groups received:', groupsData.length);
         }
         setGroups(groupsData);
@@ -129,7 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         // Carica utenti se admin
         if (user.role === 'ADMIN') {
           const usersData = await usersApi.getAll();
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.log('🔍 FRONTEND - Users received:', usersData.length);
           }
           setUsers(usersData);
@@ -764,7 +764,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   // Collega API activity callback al session timeout reset
   React.useEffect(() => {
     setUserActivityCallback(() => {
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('🔄 API activity detected - resetting session timer');
       }
       resetTimer();

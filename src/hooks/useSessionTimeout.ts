@@ -20,7 +20,7 @@ export const useSessionTimeout = ({
   // Reset del timer di inattività
   const resetTimer = useCallback(() => {
     // Solo log in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log('🔄 Session timeout reset');
     }
     lastActivityRef.current = Date.now();
@@ -37,7 +37,7 @@ export const useSessionTimeout = ({
     if (onWarning && warningMinutes > 0) {
       const warningTime = (timeoutMinutes - warningMinutes) * 60 * 1000;
       warningRef.current = window.setTimeout(() => {
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.log('⚠️ Session timeout warning');
         }
         onWarning();
@@ -46,7 +46,7 @@ export const useSessionTimeout = ({
 
     // Imposta il timer principale
     timeoutRef.current = window.setTimeout(() => {
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('⏰ Session timeout - logging out');
       }
       onTimeout();
