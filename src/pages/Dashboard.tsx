@@ -136,37 +136,60 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         setEvents(transformedEvents);
         
         // Carica gruppi - tutti gli utenti usano getAll() ma filtriamo i risultati
+        console.log('🔍 FRONTEND - Starting to load groups...');
+        console.log('🔍 FRONTEND - User:', user);
+        
         try {
+          console.log('🔍 FRONTEND - Calling groupsApi.getAll()...');
           const groupsData = await groupsApi.getAll();
-          if (import.meta.env.DEV) {
-            console.log('🔍 FRONTEND - All groups received:', groupsData.length);
-            console.log('🔍 FRONTEND - Groups data:', groupsData);
-            console.log('🔍 FRONTEND - Current user ID:', user.id, 'Role:', user.role);
+          
+          console.log('🔍 FRONTEND - Groups API response received!');
+          console.log('🔍 FRONTEND - Groups length:', groupsData?.length ?? 'undefined');
+          console.log('🔍 FRONTEND - Groups data:', groupsData);
+          console.log('🔍 FRONTEND - Current user ID:', user.id, 'Role:', user.role);
+          
+          if (!groupsData || groupsData.length === 0) {
+            console.log('⚠️ FRONTEND - No groups returned from API!');
+            setGroups([]);
+            setUserGroups([]);
+            return;
           }
           
           if (user.role === 'ADMIN') {
-            // Admin: mostra tutti i gruppi
+            console.log('🔍 FRONTEND - User is ADMIN, showing all groups');
             setGroups(groupsData);
           } else {
+            console.log('🔍 FRONTEND - User is not admin, filtering groups...');
+            
             // Utenti normali: filtra solo i gruppi di cui fanno parte
             const userGroups = groupsData.filter((group: any) => {
-              const isMember = group.user_groups?.some((ug: any) => ug.user_id === user.id);
-              if (import.meta.env.DEV) {
-                console.log(`🔍 Group "${group.name}":`, isMember ? 'IS MEMBER' : 'NOT MEMBER');
-                console.log(`🔍 user_groups:`, group.user_groups);
+              console.log(`🔍 Processing group:`, group);
+              const hasUserGroups = group.user_groups && Array.isArray(group.user_groups);
+              console.log(`🔍 Group "${group.name}" has user_groups:`, hasUserGroups, group.user_groups);
+              
+              if (!hasUserGroups) {
+                console.log(`❌ Group "${group.name}" has no user_groups relationship`);
+                return false;
               }
+              
+              const isMember = group.user_groups.some((ug: any) => {
+                console.log(`🔍 Checking membership:`, ug, 'vs user ID:', user.id);
+                return ug.user_id === user.id;
+              });
+              
+              console.log(`🔍 Group "${group.name}":`, isMember ? 'IS MEMBER ✅' : 'NOT MEMBER ❌');
               return isMember;
             });
             
-            if (import.meta.env.DEV) {
-              console.log('🔍 FRONTEND - User filtered groups:', userGroups.length);
-            }
+            console.log('🔍 FRONTEND - Filtering complete!');
+            console.log('🔍 FRONTEND - User filtered groups:', userGroups.length);
+            console.log('🔍 FRONTEND - Filtered groups:', userGroups);
             
             setGroups(userGroups);
             setUserGroups(userGroups);
           }
         } catch (error) {
-          console.error('Failed to load groups:', error);
+          console.error('❌ FRONTEND - Failed to load groups:', error);
           setGroups([]);
           setUserGroups([]);
         }
