@@ -355,8 +355,38 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       return;
     }
     
+    // Se è un'indisponibilità, gestiscila diversamente
+    if (event.type === 'availability-busy') {
+      handleEditAvailability(event);
+      return;
+    }
+    
     setSelectedEvent(event);
     setShowEditEventModal(true);
+  };
+
+  const handleEditAvailability = async (event: any) => {
+    const currentNotes = event.notes || '';
+    const newNotes = prompt(`Modifica le note per l'indisponibilità di ${event.group?.name || 'questo gruppo'}:`, currentNotes);
+    
+    // Se l'utente ha annullato o non ha cambiato nulla
+    if (newNotes === null || newNotes === currentNotes) {
+      return;
+    }
+    
+    try {
+      // Aggiorna l'indisponibilità
+      await availabilityApi.updateAvailability(event.availability_id, {
+        notes: newNotes
+      });
+      
+      // Ricarica i dati
+      await reloadData();
+      alert('✅ Note dell\'indisponibilità aggiornate con successo!');
+    } catch (error: any) {
+      console.error('Errore nell\'aggiornamento dell\'indisponibilità:', error);
+      alert('❌ Errore nell\'aggiornamento: ' + (error.message || 'Errore sconosciuto'));
+    }
   };
 
 
