@@ -487,11 +487,6 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                   <div className="truncate leading-tight">
                     {getEventDisplayNameWithBand(event)}
                   </div>
-                  {getEventTime(event) && event.type !== 'availability-busy' && (
-                    <div className="text-xs opacity-90 truncate leading-tight">
-                      {getEventTime(event)}
-                    </div>
-                  )}
                 </div>
               );
             })}
