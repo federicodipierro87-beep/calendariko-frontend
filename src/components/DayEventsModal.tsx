@@ -7,6 +7,7 @@ interface Event {
   date: string;
   time: string;
   type: 'rehearsal' | 'availability' | 'availability-busy';
+  status?: 'CONFIRMED' | 'PROPOSED' | 'CANCELLED';
   venue?: string;
   notes?: string;
   group_id?: string;
@@ -160,21 +161,51 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
     }
   };
 
-  const getEventTypeColor = (type: string) => {
-    switch (type) {
+  const getEventTypeColor = (event: Event) => {
+    // Per indisponibilità, usa sempre il colore rosso
+    if (event.type === 'availability-busy') {
+      return 'bg-red-100 text-red-700 border-red-200';
+    }
+    
+    // Per eventi normali, usa lo status se disponibile
+    if (event.status) {
+      switch (event.status) {
+        case 'CONFIRMED': return 'bg-green-100 text-green-700 border-green-200'; // Verde per confermata
+        case 'PROPOSED': return 'bg-blue-100 text-blue-700 border-blue-200';     // Blu per opzionata
+        case 'CANCELLED': return 'bg-gray-100 text-gray-700 border-gray-200';    // Grigio per cancellata
+        default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      }
+    }
+    
+    // Fallback al tipo se non c'è status
+    switch (event.type) {
       case 'rehearsal': return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'availability': return 'bg-green-100 text-green-700 border-green-200';
-      case 'availability-busy': return 'bg-red-100 text-red-700 border-red-200';
       default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
   };
 
-  const getEventTypeLabel = (type: string) => {
-    switch (type) {
+  const getEventTypeLabel = (event: Event) => {
+    // Per indisponibilità, etichetta fissa
+    if (event.type === 'availability-busy') {
+      return 'Indisponibilità';
+    }
+    
+    // Per eventi normali, usa lo status se disponibile
+    if (event.status) {
+      switch (event.status) {
+        case 'CONFIRMED': return 'Confermata';
+        case 'PROPOSED': return 'Opzionata';
+        case 'CANCELLED': return 'Cancellata';
+        default: return 'Stato sconosciuto';
+      }
+    }
+    
+    // Fallback al tipo se non c'è status
+    switch (event.type) {
       case 'rehearsal': return 'Opzionata';
       case 'availability': return 'Confermata';
-      case 'availability-busy': return 'Indisponibilità';
-      default: return type;
+      default: return event.type;
     }
   };
 
@@ -232,13 +263,13 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
           ) : (
             <div className="space-y-3">
               {events.map(event => (
-                <div key={event.id} className={`border rounded-lg p-4 ${getEventTypeColor(event.type)}`}>
+                <div key={event.id} className={`border rounded-lg p-4 ${getEventTypeColor(event)}`}>
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-medium">{event.title}</h4>
                         <span className="px-2 py-1 rounded text-xs bg-white bg-opacity-50">
-                          {getEventTypeLabel(event.type)}
+                          {getEventTypeLabel(event)}
                         </span>
                       </div>
                       {event.type !== 'availability-busy' && (
