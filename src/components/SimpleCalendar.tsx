@@ -156,12 +156,12 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
       return event.title; // Già formattato dal backend (include nome gruppo per admin)
     }
     
-    // Per eventi normali, aggiungi nome gruppo se disponibile
-    if (event.group?.name && event.title !== event.group.name) {
-      return `${event.group.name}: ${event.title}`;
+    // Per eventi normali nella vista mese, mostra solo il nome della band
+    if (event.group?.name) {
+      return event.group.name;
     }
     
-    // Fallback al solo titolo se non c'è gruppo o se il titolo è già il nome del gruppo
+    // Fallback al titolo se non c'è gruppo
     return event.title;
   };
 
