@@ -6,6 +6,7 @@ interface Event {
   date: string;
   time: string;
   type: 'rehearsal' | 'availability' | 'availability-busy';
+  status?: 'CONFIRMED' | 'PROPOSED' | 'CANCELLED';
   fee?: number;
   contact_responsible?: string;
   user?: {
@@ -454,32 +455,49 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           <div className="text-xs md:text-sm font-medium mb-1 flex-shrink-0">{day}</div>
           <div className="flex-1 overflow-hidden space-y-0.5">
             {dayEvents.slice(0, isMobile ? 3 : 4).map((event, index) => {
-              const getEventStyle = (eventType: string) => {
-                switch(eventType) {
-                  case 'availability-busy':
+              const getEventStyle = (event: Event) => {
+                // Per indisponibilità, mantieni colore rosso
+                if (event.type === 'availability-busy') {
+                  return {
+                    backgroundColor: '#dc2626',
+                    color: 'white'
+                  };
+                }
+                
+                // Per disponibilità, mantieni colore verde
+                if (event.type === 'availability') {
+                  return {
+                    backgroundColor: '#16a34a',
+                    color: 'white'
+                  };
+                }
+                
+                // Per eventi normali, usa lo status
+                switch(event.status) {
+                  case 'CONFIRMED':
                     return {
-                      backgroundColor: '#dc2626',
+                      backgroundColor: '#16a34a', // Verde per confermato
                       color: 'white'
                     };
-                  case 'availability':
+                  case 'PROPOSED':
                     return {
-                      backgroundColor: '#16a34a',
+                      backgroundColor: '#f59e0b', // Giallo per opzionato/proposto
                       color: 'white'
                     };
-                  case 'rehearsal':
+                  case 'CANCELLED':
                     return {
-                      backgroundColor: '#2563eb',
+                      backgroundColor: '#6b7280', // Grigio per cancellato
                       color: 'white'
                     };
                   default:
                     return {
-                      backgroundColor: '#7c3aed',
+                      backgroundColor: '#2563eb', // Blu default
                       color: 'white'
                     };
                 }
               };
 
-              const style = getEventStyle(event.type);
+              const style = getEventStyle(event);
               
               return (
                 <div
@@ -856,23 +874,23 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
       {/* Legenda - Mobile responsive */}
       <div className="mt-4 grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 text-xs">
         <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-purple-100 border border-purple-300 rounded flex-shrink-0"></div>
+          <div className="w-3 h-3 bg-green-500 rounded flex-shrink-0"></div>
+          <span className="truncate">Confermato</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <div className="w-3 h-3 bg-yellow-500 rounded flex-shrink-0"></div>
+          <span className="truncate">Opzionato</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <div className="w-3 h-3 bg-blue-500 rounded flex-shrink-0"></div>
           <span className="truncate">Eventi</span>
         </div>
         <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-blue-100 border border-blue-300 rounded flex-shrink-0"></div>
-          <span className="truncate">Prove</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-green-100 border border-green-300 rounded flex-shrink-0"></div>
-          <span className="truncate">Disponibilità</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-red-100 border border-red-300 rounded flex-shrink-0"></div>
+          <div className="w-3 h-3 bg-red-500 rounded flex-shrink-0"></div>
           <span className="truncate">Indisponibilità</span>
         </div>
         <div className="flex items-center space-x-1 sm:col-span-1 col-span-2 justify-center sm:justify-start">
-          <div className="w-3 h-3 bg-blue-500 rounded flex-shrink-0"></div>
+          <div className="w-3 h-3 bg-blue-600 border-2 border-blue-600 rounded flex-shrink-0"></div>
           <span className="truncate">Oggi</span>
         </div>
       </div>
