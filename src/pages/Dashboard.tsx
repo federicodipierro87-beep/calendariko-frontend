@@ -228,7 +228,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     try {
       // Carica eventi
       const eventsData = await eventsApi.getAll();
-      console.log('🔄 Raw events from backend:', eventsData.map(e => ({ id: e.id, title: e.title, status: e.status })));
+      console.log('🔄 Raw events from backend:', eventsData.map((e: any) => ({ id: e.id, title: e.title, status: e.status })));
       
       const transformedEvents = eventsData.map((event: any) => ({
         id: event.id,
@@ -247,7 +247,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         fee: event.fee || 0
       }));
       
-      console.log('🔄 Transformed events:', transformedEvents.map(e => ({ id: e.id, title: e.title, status: e.status })));
+      console.log('🔄 Transformed events:', transformedEvents.map((e: any) => ({ id: e.id, title: e.title, status: e.status })));
 
       // Carica disponibilità
       const availabilityParams = user.role === 'ADMIN' ? {} : { userId: user.id };
