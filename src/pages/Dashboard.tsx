@@ -300,9 +300,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   const handleCreateEvent = async (newEvent: any) => {
     try {
+      // Mappa il type al status corretto
+      const statusMapping = {
+        'rehearsal': 'PROPOSED',    // Opzionata
+        'availability': 'CONFIRMED', // Confermata
+        'event': 'PROPOSED'         // Default
+      };
+
       const eventData = {
         title: newEvent.title,
         event_type: newEvent.type,
+        status: statusMapping[newEvent.type as keyof typeof statusMapping] || 'PROPOSED', // Aggiungi mapping status
         date: newEvent.date,
         start_time: newEvent.time,
         end_time: newEvent.endTime,

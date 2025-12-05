@@ -112,9 +112,19 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
       // Cast per bypassare TypeScript e accedere ai campi dinamicamente
       const eventData = event as any;
       
+      // Mapping inverso: da status del backend a type del form
+      const typeFromStatus = (status: string | undefined) => {
+        switch(status) {
+          case 'CONFIRMED': return 'availability';  // Confermata
+          case 'PROPOSED': return 'rehearsal';     // Opzionata
+          case 'CANCELLED': return 'rehearsal';    // Default a opzionata
+          default: return 'rehearsal';             // Default
+        }
+      };
+      
       const newFormData = {
         title: eventData.title || '',
-        type: eventData.type || eventData.event_type || 'rehearsal',
+        type: eventData.status ? typeFromStatus(eventData.status) : (eventData.type || eventData.event_type || 'rehearsal'),
         time: getTimePart(eventData.startTime || eventData.start_time || eventData.time),
         endTime: getTimePart(eventData.endTime || eventData.end_time || eventData.endTime),
         venue: eventData.location || eventData.venue || eventData.venue_name || '',
@@ -149,6 +159,13 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
     const startDateTime = eventDate && formData.time ? `${eventDate}T${formData.time}:00` : undefined;
     const endDateTime = eventDate && formData.endTime ? `${eventDate}T${formData.endTime}:00` : undefined;
     
+    // Mappa il type al status corretto
+    const statusMapping = {
+      'rehearsal': 'PROPOSED',    // Opzionata
+      'availability': 'CONFIRMED', // Confermata
+      'event': 'PROPOSED'         // Default
+    };
+
     // Costruisci l'oggetto con le modifiche per la nuova API Prisma
     const eventUpdates = {
       id: event.id,
@@ -158,6 +175,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
       endTime: endDateTime, 
       location: formData.venue,
       groupId: formData.group_id || undefined,
+      status: statusMapping[formData.type as keyof typeof statusMapping] || 'PROPOSED', // Aggiungi mapping status
       // Mantieni i campi legacy per compatibilità
       event_type: formData.type,
       date: eventDate,
