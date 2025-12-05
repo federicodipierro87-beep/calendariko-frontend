@@ -472,26 +472,42 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                   };
                 }
                 
-                // Per eventi normali, usa lo status
-                switch(event.status) {
-                  case 'CONFIRMED':
+                // Per eventi normali, usa lo status se disponibile
+                if (event.status) {
+                  switch(event.status) {
+                    case 'CONFIRMED':
+                      return {
+                        backgroundColor: '#16a34a', // Verde per confermato
+                        color: 'white'
+                      };
+                    case 'PROPOSED':
+                      return {
+                        backgroundColor: '#f59e0b', // Giallo per opzionato/proposto
+                        color: 'white'
+                      };
+                    case 'CANCELLED':
+                      return {
+                        backgroundColor: '#6b7280', // Grigio per cancellato
+                        color: 'white'
+                      };
+                    default:
+                      return {
+                        backgroundColor: '#2563eb', // Blu default
+                        color: 'white'
+                      };
+                  }
+                }
+                
+                // Fallback per eventi senza status - usa il tipo
+                switch(event.type) {
+                  case 'rehearsal':
                     return {
-                      backgroundColor: '#16a34a', // Verde per confermato
-                      color: 'white'
-                    };
-                  case 'PROPOSED':
-                    return {
-                      backgroundColor: '#f59e0b', // Giallo per opzionato/proposto
-                      color: 'white'
-                    };
-                  case 'CANCELLED':
-                    return {
-                      backgroundColor: '#6b7280', // Grigio per cancellato
+                      backgroundColor: '#2563eb', // Blu per prove
                       color: 'white'
                     };
                   default:
                     return {
-                      backgroundColor: '#2563eb', // Blu default
+                      backgroundColor: '#7c3aed', // Viola per altri eventi
                       color: 'white'
                     };
                 }

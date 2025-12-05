@@ -118,6 +118,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           time: event.startTime ? event.startTime.split('T')[1].substring(0, 5) : '', // Estrae orario da startTime
           endTime: event.endTime ? event.endTime.split('T')[1].substring(0, 5) : '', // Estrae orario da endTime
           type: event.description || 'event',
+          status: event.status, // Aggiungi il campo status
           venue: event.location || '',
           notes: event.description || '',
           contact_responsible: event.contact_responsible || '',
@@ -235,6 +236,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         time: event.start_time || (event.startTime ? new Date(event.startTime).toTimeString().substring(0, 5) : ''),
         endTime: event.end_time || (event.endTime ? new Date(event.endTime).toTimeString().substring(0, 5) : ''),
         type: event.event_type || event.description || 'event',
+        status: event.status, // Aggiungi il campo status
         venue: event.venue_name || event.location || '',
         notes: event.notes || event.description || '',
         contact_responsible: event.contact_responsible || '',
@@ -324,6 +326,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         time: createdEvent.start_time || newEvent.time,
         endTime: createdEvent.end_time || newEvent.endTime,    // AGGIUNTO: mappa end_time a endTime
         type: createdEvent.event_type || newEvent.type || 'event',
+        status: createdEvent.status, // Aggiungi il campo status
         venue: createdEvent.venue_name || newEvent.venue || '',
         notes: createdEvent.notes || newEvent.notes || '',
         contact_responsible: createdEvent.contact_responsible || newEvent.contact_responsible || '',  // AGGIUNTO: mappa contact_responsible
@@ -373,6 +376,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         time: updatedEvent.start_time || (updatedEvent.startTime ? new Date(updatedEvent.startTime).toTimeString().substring(0, 5) : ''),
         endTime: updatedEvent.end_time || (updatedEvent.endTime ? new Date(updatedEvent.endTime).toTimeString().substring(0, 5) : ''),
         type: updatedEvent.event_type || updatedEvent.description || 'event',
+        status: updatedEvent.status, // Aggiungi il campo status
         venue: updatedEvent.venue_name || updatedEvent.location || '',
         notes: updatedEvent.notes || updatedEvent.description || '',
         contact_responsible: updatedEvent.contact_responsible || '',
