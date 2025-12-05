@@ -13,6 +13,10 @@ interface Event {
     first_name: string;
     last_name: string;
   };
+  group?: {
+    id: string;
+    name: string;
+  };
 }
 
 interface SimpleCalendarProps {
@@ -88,22 +92,11 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
     const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const dayEvents = getFilteredEvents(dayStr);
     
+    // Non coloriamo più lo sfondo del giorno - gli eventi ora sono ben visibili
+    // Lasciamo solo un leggero accento al bordo se ci sono eventi
     if (dayEvents.length === 0) return '';
     
-    // Per ADMIN: non colorare la casella per indisponibilità, mostrarle solo come eventi
-    if (userRole === 'ADMIN') {
-      // Solo coloriamo per eventi reali (prove/concerti)
-      if (dayEvents.some(e => e.type === 'availability')) return 'bg-green-100 border-green-300';
-      if (dayEvents.some(e => e.type === 'rehearsal')) return 'bg-blue-100 border-blue-300';
-      return '';
-    }
-    
-    // Per USER: Priorità: indisponibilità (rosso) > eventi (viola) > prove (blu) > disponibilità (verde)
-    if (dayEvents.some(e => e.type === 'availability-busy')) return 'bg-red-100 border-red-300';
-    if (dayEvents.some(e => e.type === 'availability')) return 'bg-green-100 border-green-300';
-    if (dayEvents.some(e => e.type === 'rehearsal')) return 'bg-blue-100 border-blue-300';
-    
-    return '';
+    return 'border-gray-300'; // Bordo neutro quando ci sono eventi
   };
 
   const getDayEvents = (day: number) => {
@@ -155,6 +148,20 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
       // L'evento ha già il titolo corretto dal backend (nome gruppo per admin, "Indisponibile" per user)
       return event.title;
     }
+    return event.title;
+  };
+
+  const getEventDisplayNameWithBand = (event: Event) => {
+    if (event.type === 'availability-busy') {
+      return event.title; // Già formattato dal backend (include nome gruppo per admin)
+    }
+    
+    // Per eventi normali, aggiungi nome gruppo se disponibile
+    if (event.group?.name && event.title !== event.group.name) {
+      return `${event.group.name}: ${event.title}`;
+    }
+    
+    // Fallback al solo titolo se non c'è gruppo o se il titolo è già il nome del gruppo
     return event.title;
   };
 
@@ -432,36 +439,69 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
         <div
           key={day}
           onClick={() => handleDayClick(day)}
-          className={`min-h-[2rem] md:min-h-[3rem] border border-gray-200 cursor-pointer ${hoverClass} ${todayClass} ${eventClass} transition-colors p-1 flex flex-col`}
+          className={`min-h-[4rem] md:min-h-[5rem] lg:min-h-[6rem] border border-gray-200 cursor-pointer ${hoverClass} ${todayClass} ${eventClass} transition-colors p-1 flex flex-col`}
           title={onDayClick ? (
             userRole !== 'ADMIN' 
               ? 'Clicca per visualizzare eventi e gestire indisponibilità' 
               : 'Clicca per visualizzare/creare eventi'
           ) : ''}
         >
-          <div className="text-xs md:text-sm font-medium mb-1">{day}</div>
-          <div className="flex-1 overflow-hidden">
-            {dayEvents.slice(0, 2).map((event, index) => (
-              <div
-                key={event.id}
-                className="text-xs mb-1 px-1 py-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
-                style={{
-                  backgroundColor: event.type === 'availability-busy' ? '#fee2e2' :
-                                   event.type === 'availability' ? '#dcfce7' :
-                                   '#dbeafe',
-                  color: event.type === 'availability-busy' ? '#991b1b' :
-                         event.type === 'availability' ? '#166534' :
-                         '#1e40af'
-                }}
-                onClick={(e) => handleEventClick(event, e)}
-                title={`Clicca per visualizzare dettagli: ${event.title}`}
+          <div className="text-xs md:text-sm font-medium mb-1 flex-shrink-0">{day}</div>
+          <div className="flex-1 overflow-hidden space-y-0.5">
+            {dayEvents.slice(0, isMobile ? 3 : 4).map((event, index) => {
+              const getEventStyle = (eventType: string) => {
+                switch(eventType) {
+                  case 'availability-busy':
+                    return {
+                      backgroundColor: '#dc2626',
+                      color: 'white'
+                    };
+                  case 'availability':
+                    return {
+                      backgroundColor: '#16a34a',
+                      color: 'white'
+                    };
+                  case 'rehearsal':
+                    return {
+                      backgroundColor: '#2563eb',
+                      color: 'white'
+                    };
+                  default:
+                    return {
+                      backgroundColor: '#7c3aed',
+                      color: 'white'
+                    };
+                }
+              };
+
+              const style = getEventStyle(event.type);
+              
+              return (
+                <div
+                  key={event.id}
+                  className="text-xs px-1.5 py-0.5 rounded-sm cursor-pointer hover:opacity-90 transition-opacity font-medium shadow-sm"
+                  style={style}
+                  onClick={(e) => handleEventClick(event, e)}
+                  title={`${getEventDisplayNameWithBand(event)}${getEventTime(event) ? ` - ${getEventTime(event)}` : ''}`}
+                >
+                  <div className="truncate leading-tight">
+                    {getEventDisplayNameWithBand(event)}
+                  </div>
+                  {getEventTime(event) && event.type !== 'availability-busy' && (
+                    <div className="text-xs opacity-90 truncate leading-tight">
+                      {getEventTime(event)}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {dayEvents.length > (isMobile ? 3 : 4) && (
+              <div 
+                className="text-xs text-gray-600 font-medium cursor-pointer hover:text-gray-800 transition-colors px-1"
+                onClick={() => handleDayClick(day)}
+                title="Clicca per vedere tutti gli eventi"
               >
-                {getEventDisplayName(event)}
-              </div>
-            ))}
-            {dayEvents.length > 2 && (
-              <div className="text-xs text-gray-500 font-medium">
-                +{dayEvents.length - 2} altri
+                +{dayEvents.length - (isMobile ? 3 : 4)} altri eventi
               </div>
             )}
           </div>
