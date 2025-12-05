@@ -228,6 +228,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     try {
       // Carica eventi
       const eventsData = await eventsApi.getAll();
+      console.log('🔄 Raw events from backend:', eventsData.map(e => ({ id: e.id, title: e.title, status: e.status })));
+      
       const transformedEvents = eventsData.map((event: any) => ({
         id: event.id,
         title: event.title,
@@ -244,6 +246,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         group: event.group,
         fee: event.fee || 0
       }));
+      
+      console.log('🔄 Transformed events:', transformedEvents.map(e => ({ id: e.id, title: e.title, status: e.status })));
 
       // Carica disponibilità
       const availabilityParams = user.role === 'ADMIN' ? {} : { userId: user.id };
@@ -323,8 +327,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       };
 
       console.log('📤 Creazione evento in corso...', eventData);
+      console.log('📤 Status inviato:', eventData.status);
       const createdEvent = await eventsApi.create(eventData);
       console.log('📥 Evento ricevuto dal backend:', createdEvent);
+      console.log('📥 Status ricevuto dal backend:', createdEvent.status);
       
       // Trasforma l'evento per il calendario con controlli null
       const transformedEvent = {
