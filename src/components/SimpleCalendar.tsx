@@ -153,7 +153,12 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
 
   const getEventDisplayNameWithBand = (event: Event) => {
     if (event.type === 'availability-busy') {
-      return event.title; // Già formattato dal backend (include nome gruppo per admin)
+      // Rimuovi la X dal nome della band per le indisponibilità
+      let title = event.title;
+      if (title.startsWith('❌ ')) {
+        title = title.substring(2);
+      }
+      return title.trim();
     }
     
     // Per eventi normali nella vista mese, mostra solo il nome della band
