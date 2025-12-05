@@ -111,20 +111,33 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
       
       // Cast per bypassare TypeScript e accedere ai campi dinamicamente
       const eventData = event as any;
+      console.log('EditEventModal - Event status:', eventData.status);
       
       // Mapping inverso: da status del backend a type del form
       const typeFromStatus = (status: string | undefined) => {
+        console.log('EditEventModal - Mapping status to type:', status);
         switch(status) {
-          case 'CONFIRMED': return 'availability';  // Confermata
-          case 'PROPOSED': return 'rehearsal';     // Opzionata
-          case 'CANCELLED': return 'rehearsal';    // Default a opzionata
-          default: return 'rehearsal';             // Default
+          case 'CONFIRMED': 
+            console.log('EditEventModal - Mapped CONFIRMED to availability');
+            return 'availability';  // Confermata
+          case 'PROPOSED': 
+            console.log('EditEventModal - Mapped PROPOSED to rehearsal');
+            return 'rehearsal';     // Opzionata
+          case 'CANCELLED': 
+            console.log('EditEventModal - Mapped CANCELLED to rehearsal');
+            return 'rehearsal';    // Default a opzionata
+          default: 
+            console.log('EditEventModal - Default mapping to rehearsal');
+            return 'rehearsal';             // Default
         }
       };
       
+      const mappedType = eventData.status ? typeFromStatus(eventData.status) : (eventData.type || eventData.event_type || 'rehearsal');
+      console.log('EditEventModal - Final mapped type:', mappedType);
+      
       const newFormData = {
         title: eventData.title || '',
-        type: eventData.status ? typeFromStatus(eventData.status) : (eventData.type || eventData.event_type || 'rehearsal'),
+        type: mappedType,
         time: getTimePart(eventData.startTime || eventData.start_time || eventData.time),
         endTime: getTimePart(eventData.endTime || eventData.end_time || eventData.endTime),
         venue: eventData.location || eventData.venue || eventData.venue_name || '',
