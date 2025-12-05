@@ -893,21 +893,47 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     document.body.removeChild(link);
   };
 
-  const exportUsers = () => {
-    const headers = ['ID', 'Nome', 'Cognome', 'Email', 'Telefono', 'Ruolo', 'Stato', 'Data Creazione'];
-    const userData = users.map(user => ({
-      id: user.id,
-      nome: user.first_name,
-      cognome: user.last_name,
-      email: user.email,
-      telefono: user.phone || '',
-      ruolo: user.role,
-      stato: user.is_locked ? 'Bloccato' : 'Attivo',
-      data_creazione: user.createdAt || user.created_at ? new Date(user.createdAt || user.created_at).toLocaleDateString('it-IT') : ''
-    }));
-    
-    const csv = convertToCSV(userData, headers);
-    downloadCSV(csv, `utenti_${new Date().toISOString().split('T')[0]}.csv`);
+  const exportUsers = async () => {
+    try {
+      // Carica utenti completi dal backend con tutte le relazioni
+      const detailedUsers = await usersApi.getForExport();
+
+      const headers = [
+        'ID', 'Nome', 'Cognome', 'Email', 'Ruolo', 'Stato Email', 
+        'Data Creazione', 'Ultimo Aggiornamento', 'Numero Gruppi', 
+        'Lista Gruppi', 'Numero Eventi Creati', 'Lista Eventi',
+        'Numero Indisponibilità', 'Lista Indisponibilità', 'Numero Notifiche',
+        'Notifiche Non Lette'
+      ];
+      
+      const userData = detailedUsers.map((user: any) => ({
+        id: user.id,
+        nome: user.firstName || '',
+        cognome: user.lastName || '',
+        email: user.email,
+        ruolo: user.role,
+        stato_email: user.emailVerified ? 'Verificata' : 'Non Verificata',
+        data_creazione: user.createdAt ? new Date(user.createdAt).toLocaleDateString('it-IT') : '',
+        ultimo_aggiornamento: user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('it-IT') : '',
+        numero_gruppi: user.groupMemberships?.length || 0,
+        lista_gruppi: user.groupMemberships?.map((gm: any) => gm.group.name).join('; ') || '',
+        numero_eventi_creati: user.events?.length || 0,
+        lista_eventi: user.events?.map((e: any) => `${e.title} (${new Date(e.startTime).toLocaleDateString('it-IT')}) - €${e.fee || 0}`).join('; ') || '',
+        numero_indisponibilita: user.dayAvailabilities?.filter((a: any) => a.type === 'BUSY').length || 0,
+        lista_indisponibilita: user.dayAvailabilities?.filter((a: any) => a.type === 'BUSY').map((a: any) => `${new Date(a.date).toLocaleDateString('it-IT')} [${a.group?.name || 'Nessun gruppo'}] - ${a.notes || 'Nessuna nota'}`).join('; ') || '',
+        numero_notifiche: user.notifications?.length || 0,
+        notifiche_non_lette: user.notifications?.filter((n: any) => !n.isRead).length || 0
+      }));
+      
+      const csv = convertToCSV(userData, headers);
+      downloadCSV(csv, `utenti_completo_${new Date().toISOString().split('T')[0]}.csv`);
+      
+      console.log(`📊 Exported detailed data for ${userData.length} users`);
+      
+    } catch (error) {
+      console.error('Errore durante l\'export utenti:', error);
+      alert('Errore durante l\'export degli utenti. Riprova.');
+    }
   };
 
   const exportGroups = () => {

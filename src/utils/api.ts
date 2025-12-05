@@ -198,6 +198,7 @@ export const usersApi = {
     body: JSON.stringify(userData),
   }),
   getAll: () => apiCall('/users'),
+  getForExport: () => apiCall('/users/export'),
   getById: (id: string) => apiCall(`/users/${id}`),
   update: (id: string, userData: any) => apiCall(`/users/${id}`, {
     method: 'PUT',

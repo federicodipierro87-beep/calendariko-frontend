@@ -27,6 +27,15 @@ type CalendarView = 'month' | 'week' | 'day';
 const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick, onEventClick, userRole }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState<CalendarView>('month');
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Hook per gestire il resize della finestra
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const monthNames = [
     'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
@@ -465,16 +474,16 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
 
   return (
     <div className="bg-white rounded-lg shadow p-4">
-      {/* Header del calendario */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-4">
+      {/* Header del calendario - Responsive */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+        <div className="flex items-center justify-center space-x-2 sm:space-x-4">
           <button
             onClick={previousPeriod}
             className="p-2 hover:bg-gray-100 rounded-full"
           >
             ←
           </button>
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 text-center">
             {getViewTitle()}
           </h2>
           <button
@@ -484,12 +493,12 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
             →
           </button>
         </div>
-        <div className="flex items-center space-x-2">
-          {/* View selector */}
+        <div className="flex items-center justify-center space-x-2">
+          {/* View selector - Mobile responsive */}
           <div className="flex bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setCurrentView('month')}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+              className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md transition-colors ${
                 currentView === 'month'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-600 hover:text-gray-900'
@@ -499,17 +508,17 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
             </button>
             <button
               onClick={() => setCurrentView('week')}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+              className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md transition-colors ${
                 currentView === 'week'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Settimana
+              Sett
             </button>
             <button
               onClick={() => setCurrentView('day')}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+              className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md transition-colors ${
                 currentView === 'day'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-600 hover:text-gray-900'
@@ -520,7 +529,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           </div>
           <button
             onClick={goToToday}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Oggi
           </button>
@@ -546,84 +555,39 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           </div>
         </>
       ) : currentView === 'week' ? (
-        <div style={{
-          border: '1px solid #e5e7eb',
-          borderRadius: '8px',
-          backgroundColor: 'white',
-          height: '500px'
-        }}>
-          {/* Header settimana */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '80px repeat(7, 1fr)',
-            height: '60px',
-            borderBottom: '1px solid #e5e7eb',
-            backgroundColor: '#f8fafc'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              borderRight: '1px solid #e5e7eb'
-            }}>
-              Ora
+        <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+          {/* Header settimana - Mobile responsive */}
+          <div className="grid grid-cols-8 h-12 sm:h-16 border-b bg-gray-50">
+            <div className="flex items-center justify-center text-xs font-bold border-r col-span-1">
+              <span className="hidden sm:inline">Ora</span>
+              <span className="sm:hidden">H</span>
             </div>
             {getWeekDays().map((date, index) => (
-              <div key={index} style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '8px',
-                borderRight: index < 6 ? '1px solid #e5e7eb' : 'none'
-              }}>
-                <div style={{fontSize: '11px', color: '#6b7280', textTransform: 'uppercase'}}>
-                  {weekDays[date.getDay()]}
+              <div key={index} className="flex flex-col items-center justify-center p-1 sm:p-2 border-r last:border-r-0">
+                <div className="text-xs sm:text-xs text-gray-500 uppercase">
+                  <span className="hidden sm:inline">{weekDays[date.getDay()]}</span>
+                  <span className="sm:hidden">{weekDays[date.getDay()].slice(0, 1)}</span>
                 </div>
-                <div style={{
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  color: date.toDateString() === new Date().toDateString() ? '#ffffff' : '#374151',
-                  backgroundColor: date.toDateString() === new Date().toDateString() ? '#3b82f6' : 'transparent',
-                  borderRadius: '50%',
-                  width: '24px',
-                  height: '24px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+                <div className={`text-xs sm:text-sm font-medium ${
+                  date.toDateString() === new Date().toDateString() 
+                    ? 'bg-blue-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center' 
+                    : 'text-gray-900'
+                }`}>
                   {date.getDate()}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Griglia calendario */}
-          <div style={{
-            height: '700px',
-            overflow: 'auto'
-          }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '80px repeat(7, 1fr)'
-            }}>
+          {/* Griglia calendario - Mobile responsive */}
+          <div className="overflow-x-auto overflow-y-auto" style={{height: '400px'}}>
+            <div className="grid grid-cols-8 min-w-full">
               {/* Colonna ore */}
-              <div style={{borderRight: '1px solid #e5e7eb', backgroundColor: '#f8fafc'}}>
+              <div className="border-r bg-gray-50 col-span-1 min-w-0">
                 {Array.from({ length: 17 }, (_, hour) => (
-                  <div key={hour + 7} style={{
-                    height: '60px',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    justifyContent: 'flex-end',
-                    paddingRight: '8px',
-                    paddingTop: '4px',
-                    borderBottom: '1px solid #e5e7eb',
-                    fontSize: '11px',
-                    color: '#6b7280'
-                  }}>
-                    {(hour + 7).toString().padStart(2, '0')}:00
+                  <div key={hour + 7} className="h-10 sm:h-12 flex items-start justify-end pr-1 sm:pr-2 pt-1 border-b text-xs text-gray-500">
+                    <span className="hidden sm:inline">{(hour + 7).toString().padStart(2, '0')}:00</span>
+                    <span className="sm:hidden">{(hour + 7).toString().padStart(2, '0')}</span>
                   </div>
                 ))}
               </div>
@@ -632,31 +596,15 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
               {getWeekDays().map((date, dayIndex) => {
                 const dayEvents = getEventsForDate(date);
                 return (
-                  <div key={dayIndex} style={{
-                    borderRight: dayIndex < 6 ? '1px solid #e5e7eb' : 'none',
-                    position: 'relative'
-                  }}>
+                  <div key={dayIndex} className="border-r last:border-r-0 relative min-w-0">
                     {/* Griglia ore */}
                     {Array.from({ length: 17 }, (_, hour) => (
                       <div 
                         key={hour + 7}
-                        style={{
-                          height: '60px',
-                          borderBottom: '1px solid #e5e7eb',
-                          cursor: 'pointer'
-                        }}
+                        className="h-10 sm:h-12 border-b cursor-pointer hover:bg-blue-50"
                         onClick={() => onDayClick && onDayClick(date.toISOString().split('T')[0])}
-                        onMouseEnter={(e) => {
-                          const target = e.target as HTMLElement;
-                          target.style.backgroundColor = '#f0f9ff';
-                        }}
-                        onMouseLeave={(e) => {
-                          const target = e.target as HTMLElement;
-                          target.style.backgroundColor = 'transparent';
-                        }}
                       />
                     ))}
-
 
                     {/* Eventi */}
                     {dayEvents.map((event, eventIndex) => {
@@ -697,7 +645,9 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                         return null;
                       }
                       
-                      const topPosition = ((startHour - 7) * 60) + startMinute;
+                      // Calcolo responsive per altezza celle
+                      const cellHeight = isMobile ? 40 : 48; // 10 = h-10, 12 = h-12 in px
+                      const topPosition = ((startHour - 7) * cellHeight) + (startMinute * cellHeight / 60);
 
                       let backgroundColor = '#8b5cf6';
                       if (event.type === 'availability-busy') backgroundColor = '#ef4444';
@@ -707,31 +657,24 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       return (
                         <div
                           key={`${event.id}-${eventIndex}`}
+                          className="absolute left-0.5 right-0.5 sm:left-1 sm:right-1 text-white text-xs rounded shadow z-10 overflow-hidden cursor-pointer"
                           style={{
-                            position: 'absolute',
-                            left: '4px',
-                            right: '4px',
                             top: `${topPosition}px`,
-                            height: '50px',
+                            height: isMobile ? '30px' : '40px',
                             backgroundColor: backgroundColor,
-                            color: 'white',
-                            fontSize: '11px',
-                            padding: '4px',
-                            borderRadius: '4px',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                            zIndex: 10,
-                            overflow: 'hidden',
-                            cursor: 'pointer'
+                            padding: isMobile ? '2px' : '4px'
                           }}
                           title={`Clicca per dettagli: ${getEventTooltip(event)}`}
                           onClick={(e) => handleEventClick(event, e)}
                         >
-                          <div style={{fontWeight: 'bold', lineHeight: '1.2'}}>
+                          <div className="font-bold leading-tight text-xs sm:text-xs truncate">
                             {getEventDisplayName(event)}
                           </div>
-                          <div style={{fontSize: '10px', opacity: 0.9, lineHeight: '1.2'}}>
-                            {getEventTime(event)}
-                          </div>
+                          {!isMobile && (
+                            <div className="text-xs opacity-90 leading-tight truncate">
+                              {getEventTime(event)}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -742,108 +685,50 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           </div>
         </div>
       ) : (
-        <div style={{
-          border: '1px solid #e5e7eb',
-          borderRadius: '8px',
-          backgroundColor: 'white',
-          height: '500px'
-        }}>
-          {/* Header giorno */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '80px 1fr',
-            height: '60px',
-            borderBottom: '1px solid #e5e7eb',
-            backgroundColor: '#f8fafc'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              borderRight: '1px solid #e5e7eb'
-            }}>
-              Ora
+        <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+          {/* Header giorno - Mobile responsive */}
+          <div className="grid grid-cols-2 h-16 sm:h-20 border-b bg-gray-50">
+            <div className="flex items-center justify-center text-xs sm:text-sm font-bold border-r">
+              <span className="hidden sm:inline">Ora</span>
+              <span className="sm:hidden">H</span>
             </div>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '8px'
-            }}>
-              <div style={{fontSize: '11px', color: '#6b7280', textTransform: 'uppercase'}}>
+            <div className="flex flex-col items-center justify-center p-2">
+              <div className="text-xs text-gray-500 uppercase">
                 {weekDays[currentDate.getDay()]}
               </div>
-              <div style={{
-                fontSize: '18px',
-                fontWeight: 'bold',
-                color: currentDate.toDateString() === new Date().toDateString() ? '#ffffff' : '#374151',
-                backgroundColor: currentDate.toDateString() === new Date().toDateString() ? '#3b82f6' : 'transparent',
-                borderRadius: '50%',
-                width: '32px',
-                height: '32px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
+              <div className={`text-lg sm:text-xl font-bold ${
+                currentDate.toDateString() === new Date().toDateString()
+                  ? 'bg-blue-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center'
+                  : 'text-gray-900'
+              }`}>
                 {currentDate.getDate()}
               </div>
             </div>
           </div>
 
-          {/* Griglia calendario */}
-          <div style={{
-            height: '900px',
-            overflow: 'auto'
-          }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '80px 1fr'
-            }}>
+          {/* Griglia calendario - Mobile responsive */}
+          <div className="overflow-y-auto" style={{height: '400px'}}>
+            <div className="grid grid-cols-2">
               {/* Colonna ore */}
-              <div style={{borderRight: '1px solid #e5e7eb', backgroundColor: '#f8fafc'}}>
+              <div className="border-r bg-gray-50">
                 {Array.from({ length: 17 }, (_, hour) => (
-                  <div key={hour + 7} style={{
-                    height: '80px',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    justifyContent: 'flex-end',
-                    paddingRight: '8px',
-                    paddingTop: '4px',
-                    borderBottom: '1px solid #e5e7eb',
-                    fontSize: '12px',
-                    color: '#6b7280'
-                  }}>
-                    {(hour + 7).toString().padStart(2, '0')}:00
+                  <div key={hour + 7} className="h-12 sm:h-16 flex items-start justify-end pr-2 pt-1 border-b text-xs sm:text-sm text-gray-500">
+                    <span className="hidden sm:inline">{(hour + 7).toString().padStart(2, '0')}:00</span>
+                    <span className="sm:hidden">{(hour + 7).toString().padStart(2, '0')}</span>
                   </div>
                 ))}
               </div>
 
               {/* Colonna giorno */}
-              <div style={{position: 'relative'}}>
+              <div className="relative">
                 {/* Griglia ore */}
                 {Array.from({ length: 17 }, (_, hour) => (
                   <div 
                     key={hour + 7}
-                    style={{
-                      height: '80px',
-                      borderBottom: '1px solid #e5e7eb',
-                      cursor: 'pointer'
-                    }}
+                    className="h-12 sm:h-16 border-b cursor-pointer hover:bg-blue-50"
                     onClick={() => onDayClick && onDayClick(currentDate.toISOString().split('T')[0])}
-                    onMouseEnter={(e) => {
-                      const target = e.target as HTMLElement;
-                      target.style.backgroundColor = '#f0f9ff';
-                    }}
-                    onMouseLeave={(e) => {
-                      const target = e.target as HTMLElement;
-                      target.style.backgroundColor = 'transparent';
-                    }}
                   />
                 ))}
-
 
                 {/* Eventi */}
                 {getEventsForDate(currentDate).map((event, eventIndex) => {
@@ -884,7 +769,9 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                     return null;
                   }
                   
-                  const topPosition = ((startHour - 7) * 80) + (startMinute * 80 / 60);
+                  // Calcolo responsive per altezza celle
+                  const cellHeight = isMobile ? 48 : 64; // h-12 = 48px, h-16 = 64px
+                  const topPosition = ((startHour - 7) * cellHeight) + (startMinute * cellHeight / 60);
 
                   let backgroundColor = '#8b5cf6';
                   if (event.type === 'availability-busy') backgroundColor = '#ef4444';
@@ -894,35 +781,29 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                   return (
                     <div
                       key={`${event.id}-${eventIndex}`}
+                      className="absolute left-2 right-2 text-white rounded shadow z-10 overflow-hidden cursor-pointer"
                       style={{
-                        position: 'absolute',
-                        left: '8px',
-                        right: '8px',
                         top: `${topPosition}px`,
-                        height: '65px',
+                        height: isMobile ? '40px' : '55px',
                         backgroundColor: backgroundColor,
-                        color: 'white',
-                        fontSize: '14px',
-                        padding: '8px',
-                        borderRadius: '6px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                        zIndex: 10,
-                        overflow: 'hidden',
-                        cursor: 'pointer'
+                        padding: isMobile ? '4px' : '8px',
+                        fontSize: isMobile ? '12px' : '14px'
                       }}
                       title={`Clicca per dettagli: ${getEventTooltip(event)}`}
                       onClick={(e) => handleEventClick(event, e)}
                     >
-                      <div style={{fontWeight: 'bold', lineHeight: '1.3', marginBottom: '4px'}}>
+                      <div className="font-bold leading-tight mb-1 truncate">
                         {getEventDisplayName(event)}
                       </div>
-                      <div style={{fontSize: '12px', opacity: 0.9, lineHeight: '1.3'}}>
+                      <div className="text-xs opacity-90 leading-tight truncate">
                         {getEventTime(event)}
                       </div>
-                      <div style={{fontSize: '11px', opacity: 0.8, lineHeight: '1.3'}}>
-                        {event.type === 'rehearsal' ? 'Prova' : 
-                         event.type === 'availability' ? 'Disponibile' : 'Occupato'}
-                      </div>
+                      {!isMobile && (
+                        <div className="text-xs opacity-80 leading-tight truncate">
+                          {event.type === 'rehearsal' ? 'Prova' : 
+                           event.type === 'availability' ? 'Disponibile' : 'Occupato'}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -932,27 +813,27 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
         </div>
       )}
 
-      {/* Legenda */}
-      <div className="mt-4 flex flex-wrap gap-4 text-xs">
+      {/* Legenda - Mobile responsive */}
+      <div className="mt-4 grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 text-xs">
         <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-purple-100 border border-purple-300 rounded"></div>
-          <span>Eventi</span>
+          <div className="w-3 h-3 bg-purple-100 border border-purple-300 rounded flex-shrink-0"></div>
+          <span className="truncate">Eventi</span>
         </div>
         <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-blue-100 border border-blue-300 rounded"></div>
-          <span>Prove</span>
+          <div className="w-3 h-3 bg-blue-100 border border-blue-300 rounded flex-shrink-0"></div>
+          <span className="truncate">Prove</span>
         </div>
         <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-          <span>Disponibilità</span>
+          <div className="w-3 h-3 bg-green-100 border border-green-300 rounded flex-shrink-0"></div>
+          <span className="truncate">Disponibilità</span>
         </div>
         <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
-          <span>Indisponibilità</span>
+          <div className="w-3 h-3 bg-red-100 border border-red-300 rounded flex-shrink-0"></div>
+          <span className="truncate">Indisponibilità</span>
         </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-blue-500 rounded"></div>
-          <span>Oggi</span>
+        <div className="flex items-center space-x-1 sm:col-span-1 col-span-2 justify-center sm:justify-start">
+          <div className="w-3 h-3 bg-blue-500 rounded flex-shrink-0"></div>
+          <span className="truncate">Oggi</span>
         </div>
       </div>
     </div>

@@ -18,7 +18,8 @@
       "Bash(npm start)",
       "Bash(npx ts-node:*)",
       "Bash(npx prisma:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(cd:*)"
     ],
     "deny": [],
     "ask": [],
