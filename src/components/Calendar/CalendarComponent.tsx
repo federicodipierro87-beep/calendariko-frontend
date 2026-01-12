@@ -109,13 +109,13 @@ const CalendarComponent: React.FC<CalendarProps> = ({
   const getEventColor = (status: string) => {
     switch (status) {
       case 'CONFIRMED':
-        return '#3b82f6';
-      case 'PROPOSED':
-        return '#f59e0b';
+        return '#16a34a'; // Verde per confermato
+      case 'PENDING':
+        return '#f59e0b'; // Giallo per opzionato
       case 'CANCELLED':
-        return '#6b7280';
+        return '#6b7280'; // Grigio per cancellato
       default:
-        return '#3b82f6';
+        return '#f59e0b'; // Default = giallo (opzionato)
     }
   };
 
@@ -163,20 +163,16 @@ const CalendarComponent: React.FC<CalendarProps> = ({
 
       <div className="mb-4 flex gap-4 text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-blue-500 rounded"></div>
-          <span>Confirmed Events</span>
+          <div className="w-4 h-4 bg-green-500 rounded"></div>
+          <span>Confermato</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-yellow-500 rounded"></div>
-          <span>Proposed Events</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-green-500 rounded"></div>
-          <span>Available</span>
+          <span>Opzionato</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-red-500 rounded"></div>
-          <span>Unavailable</span>
+          <span>Indisponibilità</span>
         </div>
       </div>
 

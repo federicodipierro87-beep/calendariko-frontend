@@ -6,7 +6,7 @@ interface Event {
   date: string;
   time: string;
   type: 'rehearsal' | 'availability' | 'availability-busy';
-  status?: 'CONFIRMED' | 'PROPOSED' | 'CANCELLED';
+  status?: 'CONFIRMED' | 'PENDING' | 'CANCELLED';
   fee?: number;
   contact_responsible?: string;
   user?: {
@@ -302,19 +302,22 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                     const startMinute = parseInt(minuteStr) || 0;
                     const topPosition = (startHour * 48) + (startMinute * 48 / 60);
 
-                    const getEventColor = (type: string) => {
-                      switch(type) {
-                        case 'availability-busy': return 'bg-red-500';
-                        case 'availability': return 'bg-green-500';
-                        case 'rehearsal': return 'bg-blue-500';
-                        default: return 'bg-purple-500';
+                    const getEventColor = (event: Event) => {
+                      // Indisponibilità
+                      if (event.type === 'availability-busy') return 'bg-red-500';
+                      // Usa lo status per determinare il colore
+                      switch(event.status) {
+                        case 'CONFIRMED': return 'bg-green-500';
+                        case 'PENDING': return 'bg-yellow-500';
+                        case 'CANCELLED': return 'bg-gray-500';
+                        default: return 'bg-yellow-500'; // Default = opzionato
                       }
                     };
 
                     return (
                       <div
                         key={`${event.id}-${eventIndex}`}
-                        className={`absolute left-1 right-1 ${getEventColor(event.type)} text-white text-xs p-1 rounded shadow z-10`}
+                        className={`absolute left-1 right-1 ${getEventColor(event)} text-white text-xs p-1 rounded shadow z-10`}
                         style={{ 
                           top: `${topPosition}px`,
                           height: '40px'
@@ -391,19 +394,22 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                 const startMinute = parseInt(minuteStr) || 0;
                 const topPosition = (startHour * 64) + (startMinute * 64 / 60);
 
-                const getEventColor = (type: string) => {
-                  switch(type) {
-                    case 'availability-busy': return 'bg-red-500';
-                    case 'availability': return 'bg-green-500';
-                    case 'rehearsal': return 'bg-blue-500';
-                    default: return 'bg-purple-500';
+                const getEventColor = (event: Event) => {
+                  // Indisponibilità
+                  if (event.type === 'availability-busy') return 'bg-red-500';
+                  // Usa lo status per determinare il colore
+                  switch(event.status) {
+                    case 'CONFIRMED': return 'bg-green-500';
+                    case 'PENDING': return 'bg-yellow-500';
+                    case 'CANCELLED': return 'bg-gray-500';
+                    default: return 'bg-yellow-500'; // Default = opzionato
                   }
                 };
 
                 return (
                   <div
                     key={`${event.id}-${eventIndex}`}
-                    className={`absolute left-2 right-2 ${getEventColor(event.type)} text-white p-2 rounded shadow z-10`}
+                    className={`absolute left-2 right-2 ${getEventColor(event)} text-white p-2 rounded shadow z-10`}
                     style={{ 
                       top: `${topPosition}px`,
                       height: '50px'
@@ -480,7 +486,7 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                         backgroundColor: '#16a34a', // Verde per confermato
                         color: 'white'
                       };
-                    case 'PROPOSED':
+                    case 'PENDING':
                       return {
                         backgroundColor: '#f59e0b', // Giallo per opzionato/proposto
                         color: 'white'
@@ -492,25 +498,17 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       };
                     default:
                       return {
-                        backgroundColor: '#2563eb', // Blu default
+                        backgroundColor: '#f59e0b', // Giallo default (opzionato)
                         color: 'white'
                       };
                   }
                 }
-                
-                // Fallback per eventi senza status - usa il tipo
-                switch(event.type) {
-                  case 'rehearsal':
-                    return {
-                      backgroundColor: '#2563eb', // Blu per prove
-                      color: 'white'
-                    };
-                  default:
-                    return {
-                      backgroundColor: '#7c3aed', // Viola per altri eventi
-                      color: 'white'
-                    };
-                }
+
+                // Fallback per eventi senza status - usa giallo (opzionato)
+                return {
+                  backgroundColor: '#f59e0b', // Giallo = opzionato
+                  color: 'white'
+                };
               };
 
               const style = getEventStyle(event);
@@ -898,14 +896,10 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
           <span className="truncate">Opzionato</span>
         </div>
         <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-blue-500 rounded flex-shrink-0"></div>
-          <span className="truncate">Eventi</span>
-        </div>
-        <div className="flex items-center space-x-1">
           <div className="w-3 h-3 bg-red-500 rounded flex-shrink-0"></div>
           <span className="truncate">Indisponibilità</span>
         </div>
-        <div className="flex items-center space-x-1 sm:col-span-1 col-span-2 justify-center sm:justify-start">
+        <div className="flex items-center space-x-1">
           <div className="w-3 h-3 bg-blue-600 border-2 border-blue-600 rounded flex-shrink-0"></div>
           <span className="truncate">Oggi</span>
         </div>
