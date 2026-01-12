@@ -721,10 +721,17 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                       const cellHeight = isMobile ? 40 : 48; // 10 = h-10, 12 = h-12 in px
                       const topPosition = ((startHour - 7) * cellHeight) + (startMinute * cellHeight / 60);
 
-                      let backgroundColor = '#8b5cf6';
-                      if (event.type === 'availability-busy') backgroundColor = '#ef4444';
-                      if (event.type === 'availability') backgroundColor = '#22c55e';
-                      if (event.type === 'rehearsal') backgroundColor = '#3b82f6';
+                      // Determina il colore in base allo status
+                      let backgroundColor = '#f59e0b'; // Default = giallo (opzionato)
+                      if (event.type === 'availability-busy') {
+                        backgroundColor = '#ef4444'; // Rosso per indisponibilità
+                      } else if (event.status === 'CONFIRMED') {
+                        backgroundColor = '#16a34a'; // Verde per confermato
+                      } else if (event.status === 'PENDING') {
+                        backgroundColor = '#f59e0b'; // Giallo per opzionato
+                      } else if (event.status === 'CANCELLED') {
+                        backgroundColor = '#6b7280'; // Grigio per cancellato
+                      }
 
                       return (
                         <div
@@ -845,10 +852,17 @@ const SimpleCalendar: React.FC<SimpleCalendarProps> = ({ events = [], onDayClick
                   const cellHeight = isMobile ? 48 : 64; // h-12 = 48px, h-16 = 64px
                   const topPosition = ((startHour - 7) * cellHeight) + (startMinute * cellHeight / 60);
 
-                  let backgroundColor = '#8b5cf6';
-                  if (event.type === 'availability-busy') backgroundColor = '#ef4444';
-                  if (event.type === 'availability') backgroundColor = '#22c55e';
-                  if (event.type === 'rehearsal') backgroundColor = '#3b82f6';
+                  // Determina il colore in base allo status
+                  let backgroundColor = '#f59e0b'; // Default = giallo (opzionato)
+                  if (event.type === 'availability-busy') {
+                    backgroundColor = '#ef4444'; // Rosso per indisponibilità
+                  } else if (event.status === 'CONFIRMED') {
+                    backgroundColor = '#16a34a'; // Verde per confermato
+                  } else if (event.status === 'PENDING') {
+                    backgroundColor = '#f59e0b'; // Giallo per opzionato
+                  } else if (event.status === 'CANCELLED') {
+                    backgroundColor = '#6b7280'; // Grigio per cancellato
+                  }
 
                   return (
                     <div
