@@ -5,9 +5,19 @@ interface CalendarEvent {
   title: string;
   date: string;
   time: string;
+  endTime?: string;
   type: 'rehearsal' | 'availability' | 'availability-busy';
+  status?: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
+  venue?: string;
+  notes?: string;
   fee?: number;
   contact_responsible?: string;
+  group?: {
+    id: string;
+    name: string;
+    color?: string | null;
+  };
+  group_id?: string;
   user?: {
     id: string;
     first_name?: string;
@@ -120,6 +130,32 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, on
     }
   };
 
+  const getStatusLabel = (status?: string) => {
+    switch (status) {
+      case 'CONFIRMED':
+        return 'Confermato';
+      case 'PENDING':
+        return 'Opzionato';
+      case 'CANCELLED':
+        return 'Cancellato';
+      default:
+        return 'Opzionato';
+    }
+  };
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case 'CONFIRMED':
+        return 'bg-green-500';
+      case 'PENDING':
+        return 'bg-yellow-500';
+      case 'CANCELLED':
+        return 'bg-gray-500';
+      default:
+        return 'bg-yellow-500';
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -138,12 +174,23 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, on
 
         {/* Content */}
         <div className="p-6 space-y-4">
-          {/* Event Type Badge */}
-          <div className="flex items-center space-x-2">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white ${getEventTypeColor(event.type)}`}>
-              {getEventTypeLabel(event.type)}
-            </span>
-          </div>
+          {/* Status Badge - per eventi normali (non indisponibilità) */}
+          {event.type !== 'availability-busy' && (
+            <div className="flex items-center space-x-2">
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white ${getStatusColor(event.status)}`}>
+                {getStatusLabel(event.status)}
+              </span>
+            </div>
+          )}
+
+          {/* Badge indisponibilità */}
+          {event.type === 'availability-busy' && (
+            <div className="flex items-center space-x-2">
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white bg-red-500`}>
+                Indisponibilità
+              </span>
+            </div>
+          )}
 
           {/* Title */}
           <div>
@@ -152,38 +199,70 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, on
             </h3>
           </div>
 
-          {/* Date and Time */}
-          <div className="space-y-3">
+          {/* Group (if present) */}
+          {event.group && (
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Data</p>
-                <p className="text-sm text-gray-600">{formatDate(event.date)}</p>
+                <p className="text-sm font-medium text-gray-900">Gruppo</p>
+                <p className="text-sm text-gray-600">{event.group.name}</p>
               </div>
             </div>
+          )}
 
-            {/* Nascondi la sezione orario per le indisponibilità */}
-            {event.type !== 'availability-busy' && (
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Orario</p>
-                  <p className="text-sm text-gray-600">{formatTime(event.time)}</p>
-                </div>
-              </div>
-            )}
+          {/* Date */}
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">Data</p>
+              <p className="text-sm text-gray-600">{formatDate(event.date)}</p>
+            </div>
           </div>
 
+          {/* Time - Nascondi per le indisponibilità */}
+          {event.type !== 'availability-busy' && event.time && (
+            <div className="flex items-center space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Orario</p>
+                <p className="text-sm text-gray-600">
+                  {formatTime(event.time)}
+                  {event.endTime && ` - ${formatTime(event.endTime)}`}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Venue (if present) */}
+          {event.venue && (
+            <div className="flex items-center space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Luogo</p>
+                <p className="text-sm text-gray-600">{event.venue}</p>
+              </div>
+            </div>
+          )}
+
           {/* Fee (if present) */}
-          {event.fee && event.fee > 0 && (
+          {event.fee !== undefined && event.fee > 0 && (
             <div className="flex items-center space-x-3">
               <div className="flex-shrink-0">
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,16 +285,33 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ event, isOpen, on
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Responsabile</p>
+                <p className="text-sm font-medium text-gray-900">Contatto Responsabile</p>
                 <p className="text-sm text-gray-600">{event.contact_responsible}</p>
               </div>
             </div>
           )}
 
-          {/* Event ID */}
-          <div className="pt-4 border-t border-gray-100">
-            <p className="text-xs text-gray-400">ID: {event.id}</p>
-          </div>
+          {/* Notes (if present) */}
+          {event.notes && (
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-0.5">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Note</p>
+                <p className="text-sm text-gray-600 whitespace-pre-wrap">{event.notes}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Event ID - only for admin */}
+          {currentUser?.role === 'ADMIN' && (
+            <div className="pt-4 border-t border-gray-100">
+              <p className="text-xs text-gray-400">ID: {event.id}</p>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
